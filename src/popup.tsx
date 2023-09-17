@@ -1,3 +1,12 @@
+import {
+  IconChartBar,
+  IconChartCandle,
+  IconDeviceGamepad,
+  IconSearch,
+  IconUsers
+} from "@tabler/icons-react"
+//@ts-ignore
+import Logo from "data-url:./images/icon.png"
 import React, { useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
@@ -7,6 +16,7 @@ import { Input } from "~components/ui/input"
 
 import "~style.css"
 
+import IconWrapper from "~components/IconWrapper"
 import Login from "~components/Login"
 
 function IndexPopup() {
@@ -16,13 +26,37 @@ function IndexPopup() {
   console.log(userTwitchKey)
   return (
     <div className="h-[32rem] w-96 flex text-white">
-      <div className="h-full w-12 bg-zinc-900 justify-center pt-8 pb-8 flex">
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
-          <path
-            fill="currentColor"
-            d="M11.64 5.93h1.43v4.28h-1.43m3.93-4.28H17v4.28h-1.43M7 2L3.43 5.57v12.86h4.28V22l3.58-3.57h2.85L20.57 12V2m-1.43 9.29l-2.85 2.85h-2.86l-2.5 2.5v-2.5H7.71V3.43h11.43Z"
+      <div className="h-full w-12 bg-zinc-900 pt-3 flex flex-col">
+        <div className="flex items-end justify-center">
+          <img
+            src={Logo}
+            className="w-7 h-7"
+            style={{ imageRendering: "pixelated" }}
           />
-        </svg>
+        </div>
+        <div className="flex flex-col justify-center items-center flex-1 gap-4">
+          <IconWrapper>
+            <IconUsers />
+          </IconWrapper>
+          <IconWrapper>
+            <IconChartBar />
+          </IconWrapper>
+          <IconWrapper>
+            <IconDeviceGamepad />
+          </IconWrapper>
+          <IconWrapper>
+            <IconSearch />
+          </IconWrapper>
+          <IconWrapper>
+            <IconChartCandle
+              onClick={() => {
+                chrome.tabs.create({
+                  url: "./options.html"
+                })
+              }}
+            />
+          </IconWrapper>
+        </div>
       </div>
       <div className="w-full h-full bg-neutral-900 flex flex-col">
         <div className="basis-12 p-2 flex-grow-0 flex-shrink flex justify-center items-center border-b border-neutral-950 bg-neutral-900">

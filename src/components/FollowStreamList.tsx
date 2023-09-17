@@ -1,4 +1,4 @@
-import { ReloadIcon } from "@radix-ui/react-icons"
+import { IconLoader2 } from "@tabler/icons-react"
 import React, { useEffect } from "react"
 import useSWR from "swr"
 
@@ -43,7 +43,7 @@ const FollowStreamList = ({ searchChannel }) => {
   if (!liveStreams) {
     return (
       <div className="flex justify-center items-center h-full">
-        <ReloadIcon className="h-8 w-8 animate-spin" />
+        <IconLoader2 className="h-8 w-8 animate-spin" />
       </div>
     )
   }
