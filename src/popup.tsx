@@ -13,6 +13,7 @@ import { useStorage } from "@plasmohq/storage/hook"
 
 import FollowStreamList from "~components/FollowStreamList"
 import { Input } from "~components/ui/input"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~components/ui/tabs"
 
 import "~style.css"
 
@@ -25,7 +26,7 @@ function IndexPopup() {
   const needToLogin = userTwitchKey === undefined
   console.log(userTwitchKey)
   return (
-    <div className="h-[32rem] w-96 flex text-white">
+    <Tabs defaultValue="followed" className="h-[32rem] w-96 flex text-white">
       <div className="h-full w-12 bg-zinc-900 pt-3 flex flex-col">
         <div className="flex items-end justify-center">
           <img
@@ -34,20 +35,20 @@ function IndexPopup() {
             style={{ imageRendering: "pixelated" }}
           />
         </div>
-        <div className="flex flex-col justify-center items-center flex-1 gap-4">
-          <IconWrapper>
+        <TabsList className="flex bg-zinc-900 flex-col justify-center items-center flex-1 gap-4">
+          <TabsTrigger className="p-1" value="followed">
             <IconUsers />
-          </IconWrapper>
-          <IconWrapper>
+          </TabsTrigger>
+          <TabsTrigger className="p-1" value="top_streams">
             <IconChartBar />
-          </IconWrapper>
-          <IconWrapper>
+          </TabsTrigger>
+          <TabsTrigger className="p-1" value="categories">
             <IconDeviceGamepad />
-          </IconWrapper>
-          <IconWrapper>
+          </TabsTrigger>
+          <TabsTrigger className="p-1" value="search">
             <IconSearch />
-          </IconWrapper>
-          <IconWrapper>
+          </TabsTrigger>
+          <TabsTrigger className="p-1">
             <IconChartCandle
               onClick={() => {
                 chrome.tabs.create({
@@ -55,8 +56,8 @@ function IndexPopup() {
                 })
               }}
             />
-          </IconWrapper>
-        </div>
+          </TabsTrigger>
+        </TabsList>
       </div>
       <div className="w-full h-full bg-neutral-900 flex flex-col">
         <div className="basis-12 p-2 flex-grow-0 flex-shrink flex justify-center items-center border-b border-neutral-950 bg-neutral-900">
@@ -69,16 +70,16 @@ function IndexPopup() {
             onChange={(e) => setSearchChannel(e.target.value)}
           />
         </div>
-
-        <div className="overflow-y-auto flex-grow">
+        <TabsContent className="overflow-y-auto flex-grow" value="followed">
           {needToLogin ? (
             <Login />
           ) : (
             <FollowStreamList searchChannel={searchChannel} />
           )}
-        </div>
+        </TabsContent>
+        <TabsContent value="top_streams">siema</TabsContent>
       </div>
-    </div>
+    </Tabs>
   )
 }
 
