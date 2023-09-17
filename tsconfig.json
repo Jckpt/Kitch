@@ -7,11 +7,12 @@
     ".plasmo/index.d.ts",
     "./**/*.ts",
     "./**/*.tsx"
-  ],
+, "src/lib/util/fetcher.js"  ],
   "compilerOptions": {
+    "jsx": "react",
     "paths": {
       "~*": [
-        "./*"
+        "./src/*"
       ]
     },
     "baseUrl": "."
