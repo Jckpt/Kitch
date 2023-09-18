@@ -1,5 +1,5 @@
 import { IconLoader2 } from "@tabler/icons-react"
-import React, { useEffect } from "react"
+import React from "react"
 import useSWR from "swr"
 
 import { useStorage } from "@plasmohq/storage/hook"
@@ -10,32 +10,31 @@ import StreamItem from "./StreamItem"
 
 const FollowStreamList = ({ searchQuery }) => {
   const [userTwitchKey] = useStorage("userTwitchKey")
-
-  const { data: userData } = useSWR(
-    () => ["https://api.twitch.tv/helix/users", userTwitchKey],
-    twitchFetcher
-  )
   const {
     data: liveStreams,
     isLoading,
     error
   } = useSWR(
-    () => [
-      `https://api.twitch.tv/helix/streams/followed?user_id=${userData.data[0].id}`,
-      userTwitchKey
-    ],
+    () => [`https://api.twitch.tv/helix/streams`, userTwitchKey],
     twitchFetcher
   )
-  console.log(liveStreams)
+  console.log(`searchChannel: ${searchQuery}`)
   const filteredStreams = liveStreams?.data?.filter((stream) =>
     stream.user_name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  // If liveStreams is undefined or there are no matching streams, return null
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
         <IconLoader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        Something went wrong
       </div>
     )
   }
