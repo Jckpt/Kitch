@@ -26,13 +26,7 @@ const SidebarTabs = () => {
         <IconSearch />
       </TabsTrigger>
       <TabsTrigger className="p-1" value="options">
-        <IconChartCandle
-          onClick={() => {
-            chrome.tabs.create({
-              url: "./options.html"
-            })
-          }}
-        />
+        <IconChartCandle />
       </TabsTrigger>
     </TabsList>
   )

@@ -43,7 +43,9 @@ const TopCategories = ({ searchQuery }) => {
   }
 
   return (
-    <>{games?.data?.map((game) => <GameItem game={game} key={game.id} />)}</>
+    <div className="grid grid-cols-4">
+      {games?.data?.map((game) => <GameItem game={game} key={game.id} />)}
+    </div>
   )
 }
 

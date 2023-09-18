@@ -16,6 +16,7 @@ const StreamItem = ({
           src={`https://static-cdn.jtvnw.net/previews-ttv/live_user_${user_login}-96x54.jpg`}
           alt="stream preview"
           className="h-fit"
+          loading="lazy"
         />
       </div>
       <div className="flex w-full flex-col pl-1.5">

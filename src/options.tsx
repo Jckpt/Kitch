@@ -20,6 +20,8 @@ type UserTwitchKey = {
 }
 
 function OptionsIndex() {
+  const [didLogin, setDidLogin] = useState<boolean>(null)
+  const [callbackSite, setCallbackSite] = useState<"twitch" | "kick">(null)
   const [userTwitchKey, setUserTwitchKey, { remove: removeTwitch }] =
     useStorage("userTwitchKey")
   const saveToStorageTwitch = () => {
@@ -42,28 +44,25 @@ function OptionsIndex() {
     const params = new URLSearchParams(window.location.search)
     if (params.get("callback") === "twitch") {
       saveToStorageTwitch()
+      setCallbackSite("twitch")
+      setDidLogin(true)
     }
   }, [])
   return (
     <div className="h-screen flex justify-center items-center flex-col gap-6 bg-neutral-800">
       <Card className="w-[350px] flex flex-col border-none bg-neutral-900 text-white">
         <CardHeader>
-          <CardTitle className="text-xl">Options</CardTitle>
-          <CardDescription>Log out</CardDescription>
+          <CardTitle className="text-xl">
+            {didLogin === true ? "Login successful" : "Login failed"}
+          </CardTitle>
+          <CardDescription className="capitalize">
+            {callbackSite}
+          </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4 justify-center">
-          <Button
-            className="w-full bg-purple-600 hover:bg-red-600"
-            disabled={userTwitchKey === undefined}
-            onClick={logOutTwitch}>
-            Log out of Twitch
-          </Button>
-          <Button
-            className="w-full bg-green-600 hover:bg-red-600"
-            disabled={true}
-            onClick={logOutTwitch}>
-            Log out of Kick
-          </Button>
+        <CardContent className="text-center text-base">
+          {didLogin === true
+            ? "You can now close this window."
+            : "Something went wrong."}
         </CardContent>
       </Card>
     </div>
