@@ -5,12 +5,9 @@ import { useStorage } from "@plasmohq/storage/hook"
 import { Button } from "~components/ui/button"
 
 const OptionsTab = () => {
-  const [userTwitchKey, setUserTwitchKey, { remove: removeTwitch }] =
+  const [userTwitchKey, _, { remove: logoutTwitch }] =
     useStorage("userTwitchKey")
-  const logOutTwitch = () => {
-    removeTwitch()
-  }
-  const logIntoTwitch = () => {
+  const loginTwitch = () => {
     window.open(
       "https://id.twitch.tv/oauth2/authorize?client_id=256lknox4x75bj30rwpctxna2ckbmn&redirect_uri=https://twiki.space/twitch/callback&response_type=token&scope=user:read:follows",
       "_blank"
@@ -21,22 +18,22 @@ const OptionsTab = () => {
       {userTwitchKey === undefined ? (
         <Button
           className="w-3/4 bg-purple-600 hover:bg-purple-700"
-          onClick={logIntoTwitch}>
+          onClick={loginTwitch}>
           Login to Twitch
         </Button>
       ) : (
         <Button
-          className="w-3/4 bg-purple-600 hover:bg-red-600"
-          onClick={logOutTwitch}>
+          className="w-3/4 bg-zinc-700 hover:bg-red-600"
+          onClick={logoutTwitch}>
           Logout of Twitch
         </Button>
       )}
 
       <Button
-        className="w-3/4 bg-green-600 hover:bg-red-600"
+        className="w-3/4 bg-green-600 hover:bg-green-700"
         disabled={true}
-        onClick={logOutTwitch}>
-        Logout of Kick
+        onClick={logoutTwitch}>
+        Login to Kick
       </Button>
     </div>
   )

@@ -7,7 +7,6 @@ import {
 } from "@tabler/icons-react"
 import React from "react"
 
-import IconWrapper from "~components/IconWrapper"
 import { TabsList, TabsTrigger } from "~components/ui/tabs"
 
 const SidebarTabs = () => {

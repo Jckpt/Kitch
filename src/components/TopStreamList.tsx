@@ -18,7 +18,6 @@ const FollowStreamList = ({ searchQuery }) => {
     () => [`https://api.twitch.tv/helix/streams`, userTwitchKey],
     twitchFetcher
   )
-  console.log(`searchChannel: ${searchQuery}`)
   const filteredStreams = liveStreams?.data?.filter((stream) =>
     stream.user_name.toLowerCase().includes(searchQuery.toLowerCase())
   )

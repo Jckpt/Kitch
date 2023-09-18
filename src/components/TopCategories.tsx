@@ -7,7 +7,6 @@ import { useStorage } from "@plasmohq/storage/hook"
 import { twitchFetcher } from "~lib/util/fetcher"
 
 import GameItem from "./GameItem"
-import StreamItem from "./StreamItem"
 
 const TopCategories = ({ searchQuery }) => {
   const [userTwitchKey] = useStorage("userTwitchKey")

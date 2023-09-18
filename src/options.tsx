@@ -22,9 +22,8 @@ type UserTwitchKey = {
 function OptionsIndex() {
   const [didLogin, setDidLogin] = useState<boolean>(null)
   const [callbackSite, setCallbackSite] = useState<"twitch" | "kick">(null)
-  const [userTwitchKey, setUserTwitchKey, { remove: removeTwitch }] =
-    useStorage("userTwitchKey")
-  const saveToStorageTwitch = () => {
+  const [_, setUserTwitchKey] = useStorage("userTwitchKey")
+  const getTwitchCredentials = () => {
     const hash = window.location.hash.substring(1)
     if (hash === "") return
 
@@ -34,18 +33,15 @@ function OptionsIndex() {
       return res
     }, {} as UserTwitchKey)
     result.client_id = "256lknox4x75bj30rwpctxna2ckbmn"
-
-    setUserTwitchKey(result)
-  }
-  const logOutTwitch = () => {
-    removeTwitch()
+    return result
   }
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get("callback") === "twitch") {
-      saveToStorageTwitch()
+      const credentials = getTwitchCredentials()
       setCallbackSite("twitch")
       setDidLogin(true)
+      setUserTwitchKey(credentials)
     }
   }, [])
   return (
