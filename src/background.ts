@@ -20,6 +20,8 @@ const refresh = async () => {
       `https://api.twitch.tv/helix/streams/followed?user_id=${userTwitchKey?.user_id}`,
       userTwitchKey
     ])
+    chrome.action.setBadgeText({ text: response.data.length.toString() })
+    chrome.action.setBadgeBackgroundColor({ color: "#737373" })
     await storage.set("followedLive", response)
   } catch (error) {
     console.error("Error fetching Twitch data:", error)

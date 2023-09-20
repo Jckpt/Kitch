@@ -24,7 +24,7 @@ const StreamItem = ({
           <h1 className="text-white text-sm font-bold">{user_name}</h1>
           <div className="text-red-600 flex flex-row items-center">
             <IconUser className="w-3.5 h-3.5" />
-            <span className="text-xs">{viewer_count}</span>
+            <span className="text-xs">{viewer_count.toLocaleString()}</span>
           </div>
         </div>
         <div

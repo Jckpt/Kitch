@@ -27,6 +27,14 @@ const SearchTab = ({ searchQuery }) => {
   //   stream.user_name.toLowerCase().includes(searchQuery.toLowerCase())
   // )
 
+  if (searchQuery === "") {
+    return (
+      <div className="flex justify-center items-center h-full">
+        Search for a channel
+      </div>
+    )
+  }
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
@@ -36,7 +44,7 @@ const SearchTab = ({ searchQuery }) => {
   }
 
   return (
-    <>{users?.data?.map((user) => <UserItem user={user} key={user.id} />)}</>
+    <>{users?.data.map((user) => <UserItem user={user} key={user.id} />)}</>
   )
 }
 
