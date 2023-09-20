@@ -11,7 +11,6 @@ import StreamItem from "./StreamItem"
 const FollowStreamList = ({ searchQuery }) => {
   const [userTwitchKey] = useStorage("userTwitchKey")
   const getKey = (pageIndex, previousPageData) => {
-    console.log(pageIndex, previousPageData)
     // reached the end
     if (previousPageData && !previousPageData.data) return null
 
@@ -31,7 +30,6 @@ const FollowStreamList = ({ searchQuery }) => {
     size,
     setSize
   } = useSWRInfinite(getKey, twitchFetcher)
-  console.log(`liveStreams`, liveStreamsArray)
 
   if (isLoading) {
     return (
@@ -49,7 +47,9 @@ const FollowStreamList = ({ searchQuery }) => {
           <StreamItem stream={stream} key={stream.id} />
         ))
       })}
-      <button onClick={() => setSize(size + 1)}>Load More</button>
+      <button onClick={() => setSize(size + 1)}>
+        {isLoading ? "Loading..." : "Load more"}
+      </button>
     </>
   )
 }

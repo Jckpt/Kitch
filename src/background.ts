@@ -21,10 +21,6 @@ const refresh = async () => {
       userTwitchKey
     ])
     await storage.set("followedLive", response)
-    if (!response.data)
-      console.error("Failed to fetch Twitch data. Status:", response)
-
-    console.log("Fetched Twitch data:", response)
   } catch (error) {
     console.error("Error fetching Twitch data:", error)
   }
