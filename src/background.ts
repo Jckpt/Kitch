@@ -20,7 +20,7 @@ const refresh = async () => {
       `https://api.twitch.tv/helix/streams/followed?user_id=${userTwitchKey?.user_id}`,
       userTwitchKey
     ])
-    await storage.set("followedLive", response.data)
+    await storage.set("followedLive", response)
     if (!response.data)
       console.error("Failed to fetch Twitch data. Status:", response)
 

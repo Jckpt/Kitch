@@ -1,31 +1,33 @@
 import { IconLoader2 } from "@tabler/icons-react"
-import React from "react"
-import useSWR from "swr"
+import React, { useEffect } from "react"
+import useSWRMutation from "swr/mutation"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { twitchFetcher } from "~lib/util/fetcher"
 
 import StreamItem from "./StreamItem"
+import { Button } from "./ui/button"
 
 const FollowStreamList = ({ searchQuery }) => {
   const [userTwitchKey] = useStorage("userTwitchKey")
-  const [followedLive] = useStorage("followedLive")
-  // const {
-  //   data: liveStreams,
-  //   isLoading,
-  //   error
-  // } = useSWR(
-  //   [
-  //     `https://api.twitch.tv/helix/streams/followed?user_id=${userTwitchKey?.user_id}`,
-  //     userTwitchKey
-  //   ],
-  //   twitchFetcher
-  // )
-  console.log(followedLive)
-  const filteredStreams = followedLive?.filter((stream) =>
-    stream.user_name.toLowerCase().includes(searchQuery.toLowerCase())
+  const [followedLive, setFollowedLive] = useStorage("followedLive")
+  const { data: refreshedStreams, trigger } = useSWRMutation(
+    [
+      `https://api.twitch.tv/helix/streams/followed?user_id=${userTwitchKey?.user_id}`,
+      userTwitchKey
+    ],
+    twitchFetcher
   )
+
+  useEffect(() => {
+    if (!refreshedStreams) return
+    setFollowedLive(refreshedStreams.data)
+  }, [refreshedStreams])
+
+  // const filteredStreams = followedLive?.filter((stream) =>
+  //   stream.user_name.toLowerCase().includes(searchQuery.toLowerCase())
+  // )
 
   if (followedLive?.length === 0) {
     return (
@@ -37,9 +39,10 @@ const FollowStreamList = ({ searchQuery }) => {
 
   return (
     <>
-      {filteredStreams?.map((stream) => (
+      {followedLive?.data?.map((stream) => (
         <StreamItem stream={stream} key={stream.id} />
       ))}
+      <Button onClick={trigger}>refresh</Button>
     </>
   )
 }

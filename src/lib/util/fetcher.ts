@@ -13,8 +13,10 @@ export const twitchFetcher = async (params) => {
       "Client-Id": userTwitchKey?.client_id
     }
   }
-  const data = await fetch(url, headerValue)
-  return data.json()
+  const response = await fetch(url, headerValue)
+  const data = await response.json()
+  console.log("Fetched Twitch data2:", data)
+  return data
 }
 
 export const getTwitchUser = async (credentials: UserTwitchKey) => {
