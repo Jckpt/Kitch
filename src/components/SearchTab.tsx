@@ -6,23 +6,26 @@ import { useStorage } from "@plasmohq/storage/hook"
 
 import { twitchFetcher } from "~lib/util/fetcher"
 
-import GameItem from "./GameItem"
+import UserItem from "./UserItem"
 
-const TopCategories = ({ searchQuery }) => {
+const SearchTab = ({ searchQuery }) => {
   const [userTwitchKey] = useStorage("userTwitchKey")
   const {
-    data: games,
+    data: users,
     isLoading,
     error
   } = useSWR(
     () => [
       searchQuery === ""
-        ? `https://api.twitch.tv/helix/games/top`
-        : `https://api.twitch.tv/helix/games?name=${searchQuery}`,
+        ? null
+        : `https://api.twitch.tv/helix/search/channels?query=${searchQuery}`,
       userTwitchKey
     ],
     twitchFetcher
   )
+  // const filteredStreams = followedLive?.filter((stream) =>
+  //   stream.user_name.toLowerCase().includes(searchQuery.toLowerCase())
+  // )
 
   if (isLoading) {
     return (
@@ -32,19 +35,9 @@ const TopCategories = ({ searchQuery }) => {
     )
   }
 
-  if (error) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        Something went wrong
-      </div>
-    )
-  }
-
   return (
-    <div className="grid grid-cols-4">
-      {games?.data?.map((game) => <GameItem game={game} key={game.id} />)}
-    </div>
+    <>{users?.data?.map((user) => <UserItem user={user} key={user.id} />)}</>
   )
 }
 
-export default TopCategories
+export default SearchTab

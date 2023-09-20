@@ -11,6 +11,7 @@ import { Tabs, TabsContent } from "~components/ui/tabs"
 import "~style.css"
 
 import OptionsTab from "~components/OptionsTab"
+import SearchTab from "~components/SearchTab"
 import SidebarTabs from "~components/SidebarTabs"
 import TopCategories from "~components/TopCategories"
 import TopStreamList from "~components/TopStreamList"
@@ -56,6 +57,9 @@ function IndexPopup() {
               className="overflow-y-auto flex-grow"
               value="categories">
               <TopCategories searchQuery={searchQuery} />
+            </TabsContent>
+            <TabsContent className="overflow-y-auto flex-grow" value="search">
+              <SearchTab searchQuery={searchQuery} />
             </TabsContent>
             <TabsContent
               className="p-0 m-0 overflow-y-auto flex-grow"

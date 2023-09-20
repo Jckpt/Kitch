@@ -6,6 +6,7 @@ type UserTwitchKey = {
 
 export const twitchFetcher = async (params) => {
   const [url, userTwitchKey] = params
+  if (!userTwitchKey) return
   const headerValue = {
     method: "GET",
     headers: {
@@ -15,7 +16,6 @@ export const twitchFetcher = async (params) => {
   }
   const response = await fetch(url, headerValue)
   const data = await response.json()
-  console.log("Fetched Twitch data2:", data)
   return data
 }
 

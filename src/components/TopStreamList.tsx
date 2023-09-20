@@ -10,6 +10,7 @@ import StreamItem from "./StreamItem"
 
 const FollowStreamList = ({ searchQuery }) => {
   const [userTwitchKey] = useStorage("userTwitchKey")
+
   const getKey = (pageIndex, previousPageData) => {
     // reached the end
     if (previousPageData && !previousPageData.data) return null
