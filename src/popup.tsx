@@ -21,7 +21,10 @@ function IndexPopup() {
   const [userTwitchKey] = useStorage("userTwitchKey")
   const twitchLoggedIn = userTwitchKey !== undefined
   return (
-    <Tabs defaultValue="followed" className="h-[32rem] w-96 flex text-white">
+    <Tabs
+      onValueChange={() => setSearchQuery("")}
+      defaultValue="followed"
+      className="h-[32rem] w-96 flex text-white">
       <div className="h-full w-12 bg-zinc-900 pt-3 flex flex-col">
         <div className="flex items-end justify-center">
           <img
