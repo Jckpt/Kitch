@@ -15,22 +15,25 @@ const OptionsTab = () => {
   }
   return (
     <div className="flex flex-col h-full gap-4 items-center justify-center">
-      {userTwitchKey === undefined ? (
+      {userTwitchKey ? (
         <Button
-          className="w-3/4 bg-purple-600 hover:bg-purple-700"
-          onClick={loginTwitch}>
-          Login to Twitch
+          variant="outline"
+          className="w-3/4  hover:border-red-700 hover:bg-red-700 hover:text-white"
+          onClick={logoutTwitch}>
+          Logout of Twitch
         </Button>
       ) : (
         <Button
-          className="w-3/4 bg-zinc-700 hover:bg-red-600"
-          onClick={logoutTwitch}>
-          Logout of Twitch
+          variant="outline"
+          className="w-3/4  hover:bg-purple-700 hover:border-purple-700 hover:text-white"
+          onClick={loginTwitch}>
+          Login to Twitch
         </Button>
       )}
 
       <Button
-        className="w-3/4 bg-green-600 hover:bg-green-700"
+        variant="outline"
+        className="w-3/4 hover:bg-green-700 hover:border-green-700 hover:text-white"
         disabled={true}
         onClick={logoutTwitch}>
         Login to Kick

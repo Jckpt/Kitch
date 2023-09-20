@@ -4,20 +4,15 @@ import "./style.css"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
-import { Button } from "~components/ui/button"
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle
 } from "~components/ui/card"
-
-type UserTwitchKey = {
-  access_token: string
-  client_id: string
-}
+import { type UserTwitchKey } from "~lib/types/twitchTypes"
+import { getTwitchUser } from "~lib/util/fetcher"
 
 function OptionsIndex() {
   const [didLogin, setDidLogin] = useState<boolean>(null)
@@ -35,13 +30,17 @@ function OptionsIndex() {
     result.client_id = "256lknox4x75bj30rwpctxna2ckbmn"
     return result
   }
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get("callback") === "twitch") {
       const credentials = getTwitchCredentials()
-      setCallbackSite("twitch")
-      setDidLogin(true)
-      setUserTwitchKey(credentials)
+      getTwitchUser(credentials).then((userData) => {
+        const newCredentials = { user_id: userData.id, ...credentials }
+        setCallbackSite("twitch")
+        setDidLogin(true)
+        setUserTwitchKey(newCredentials)
+      })
     }
   }, [])
   return (
