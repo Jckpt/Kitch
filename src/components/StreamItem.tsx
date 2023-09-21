@@ -1,9 +1,19 @@
-import { IconUser } from "@tabler/icons-react"
-import React from "react"
+import { IconLoader2, IconUser } from "@tabler/icons-react"
+import React, { useEffect, useRef, useState } from "react"
+
+import { Skeleton } from "./ui/skeleton"
 
 const StreamItem = ({
   stream: { user_login, user_name, viewer_count, title, game_name }
 }) => {
+  const [loaded, setLoaded] = useState(false)
+  const imgRef = useRef<HTMLImageElement>(null)
+  useEffect(() => {
+    if (imgRef.current?.complete) {
+      console.log("loaded123")
+      setLoaded(true)
+    }
+  }, [imgRef.current?.complete])
   return (
     <a
       key={user_login}
@@ -15,9 +25,11 @@ const StreamItem = ({
         <img
           src={`https://static-cdn.jtvnw.net/previews-ttv/live_user_${user_login}-96x54.jpg`}
           alt="stream preview"
-          className="h-fit"
-          loading="lazy"
+          className={`h-fit rounded-md`}
+          style={{ display: loaded ? "block" : "none" }}
+          onLoad={() => setLoaded(true)}
         />
+        {!loaded && <Skeleton className={`h-full w-full bg-neutral-800`} />}
       </div>
       <div className="flex w-full flex-col pl-1.5">
         <div className="flex justify-between">

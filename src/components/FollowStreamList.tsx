@@ -8,9 +8,9 @@ import StreamItem from "./StreamItem"
 const FollowStreamList = ({ searchQuery }) => {
   const [followedLive] = useStorage("followedLive")
 
-  // const filteredStreams = followedLive?.filter((stream) =>
-  //   stream.user_name.toLowerCase().includes(searchQuery.toLowerCase())
-  // )
+  const filteredStreams = followedLive?.data?.filter((stream) =>
+    stream.user_name.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   if (followedLive?.length === 0) {
     return (
@@ -22,7 +22,7 @@ const FollowStreamList = ({ searchQuery }) => {
 
   return (
     <>
-      {followedLive?.data?.map((stream) => (
+      {filteredStreams?.map((stream) => (
         <StreamItem stream={stream} key={stream.id} />
       ))}
     </>
