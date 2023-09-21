@@ -1,8 +1,4 @@
-type UserTwitchKey = {
-  user_id: string
-  access_token: string
-  client_id: string
-}
+import { type UserTwitchKey } from "~lib/types/twitchTypes"
 
 export const twitchFetcher = async (params) => {
   const [url, userTwitchKey] = params
@@ -20,9 +16,21 @@ export const twitchFetcher = async (params) => {
 }
 
 export const getTwitchUser = async (credentials: UserTwitchKey) => {
-  const response = await twitchFetcher([
+  const data = await twitchFetcher([
     "https://api.twitch.tv/helix/users",
     credentials
   ])
-  return response.data[0]
+  return data.data[0]
+}
+
+export const getTwitchStreamer = async (
+  credentials: UserTwitchKey,
+  user_id: string
+) => {
+  const data = await twitchFetcher([
+    `https://api.twitch.tv/helix/users?id=${user_id}`,
+    credentials
+  ])
+  console.log(data, user_id)
+  return data.data[0]
 }
