@@ -7,13 +7,6 @@ const StreamItem = ({
   stream: { user_login, user_name, viewer_count, title, game_name }
 }) => {
   const [loaded, setLoaded] = useState(false)
-  const imgRef = useRef<HTMLImageElement>(null)
-  useEffect(() => {
-    if (imgRef.current?.complete) {
-      console.log("loaded123")
-      setLoaded(true)
-    }
-  }, [imgRef.current?.complete])
   return (
     <a
       key={user_login}

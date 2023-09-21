@@ -38,7 +38,6 @@ const refresh = async () => {
       storageLive.data,
       refreshedLive.data
     )
-
     if (newLiveChannels.length == 1 && storageLive.data.length > 0) {
       console.log(newLiveChannels[0])
       const channel = await getTwitchStreamer(
@@ -47,7 +46,7 @@ const refresh = async () => {
       )
       console.log(channel)
       chrome.notifications.create("liveNotification", {
-        title: `${newLiveChannels[0].user_name} is now lived!`,
+        title: `${newLiveChannels[0].user_name} is now live!`,
         message: `${newLiveChannels[0].title}`,
         iconUrl: channel.profile_image_url,
         type: "basic"
