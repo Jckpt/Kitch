@@ -11,13 +11,15 @@ import {
   CardHeader,
   CardTitle
 } from "~components/ui/card"
-import { type UserTwitchKey } from "~lib/types/twitchTypes"
-import { getTwitchUser } from "~lib/util/fetcher"
+import { type TwitchResponse, type UserTwitchKey } from "~lib/types/twitchTypes"
+import { getTwitchUser, twitchFetcher } from "~lib/util/fetcher"
 
 function OptionsIndex() {
   const [didLogin, setDidLogin] = useState<boolean>(null)
   const [callbackSite, setCallbackSite] = useState<"twitch" | "kick">(null)
   const [_, setUserTwitchKey] = useStorage("userTwitchKey")
+  const [getFollowedLive, setFollowedLive, { remove }] =
+    useStorage<TwitchResponse>("followedLive")
   const getTwitchCredentials = () => {
     const hash = window.location.hash.substring(1)
     if (hash === "") return
@@ -35,11 +37,17 @@ function OptionsIndex() {
     const params = new URLSearchParams(window.location.search)
     if (params.get("callback") === "twitch") {
       const credentials = getTwitchCredentials()
-      getTwitchUser(credentials).then((userData) => {
+      getTwitchUser(credentials).then(async (userData) => {
         const newCredentials = { user_id: userData.id, ...credentials }
         setCallbackSite("twitch")
         setDidLogin(true)
         setUserTwitchKey(newCredentials)
+        // fetch user follows for initialization
+        const followedLive = await twitchFetcher([
+          `https://api.twitch.tv/helix/streams/followed?user_id=${newCredentials?.user_id}`,
+          newCredentials
+        ])
+        setFollowedLive(followedLive)
       })
     }
   }, [])

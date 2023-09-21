@@ -24,30 +24,30 @@ chrome.notifications.onClicked.addListener(() => {
 const refresh = async () => {
   try {
     const storage = new Storage()
-
-    const storageLive = await storage.get<TwitchResponse>("followedLive")
+    console.log("Refreshing...")
+    const followedLive = await storage.get<TwitchResponse>("followedLive")
     const userTwitchKey = await storage.get<UserTwitchKey>("userTwitchKey")
     const notificationsEnabled = await storage.get<boolean>(
       "notificationsEnabled"
     )
 
-    if (!userTwitchKey) console.error("No Twitch API key found in storage")
+    if (!userTwitchKey) return
 
     const refreshedLive = await twitchFetcher([
       `https://api.twitch.tv/helix/streams/followed?user_id=${userTwitchKey?.user_id}`,
       userTwitchKey
     ])
+    await storage.set("followedLive", refreshedLive)
+    if (!followedLive.data) return
     const newLiveChannels = await justWentLive(
-      storageLive.data,
+      followedLive.data,
       refreshedLive.data
     )
 
     chrome.action.setBadgeText({ text: refreshedLive.data.length.toString() })
     chrome.action.setBadgeBackgroundColor({ color: "#737373" })
 
-    await storage.set("followedLive", refreshedLive)
-
-    if (!notificationsEnabled || storageLive.data.length <= 0) return
+    if (!notificationsEnabled || followedLive.data.length <= 0) return
     if (newLiveChannels.length == 1) {
       console.log(newLiveChannels[0])
       const channel = await getTwitchStreamer(

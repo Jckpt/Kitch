@@ -36,7 +36,7 @@ function IndexPopup() {
         <SidebarTabs />
       </div>
       <div className="w-full h-full bg-neutral-900 flex flex-col">
-        <div className="basis-12 p-2 h-14 flex-grow-0 flex-shrink flex justify-center items-center border-b border-neutral-950 bg-neutral-900">
+        <div className="basis-12 p-2 h-14 flex-grow-0 flex-shrink flex justify-center items-center border-b border-neutral-950 bg-zinc-900">
           <Input
             type="input"
             className="w-3/4 border-0 bg-neutral-800"

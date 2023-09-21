@@ -1,5 +1,5 @@
-import { IconLoader2, IconUser } from "@tabler/icons-react"
-import React, { useEffect, useRef, useState } from "react"
+import { IconUser } from "@tabler/icons-react"
+import React, { useState } from "react"
 
 import { Skeleton } from "./ui/skeleton"
 
