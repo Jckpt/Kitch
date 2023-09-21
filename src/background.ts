@@ -27,6 +27,9 @@ const refresh = async () => {
 
     const storageLive = await storage.get<TwitchResponse>("followedLive")
     const userTwitchKey = await storage.get<UserTwitchKey>("userTwitchKey")
+    const notificationsEnabled = await storage.get<boolean>(
+      "notificationsEnabled"
+    )
 
     if (!userTwitchKey) console.error("No Twitch API key found in storage")
 
@@ -38,7 +41,14 @@ const refresh = async () => {
       storageLive.data,
       refreshedLive.data
     )
-    if (newLiveChannels.length == 1 && storageLive.data.length > 0) {
+
+    chrome.action.setBadgeText({ text: refreshedLive.data.length.toString() })
+    chrome.action.setBadgeBackgroundColor({ color: "#737373" })
+
+    await storage.set("followedLive", refreshedLive)
+
+    if (!notificationsEnabled || storageLive.data.length <= 0) return
+    if (newLiveChannels.length == 1) {
       console.log(newLiveChannels[0])
       const channel = await getTwitchStreamer(
         userTwitchKey,
@@ -51,7 +61,7 @@ const refresh = async () => {
         iconUrl: channel.profile_image_url,
         type: "basic"
       })
-    } else if (newLiveChannels.length > 1 && storageLive.data.length > 0) {
+    } else if (newLiveChannels.length > 1) {
       chrome.notifications.create("liveNotification", {
         title: `${newLiveChannels.length} channels are now live!`,
         message: `${newLiveChannels
@@ -61,11 +71,6 @@ const refresh = async () => {
         type: "basic"
       })
     }
-
-    chrome.action.setBadgeText({ text: refreshedLive.data.length.toString() })
-    chrome.action.setBadgeBackgroundColor({ color: "#737373" })
-
-    await storage.set("followedLive", refreshedLive)
   } catch (error) {
     console.error("Error fetching Twitch data:", error)
   }

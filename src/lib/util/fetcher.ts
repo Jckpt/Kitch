@@ -2,7 +2,7 @@ import { type UserTwitchKey } from "~lib/types/twitchTypes"
 
 export const twitchFetcher = async (params) => {
   const [url, userTwitchKey] = params
-  if (!userTwitchKey) return
+  if (!userTwitchKey || url === null) return
   const headerValue = {
     method: "GET",
     headers: {
