@@ -1,13 +1,17 @@
 import { IconLoader2 } from "@tabler/icons-react"
 import React from "react"
 
+import { Storage } from "@plasmohq/storage"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import StreamItem from "./StreamItem"
 
 const FollowStreamList = ({ searchQuery }) => {
-  const [followedLive] = useStorage("followedLive")
-
+  const [followedLive] = useStorage({
+    key: "followedLive",
+    instance: new Storage({ area: "local" })
+  })
+  console.log(followedLive)
   const filteredStreams = followedLive?.data?.filter((stream) =>
     stream.user_name.toLowerCase().includes(searchQuery.toLowerCase())
   )

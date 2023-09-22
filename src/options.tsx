@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react"
 
 import "./style.css"
 
+import { Storage } from "@plasmohq/storage"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import {
@@ -18,8 +19,12 @@ function OptionsIndex() {
   const [didLogin, setDidLogin] = useState<boolean>(null)
   const [callbackSite, setCallbackSite] = useState<"twitch" | "kick">(null)
   const [_, setUserTwitchKey] = useStorage("userTwitchKey")
+
   const [getFollowedLive, setFollowedLive, { remove }] =
-    useStorage<TwitchResponse>("followedLive")
+    useStorage<TwitchResponse>({
+      key: "followedLive",
+      instance: new Storage({ area: "local" })
+    })
   const getTwitchCredentials = () => {
     const hash = window.location.hash.substring(1)
     if (hash === "") return
@@ -66,6 +71,7 @@ function OptionsIndex() {
           {didLogin === true
             ? "You can now close this window."
             : "Something went wrong."}
+          <button onClick={() => remove()}>Remove</button>
         </CardContent>
       </Card>
     </div>
