@@ -4,17 +4,17 @@ import React, { useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
-import FollowStreamList from "~components/FollowStreamList"
 import { Input } from "~components/ui/input"
 import { Tabs, TabsContent } from "~components/ui/tabs"
 
 import "~style.css"
 
-import OptionsTab from "~components/OptionsTab"
-import SearchTab from "~components/SearchTab"
-import SidebarTabs from "~components/SidebarTabs"
-import TopCategories from "~components/TopCategories"
-import TopStreamList from "~components/TopStreamList"
+import FollowedTab from "~components/tabs/FollowedTab"
+import OptionsTab from "~components/tabs/OptionsTab"
+import SearchTab from "~components/tabs/SearchTab"
+import SidebarTabs from "~components/tabs/SidebarTabs"
+import TopCategoriesTab from "~components/tabs/TopCategoriesTab"
+import TopStreamTab from "~components/tabs/TopStreamsTab"
 
 function IndexPopup() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -49,17 +49,17 @@ function IndexPopup() {
         {twitchLoggedIn ? (
           <>
             <TabsContent className="overflow-y-auto flex-grow" value="followed">
-              <FollowStreamList searchQuery={searchQuery} />
+              <FollowedTab searchQuery={searchQuery} />
             </TabsContent>
             <TabsContent
               className="overflow-y-auto flex-grow"
               value="top_streams">
-              <TopStreamList searchQuery={searchQuery} />
+              <TopStreamTab searchQuery={searchQuery} />
             </TabsContent>
             <TabsContent
               className="overflow-y-auto flex-grow"
               value="categories">
-              <TopCategories searchQuery={searchQuery} />
+              <TopCategoriesTab searchQuery={searchQuery} />
             </TabsContent>
             <TabsContent className="overflow-y-auto flex-grow" value="search">
               <SearchTab searchQuery={searchQuery} />

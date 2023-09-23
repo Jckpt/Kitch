@@ -11,14 +11,20 @@ const UserItem = ({
       href={`https://twitch.tv/${display_name}`}
       target="_blank"
       className="flex flex-row p-2 gap-2 items-center hover:bg-neutral-800">
-      <div>
+      <div className="relative flex-col">
         <img
           src={avatar}
-          className="rounded-full"
+          className={`rounded-full ${is_live ? "ring-2 ring-red-500" : ""}`}
           width={42}
           height={42}
           loading="lazy"
         />
+        <div
+          className={`absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-3/4 rounded-sm bg-red-500 text-[10px] flex justify-center items-center ${
+            !is_live && "hidden"
+          }`}>
+          LIVE
+        </div>
       </div>
       <div className="flex flex-col items-start">
         <span>{display_name}</span>

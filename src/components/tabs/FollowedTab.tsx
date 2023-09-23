@@ -4,9 +4,9 @@ import React from "react"
 import { Storage } from "@plasmohq/storage"
 import { useStorage } from "@plasmohq/storage/hook"
 
-import StreamItem from "./StreamItem"
+import StreamItem from "../StreamItem"
 
-const FollowStreamList = ({ searchQuery }) => {
+const FollowedTab = ({ searchQuery }) => {
   const [followedLive] = useStorage({
     key: "followedLive",
     instance: new Storage({ area: "local" })
@@ -33,4 +33,4 @@ const FollowStreamList = ({ searchQuery }) => {
   )
 }
 
-export default FollowStreamList
+export default FollowedTab

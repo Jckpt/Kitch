@@ -6,7 +6,7 @@ import { useStorage } from "@plasmohq/storage/hook"
 
 import { twitchFetcher } from "~lib/util/fetcher"
 
-import UserItem from "./UserItem"
+import UserItem from "../UserItem"
 
 const SearchTab = ({ searchQuery }) => {
   const [userTwitchKey] = useStorage("userTwitchKey")

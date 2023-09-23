@@ -4,8 +4,8 @@ import { useStorage } from "@plasmohq/storage/hook"
 
 import { Button } from "~components/ui/button"
 
-import { Label } from "./ui/label"
-import { Switch } from "./ui/switch"
+import { Label } from "../ui/label"
+import { Switch } from "../ui/switch"
 
 const OptionsTab = () => {
   const [userTwitchKey, _, { remove: twitchLogout }] =

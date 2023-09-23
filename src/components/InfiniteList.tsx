@@ -4,11 +4,10 @@ import useSWRInfinite from "swr/infinite"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
+import { cn } from "~lib/util"
 import { twitchFetcher } from "~lib/util/fetcher"
 
-import StreamItem from "./StreamItem"
-
-const FollowStreamList = ({ searchQuery }) => {
+const InfiniteList = ({ searchQuery, fetchUrl, children, className = "" }) => {
   const [userTwitchKey] = useStorage("userTwitchKey")
   const listRef = useRef(null)
 
@@ -17,17 +16,17 @@ const FollowStreamList = ({ searchQuery }) => {
     if (previousPageData && !previousPageData.data) return null
 
     // first page, we don't have `previousPageData`
-    if (pageIndex === 0)
-      return [`https://api.twitch.tv/helix/streams`, userTwitchKey]
+    if (pageIndex === 0) return [fetchUrl, userTwitchKey]
 
     // add the cursor to the API endpoint
     return [
-      `https://api.twitch.tv/helix/streams?after=${previousPageData.pagination.cursor}`,
+      `${fetchUrl}?after=${previousPageData.pagination.cursor}`,
       userTwitchKey
     ]
   }
+
   const {
-    data: liveStreamsArray,
+    data: pageArray,
     isLoading,
     size,
     setSize
@@ -61,15 +60,18 @@ const FollowStreamList = ({ searchQuery }) => {
   }
 
   return (
-    <div ref={listRef} className="flex overflow-y-auto flex-col h-full">
-      {liveStreamsArray.map((liveStreams) => {
+    <div
+      ref={listRef}
+      className={cn("overflow-y-auto flex flex-col h-full", className)}>
+      {pageArray.map((items) => {
         // `data` is an array of each page's API response.
-        return liveStreams?.data?.map((stream) => (
-          <StreamItem stream={stream} key={stream.id} />
-        ))
+        return items?.data?.map((item) =>
+          // Render the child component
+          children(item)
+        )
       })}
     </div>
   )
 }
 
-export default FollowStreamList
+export default InfiniteList
