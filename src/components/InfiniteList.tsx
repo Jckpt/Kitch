@@ -12,17 +12,19 @@ const InfiniteList = ({ searchQuery, fetchUrl, children, className = "" }) => {
   const listRef = useRef(null)
 
   const getKey = (pageIndex, previousPageData) => {
-    // reached the end
     if (previousPageData && !previousPageData.data) return null
 
     // first page, we don't have `previousPageData`
     if (pageIndex === 0) return [fetchUrl, userTwitchKey]
 
-    // add the cursor to the API endpoint
-    return [
-      `${fetchUrl}?after=${previousPageData.pagination.cursor}`,
-      userTwitchKey
-    ]
+    let apiUrl = fetchUrl
+    // Check if the URL already contains a question mark
+    if (apiUrl.includes("?")) {
+      apiUrl += `&after=${previousPageData.pagination.cursor}`
+    } else {
+      apiUrl += `?after=${previousPageData.pagination.cursor}`
+    }
+    return [apiUrl, userTwitchKey]
   }
 
   const {

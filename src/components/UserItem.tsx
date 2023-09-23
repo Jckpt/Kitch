@@ -4,8 +4,6 @@ const UserItem = ({
   user: { display_name, game_name, is_live, thumbnail_url, title }
 }) => {
   const avatar = thumbnail_url.replace("300x300", "70x70")
-  console.log(avatar)
-  console.log(display_name, game_name, is_live, thumbnail_url, title)
   return (
     <a
       href={`https://twitch.tv/${display_name}`}
