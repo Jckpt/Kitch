@@ -40,7 +40,7 @@ function IndexPopup() {
           <Input
             type="input"
             className="w-3/4 border-0 bg-neutral-800"
-            placeholder="Search channel"
+            placeholder="Search"
             value={searchQuery}
             disabled={!twitchLoggedIn}
             onChange={(e) => setSearchQuery(e.target.value)}

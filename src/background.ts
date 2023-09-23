@@ -4,21 +4,16 @@ import Logo from "data-url:./images/icon.png"
 import { Storage } from "@plasmohq/storage"
 
 import { type TwitchResponse, type UserTwitchKey } from "~lib/types/twitchTypes"
-import { justWentLive } from "~lib/util/helperFunc"
-
 import {
-  getTwitchStreamer,
-  getTwitchUser,
-  twitchFetcher
-} from "./lib/util/fetcher"
+  createNotification,
+  createNotificationMultipleStreams,
+  justWentLive
+} from "~lib/util/helperFunc"
 
-// Set up a listener for the alarm event
+import { getTwitchStreamer, twitchFetcher } from "./lib/util/fetcher"
+
 chrome.alarms.onAlarm.addListener(() => {
   refresh()
-})
-
-chrome.notifications.onClicked.addListener(() => {
-  chrome.tabs.create({ url: "https://twitch.tv/forsen" })
 })
 
 const refresh = async () => {
@@ -27,7 +22,7 @@ const refresh = async () => {
     const storageLocal = new Storage({
       area: "local"
     })
-    console.log("Refreshing...")
+    console.log("Refreshing..")
     const followedLive = await storageLocal.get<TwitchResponse>("followedLive")
     const userTwitchKey = await storage.get<UserTwitchKey>("userTwitchKey")
     const notificationsEnabled = await storage.get<boolean>(
@@ -47,30 +42,19 @@ const refresh = async () => {
       followedLive.data,
       refreshedLive.data
     )
-
+    //asdasda
     if (!notificationsEnabled || followedLive.data.length <= 0) return
     if (newLiveChannels.length == 1) {
-      console.log(newLiveChannels[0])
-      const channel = await getTwitchStreamer(
+      const liveChannel = newLiveChannels[0]
+      const { profile_image_url } = await getTwitchStreamer(
         userTwitchKey,
-        newLiveChannels[0].user_id
+        liveChannel.user_id
       )
-      console.log(channel)
-      chrome.notifications.create("liveNotification", {
-        title: `${newLiveChannels[0].user_name} is now live!`,
-        message: `${newLiveChannels[0].title}`,
-        iconUrl: channel.profile_image_url,
-        type: "basic"
-      })
-    } else if (newLiveChannels.length > 1) {
-      chrome.notifications.create("liveNotification", {
-        title: `${newLiveChannels.length} channels are now live!`,
-        message: `${newLiveChannels
-          .map((channel) => channel.user_name)
-          .join(", ")} are now live!`,
-        iconUrl: Logo,
-        type: "basic"
-      })
+      console.log(profile_image_url)
+      createNotification(liveChannel, profile_image_url)
+    }
+    if (newLiveChannels.length > 1) {
+      createNotificationMultipleStreams(newLiveChannels, Logo)
     }
   } catch (error) {
     console.error("Error fetching Twitch data:", error)

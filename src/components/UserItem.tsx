@@ -3,21 +3,35 @@ import React from "react"
 const UserItem = ({
   user: { display_name, game_name, is_live, thumbnail_url, title }
 }) => {
-  const avatar = thumbnail_url
-    .replace("{width}", "70")
-    .replace("{height}", "70")
+  const avatar = thumbnail_url.replace("300x300", "70x70")
+  console.log(avatar)
   console.log(display_name, game_name, is_live, thumbnail_url, title)
   return (
-    <div>
-      <img src={avatar} width={70} height={70} loading="lazy" />
-      <span>{display_name}</span>
-      <div
-        className="text-gray-300 w-20 overflow-ellipsis overflow-hidden whitespace-nowrap"
-        title={title}>
-        {title}
+    <a
+      href={`https://twitch.tv/${display_name}`}
+      target="_blank"
+      className="flex flex-row p-2 gap-2 items-center hover:bg-neutral-800">
+      <div>
+        <img
+          src={avatar}
+          className="rounded-full"
+          width={42}
+          height={42}
+          loading="lazy"
+        />
       </div>
-      <div>is live? {is_live ? "true" : "false"}</div>
-    </div>
+      <div className="flex flex-col items-start">
+        <span>{display_name}</span>
+        <div
+          className="text-gray-400 w-64 overflow-ellipsis overflow-hidden whitespace-nowrap"
+          title={title}>
+          {title === "" ? "No title" : title}
+        </div>
+        <div className="text-gray-400">
+          {game_name === "" ? "No category" : game_name}
+        </div>
+      </div>
+    </a>
   )
 }
 

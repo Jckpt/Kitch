@@ -29,7 +29,7 @@ const SearchTab = ({ searchQuery }) => {
 
   if (searchQuery === "") {
     return (
-      <div className="flex justify-center items-center grow h-full">
+      <div className="flex justify-center items-center text-sm grow h-full">
         Search for a channel
       </div>
     )
