@@ -31,7 +31,7 @@ const SidebarTabs = () => {
         {category === "" ? (
           <IconDeviceGamepad />
         ) : (
-          <IconChevronLeft className="stroke-blue-400" />
+          <IconChevronLeft className="stroke-white" />
         )}
       </TabsTrigger>
       <TabsTrigger className="p-1" value="search">

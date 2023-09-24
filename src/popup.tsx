@@ -9,20 +9,29 @@ import { Tabs, TabsContent } from "~components/ui/tabs"
 
 import "~style.css"
 
+import { useAtom } from "jotai"
+
 import FollowedTab from "~components/tabs/FollowedTab"
 import OptionsTab from "~components/tabs/OptionsTab"
 import SearchTab from "~components/tabs/SearchTab"
 import SidebarTabs from "~components/tabs/SidebarTabs"
-import TopCategoriesTab from "~components/tabs/TopCategoriesTab"
+import TopCategoriesTab, {
+  categoryAtom
+} from "~components/tabs/TopCategoriesTab"
 import TopStreamTab from "~components/tabs/TopStreamsTab"
 
 function IndexPopup() {
   const [searchQuery, setSearchQuery] = useState<string>("")
   const [userTwitchKey] = useStorage("userTwitchKey")
+  const [category, setCategory] = useAtom(categoryAtom)
   const twitchLoggedIn = userTwitchKey !== undefined
+  const handleClick = () => {
+    setCategory("")
+    setSearchQuery("")
+  }
   return (
     <Tabs
-      onValueChange={() => setSearchQuery("")}
+      onValueChange={handleClick}
       defaultValue="followed"
       className="h-[32rem] w-96 flex text-white">
       <div className="h-full w-12 bg-zinc-900 pt-3 flex flex-col">
