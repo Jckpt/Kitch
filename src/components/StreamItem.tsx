@@ -1,11 +1,17 @@
 import { IconUser } from "@tabler/icons-react"
 import React, { useState } from "react"
 
+import type { TwitchStream } from "~lib/types/twitchTypes"
+
 import { Skeleton } from "./ui/skeleton"
+
+type Props = {
+  stream: TwitchStream
+}
 
 const StreamItem = ({
   stream: { user_login, user_name, viewer_count, title, game_name }
-}) => {
+}: Props) => {
   const [loaded, setLoaded] = useState(false)
   return (
     <a

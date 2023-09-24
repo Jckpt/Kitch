@@ -17,7 +17,7 @@ import TopCategoriesTab from "~components/tabs/TopCategoriesTab"
 import TopStreamTab from "~components/tabs/TopStreamsTab"
 
 function IndexPopup() {
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState<string>("")
   const [userTwitchKey] = useStorage("userTwitchKey")
   const twitchLoggedIn = userTwitchKey !== undefined
   return (

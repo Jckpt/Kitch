@@ -1,12 +1,18 @@
 import React, { useState } from "react"
 
+import type { TwitchGame } from "~lib/types/twitchTypes"
+
 import { Skeleton } from "./ui/skeleton"
 
-const GameItem = ({ game: { name, box_art_url } }) => {
+type Props = {
+  game: TwitchGame
+}
+
+const GameItem = ({ game: { name, box_art_url, id } }: Props) => {
   box_art_url = box_art_url.replace("{width}", "80").replace("{height}", "100")
   const [loaded, setLoaded] = useState(false)
   return (
-    <div className="hover:bg-neutral-800 hover:cursor-pointer">
+    <div className="hover:bg-neutral-800 p-1 hover:cursor-pointer flex justify-center items-center flex-col">
       <img
         src={box_art_url}
         style={{ display: loaded ? "block" : "none" }}

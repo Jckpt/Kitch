@@ -1,8 +1,14 @@
 import React from "react"
 
+import type { TwitchUser } from "~lib/types/twitchTypes"
+
+type Props = {
+  user: TwitchUser
+}
+
 const UserItem = ({
   user: { display_name, game_name, is_live, thumbnail_url, title }
-}) => {
+}: Props) => {
   const avatar = thumbnail_url.replace("300x300", "70x70")
   return (
     <a
