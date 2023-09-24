@@ -24,7 +24,6 @@ const InfiniteList = ({ searchQuery, fetchUrl, children, className = "" }) => {
     } else {
       apiUrl += `?after=${previousPageData.pagination.cursor}`
     }
-    console.log(apiUrl)
     return [apiUrl, userTwitchKey]
   }
 

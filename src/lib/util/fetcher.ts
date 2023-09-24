@@ -31,6 +31,6 @@ export const getTwitchStreamer = async (
     `https://api.twitch.tv/helix/users?id=${user_id}`,
     credentials
   ])
-  console.log(data, user_id)
+
   return data.data[0]
 }

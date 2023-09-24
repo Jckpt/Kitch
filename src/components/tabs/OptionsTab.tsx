@@ -23,7 +23,6 @@ const OptionsTab = () => {
       "_blank"
     )
   }
-  console.log(notificationsEnabled)
   return (
     <div className="flex flex-col h-full gap-4 items-center justify-center">
       <div className="flex items-center justify-start w-3/4 space-x-2">

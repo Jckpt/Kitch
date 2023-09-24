@@ -11,7 +11,7 @@ const FollowedTab = ({ searchQuery }) => {
     key: "followedLive",
     instance: new Storage({ area: "local" })
   })
-  console.log(followedLive)
+
   const filteredStreams = followedLive?.data?.filter((stream) =>
     stream.user_name.toLowerCase().includes(searchQuery.toLowerCase())
   )

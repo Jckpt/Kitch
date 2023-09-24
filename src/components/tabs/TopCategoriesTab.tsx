@@ -9,14 +9,12 @@ import InfiniteList from "../InfiniteList"
 export const categoryAtom = atom("")
 
 const TopCategoriesTab = ({ searchQuery }) => {
+  // if category is not empty, fetch streams, else fetch games, and render accordingly
   const [category] = useAtom(categoryAtom)
   const fetchUrl =
     category === ""
       ? "https://api.twitch.tv/helix/games/top"
       : `https://api.twitch.tv/helix/streams?game_id=${category}`
-  // TODO: jak sie kliknie to ma sie otworzyc kategoria,
-  // wymyslilem jak to zrobic: dodac jakis state managment i jezeli game_id jest ustawione to
-  // wtedy renderowac kategorie, a jak nie to renderowac liste gier
   return (
     <InfiniteList
       searchQuery={searchQuery}

@@ -3,7 +3,11 @@ import Logo from "data-url:./images/icon.png"
 
 import { Storage } from "@plasmohq/storage"
 
-import { type TwitchResponse, type UserTwitchKey } from "~lib/types/twitchTypes"
+import {
+  type TwitchResponse,
+  type TwitchStream,
+  type UserTwitchKey
+} from "~lib/types/twitchTypes"
 import {
   createNotification,
   createNotificationMultipleStreams,
@@ -23,7 +27,8 @@ const refresh = async () => {
       area: "local"
     })
     console.log("Refreshing..")
-    const followedLive = await storageLocal.get<TwitchResponse>("followedLive")
+    const followedLive =
+      await storageLocal.get<TwitchResponse<TwitchStream>>("followedLive")
     const userTwitchKey = await storage.get<UserTwitchKey>("userTwitchKey")
     const notificationsEnabled = await storage.get<boolean>(
       "notificationsEnabled"
@@ -50,7 +55,7 @@ const refresh = async () => {
         userTwitchKey,
         liveChannel.user_id
       )
-      console.log(profile_image_url)
+
       createNotification(liveChannel, profile_image_url)
     }
     if (newLiveChannels.length > 1) {

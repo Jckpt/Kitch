@@ -12,19 +12,24 @@ import {
   CardHeader,
   CardTitle
 } from "~components/ui/card"
-import { type TwitchResponse, type UserTwitchKey } from "~lib/types/twitchTypes"
+import {
+  type TwitchResponse,
+  type TwitchStream,
+  type UserTwitchKey
+} from "~lib/types/twitchTypes"
 import { getTwitchUser, twitchFetcher } from "~lib/util/fetcher"
 
 function OptionsIndex() {
   const [didLogin, setDidLogin] = useState<boolean>(null)
   const [callbackSite, setCallbackSite] = useState<"twitch" | "kick">(null)
-  const [_, setUserTwitchKey] = useStorage("userTwitchKey")
+  const [_, setUserTwitchKey] = useStorage<UserTwitchKey>("userTwitchKey")
 
-  const [getFollowedLive, setFollowedLive, { remove }] =
-    useStorage<TwitchResponse>({
-      key: "followedLive",
-      instance: new Storage({ area: "local" })
-    })
+  const [getFollowedLive, setFollowedLive] = useStorage<
+    TwitchResponse<TwitchStream>
+  >({
+    key: "followedLive",
+    instance: new Storage({ area: "local" })
+  })
   const getTwitchCredentials = () => {
     const hash = window.location.hash.substring(1)
     if (hash === "") return
@@ -71,7 +76,6 @@ function OptionsIndex() {
           {didLogin === true
             ? "You can now close this window."
             : "Something went wrong."}
-          <button onClick={() => remove()}>Remove</button>
         </CardContent>
       </Card>
     </div>
