@@ -38,7 +38,10 @@ const refresh = async () => {
     const notificationsEnabled = await storage.get<boolean>(
       "notificationsEnabled"
     )
-    if (!userTwitchKey) return
+    if (!userTwitchKey) {
+      console.log("No userTwitchKey")
+      return
+    }
 
     const refreshedLive = await twitchFetcher([
       `https://api.twitch.tv/helix/streams/followed?user_id=${userTwitchKey?.user_id}`,
@@ -47,13 +50,20 @@ const refresh = async () => {
     await storageLocal.set("followedLive", refreshedLive)
     chrome.action.setBadgeText({ text: refreshedLive.data.length.toString() })
     chrome.action.setBadgeBackgroundColor({ color: "#737373" })
-    if (!followedLive) return
+    if (!followedLive) {
+      console.log("No followedLive")
+      return
+    }
+
     const newLiveChannels = await justWentLive(
       followedLive.data,
       refreshedLive.data
     )
 
-    if (!notificationsEnabled || followedLive.data.length <= 0) return
+    if (!notificationsEnabled || followedLive.data.length <= 0) {
+      console.log("Notifications disabled or no followed channels")
+      return
+    }
     if (newLiveChannels.length == 1) {
       const liveChannel = newLiveChannels[0]
       const { profile_image_url } = await getTwitchStreamer(
@@ -68,10 +78,12 @@ const refresh = async () => {
     }
   } catch (error) {
     console.error("Error fetching Twitch data:", error)
+  } finally {
+    console.log("refresh alarm created")
+    chrome.alarms.create("refresh", {
+      delayInMinutes: 1.5
+    })
   }
-  chrome.alarms.create("refresh", {
-    delayInMinutes: 1.5
-  })
 }
 
 refresh()
