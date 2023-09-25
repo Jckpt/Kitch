@@ -16,15 +16,15 @@ const GameItem = ({ game: { name, box_art_url, id } }: Props) => {
   const [loaded, setLoaded] = useState(false)
   return (
     <div
-      className="hover:bg-neutral-800 p-1 hover:cursor-pointer flex justify-center items-center flex-col"
+      className="p-1 flex justify-center items-center flex-col hover:cursor-pointer hover:bg-neutral-800"
       onClick={() => setCategory(id)}>
       <img
         src={box_art_url}
         style={{ display: loaded ? "block" : "none" }}
-        className="rounded-md"
+        className="rounded-md h-[95px] w-[76px]"
         onLoad={() => setLoaded(true)}
       />
-      {!loaded && <Skeleton className={`h-[100px] w-[80px] bg-neutral-700`} />}
+      {!loaded && <Skeleton className={`h-[95px] w-[76px] bg-neutral-700`} />}
       <div
         className="text-gray-300 w-20 overflow-ellipsis overflow-hidden whitespace-nowrap"
         title={name}>
