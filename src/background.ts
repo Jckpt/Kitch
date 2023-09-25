@@ -20,13 +20,18 @@ chrome.alarms.onAlarm.addListener(() => {
   refresh()
 })
 
+chrome.runtime.onStartup.addListener(() => {
+  console.log("Starting up..")
+  refresh()
+})
+
 const refresh = async () => {
+  console.log("Refreshing..")
   try {
     const storage = new Storage()
     const storageLocal = new Storage({
       area: "local"
     })
-    console.log("Refreshing..")
     const followedLive =
       await storageLocal.get<TwitchResponse<TwitchStream>>("followedLive")
     const userTwitchKey = await storage.get<UserTwitchKey>("userTwitchKey")
@@ -47,7 +52,7 @@ const refresh = async () => {
       followedLive.data,
       refreshedLive.data
     )
-    //asdasda
+
     if (!notificationsEnabled || followedLive.data.length <= 0) return
     if (newLiveChannels.length == 1) {
       const liveChannel = newLiveChannels[0]

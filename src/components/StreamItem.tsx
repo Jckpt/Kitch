@@ -41,9 +41,15 @@ const StreamItem = ({
         <div
           className="text-gray-300 w-52 overflow-ellipsis overflow-hidden whitespace-nowrap"
           title={title}>
-          {title}
+          {title === "" ? <span className="italic">No title</span> : title}
         </div>
-        <div className="text-gray-300">{game_name}</div>
+        <div className="text-gray-300 w-52 overflow-ellipsis overflow-hidden whitespace-nowrap">
+          {game_name === "" ? (
+            <span className="italic">No category</span>
+          ) : (
+            game_name
+          )}
+        </div>
       </div>
     </a>
   )
