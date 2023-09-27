@@ -20,8 +20,13 @@ chrome.alarms.onAlarm.addListener(() => {
   refresh()
 })
 
-chrome.runtime.onStartup.addListener(() => {
+chrome.runtime.onStartup.addListener(async () => {
   console.log("Starting up..")
+  const storageLocal = new Storage({
+    area: "local"
+  })
+  storageLocal.remove("followedLive")
+
   refresh()
 })
 
@@ -60,7 +65,7 @@ const refresh = async () => {
       refreshedLive.data
     )
 
-    if (!notificationsEnabled || followedLive.data.length <= 0) {
+    if (!notificationsEnabled || newLiveChannels.length <= 0) {
       console.log("Notifications disabled or no followed channels")
       return
     }
@@ -85,5 +90,3 @@ const refresh = async () => {
     })
   }
 }
-
-refresh()

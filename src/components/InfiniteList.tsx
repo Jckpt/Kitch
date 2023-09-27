@@ -1,5 +1,5 @@
 import { IconLoader2 } from "@tabler/icons-react"
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import useSWRInfinite from "swr/infinite"
 
 import { useStorage } from "@plasmohq/storage/hook"
@@ -9,7 +9,9 @@ import { twitchFetcher } from "~lib/util/fetcher"
 
 const InfiniteList = ({ searchQuery, fetchUrl, children, className = "" }) => {
   const [userTwitchKey] = useStorage("userTwitchKey")
+
   const listRef = useRef(null)
+  const [scrollToTop, setScrollToTop] = useState(false)
 
   const getKey = (pageIndex, previousPageData) => {
     if (previousPageData && !previousPageData.data) return null
@@ -35,10 +37,15 @@ const InfiniteList = ({ searchQuery, fetchUrl, children, className = "" }) => {
   } = useSWRInfinite(getKey, twitchFetcher)
 
   useEffect(() => {
+    if (!listRef.current) return
     const list = listRef.current
+    if (scrollToTop && listRef) {
+      list.scrollTop = 0
+      setScrollToTop(false)
+    }
 
     const handleScroll = () => {
-      if (list && list?.scrollTop + list?.clientHeight >= list?.scrollHeight) {
+      if (list && list.scrollTop + list.clientHeight >= list.scrollHeight) {
         // Reached the end of the list, load more data
         if (!isLoading) {
           setSize(size + 1)
@@ -51,7 +58,11 @@ const InfiniteList = ({ searchQuery, fetchUrl, children, className = "" }) => {
     return () => {
       list?.removeEventListener("scroll", handleScroll)
     }
-  }, [isLoading, size, setSize])
+  }, [scrollToTop, isLoading, size])
+
+  useEffect(() => {
+    setScrollToTop(true) // Trigger scroll to top when children change
+  }, [children])
 
   if (isLoading) {
     return (

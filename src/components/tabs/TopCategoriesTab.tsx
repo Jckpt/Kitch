@@ -15,18 +15,19 @@ const TopCategoriesTab = ({ searchQuery }) => {
     category === ""
       ? "https://api.twitch.tv/helix/games/top"
       : `https://api.twitch.tv/helix/streams?game_id=${category}`
+  if (category !== "") {
+    return (
+      <InfiniteList searchQuery={searchQuery} fetchUrl={fetchUrl}>
+        {(item) => <StreamItem stream={item} key={item.id} />}
+      </InfiniteList>
+    )
+  }
   return (
     <InfiniteList
       searchQuery={searchQuery}
       fetchUrl={fetchUrl}
-      className={`${category === "" && "grid grid-cols-4"}`}>
-      {(item) =>
-        category === "" ? (
-          <GameItem game={item} key={item.id} />
-        ) : (
-          <StreamItem stream={item} key={item.id} />
-        )
-      }
+      className="grid grid-cols-4">
+      {(item) => <GameItem game={item} key={item.id} />}
     </InfiniteList>
   )
 }
