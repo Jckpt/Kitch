@@ -16,7 +16,7 @@ const OptionsTab = () => {
   const twitchLogin = () => {
     const BASE_URL = "https://id.twitch.tv/oauth2/authorize"
     const REDIRECT_URI =
-      "https://twiki.space/twitch/callback&response_type=token&scope=user:read:follows"
+      "https://twiki-backend.fly.dev/twitch/callback&response_type=token&scope=user:read:follows"
     const CLIENT_ID = "256lknox4x75bj30rwpctxna2ckbmn"
     window.open(
       `${BASE_URL}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`,

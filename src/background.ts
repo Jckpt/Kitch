@@ -90,3 +90,5 @@ const refresh = async () => {
     })
   }
 }
+
+refresh()
