@@ -13,8 +13,8 @@ import {
   CardTitle
 } from "~components/ui/card"
 import {
-  type TwitchResponse,
-  type TwitchStream,
+  type PlatformResponse,
+  type PlatformStream,
   type UserTwitchKey
 } from "~lib/types/twitchTypes"
 import { getTwitchUser, twitchFetcher } from "~lib/util/fetcher"
@@ -25,7 +25,7 @@ function OptionsIndex() {
   const [_, setUserTwitchKey] = useStorage<UserTwitchKey>("userTwitchKey")
 
   const [getFollowedLive, setFollowedLive] = useStorage<
-    TwitchResponse<TwitchStream>
+    PlatformResponse<PlatformStream>
   >({
     key: "followedLive",
     instance: new Storage({ area: "local" })

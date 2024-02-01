@@ -4,14 +4,15 @@ import Logo from "data-url:./images/icon.png"
 import { Storage } from "@plasmohq/storage"
 
 import {
-  type TwitchResponse,
-  type TwitchStream,
+  type PlatformResponse,
+  type PlatformStream,
   type UserTwitchKey
 } from "~lib/types/twitchTypes"
 import {
   createNotification,
   createNotificationMultipleStreams,
-  justWentLive
+  justWentLive,
+  parseKickObject
 } from "~lib/util/helperFunc"
 
 import { getTwitchStreamer, twitchFetcher } from "./lib/util/fetcher"
@@ -38,20 +39,37 @@ const refresh = async () => {
       area: "local"
     })
     const followedLive =
-      await storageLocal.get<TwitchResponse<TwitchStream>>("followedLive")
+      await storageLocal.get<PlatformResponse<PlatformStream>>("followedLive")
     const userTwitchKey = await storage.get<UserTwitchKey>("userTwitchKey")
     const notificationsEnabled = await storage.get<boolean>(
       "notificationsEnabled"
     )
+
     if (!userTwitchKey) {
       console.log("No userTwitchKey")
       return
     }
 
-    const refreshedLive = await twitchFetcher([
+    let refreshedLive = (await twitchFetcher([
       `https://api.twitch.tv/helix/streams/followed?user_id=${userTwitchKey?.user_id}`,
       userTwitchKey
-    ])
+    ])) as PlatformResponse<PlatformStream>
+
+    const kickStreamers = ["amouranth", "xqc"]
+    let kickLivestreams = []
+    for (const streamer of kickStreamers) {
+      const kickStream = await fetch(
+        `https://kick.com/api/v1/channels/${streamer}`
+      )
+      const kickStreamJson = await kickStream.json()
+
+      if (kickStreamJson.livestream === null) continue
+
+      kickLivestreams.push(parseKickObject(kickStreamJson))
+    }
+
+    refreshedLive.data = [...refreshedLive.data, ...kickLivestreams]
+
     await storageLocal.set("followedLive", refreshedLive)
     chrome.action.setBadgeText({ text: refreshedLive.data.length.toString() })
     chrome.action.setBadgeBackgroundColor({ color: "#737373" })

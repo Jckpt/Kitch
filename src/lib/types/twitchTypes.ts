@@ -4,7 +4,7 @@ export type UserTwitchKey = {
   client_id: string
 }
 
-export type TwitchStream = {
+export type PlatformStream = {
   id: string
   user_id: string
   user_login: string
@@ -20,6 +20,7 @@ export type TwitchStream = {
   thumbnail_url: string
   tag_ids: string[]
   is_mature: boolean
+  platform?: string
 }
 
 export type TwitchUser = {
@@ -43,10 +44,11 @@ export type TwitchGame = {
   box_art_url: string
 }
 
-export interface TwitchResponse<T> {
+export interface PlatformResponse<T> {
   data: Array<T>
 
   pagination: {
     cursor?: string
   }
+  platform: string
 }

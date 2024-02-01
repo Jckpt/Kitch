@@ -1,12 +1,12 @@
 import { IconUser } from "@tabler/icons-react"
 import React, { useState } from "react"
 
-import type { TwitchStream } from "~lib/types/twitchTypes"
+import type { PlatformStream } from "~lib/types/twitchTypes"
 
 import { Skeleton } from "./ui/skeleton"
 
 type Props = {
-  stream: TwitchStream
+  stream: PlatformStream
 }
 
 const StreamItem = ({
@@ -33,9 +33,9 @@ const StreamItem = ({
       <div className="flex w-full flex-col pl-1.5">
         <div className="flex justify-between">
           <h1 className="text-white text-sm font-bold">{user_name}</h1>
-          <div className="text-red-600 flex flex-row items-center">
-            <IconUser className="w-3.5 h-3.5" />
+          <div className="text-red-500 flex flex-row items-center">
             <span className="text-xs">{viewer_count.toLocaleString()}</span>
+            <IconUser className="w-3.5 h-3.5" />
           </div>
         </div>
         <div
