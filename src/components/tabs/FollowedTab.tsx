@@ -4,6 +4,8 @@ import React from "react"
 import { Storage } from "@plasmohq/storage"
 import { useStorage } from "@plasmohq/storage/hook"
 
+import type { PlatformStream } from "~lib/types/twitchTypes"
+
 import StreamItem from "../StreamItem"
 
 const FollowedTab = ({ searchQuery }) => {
@@ -26,9 +28,13 @@ const FollowedTab = ({ searchQuery }) => {
 
   return (
     <>
-      {filteredStreams?.map((stream) => (
-        <StreamItem stream={stream} key={stream.id} />
-      ))}
+      {filteredStreams?.map((stream: PlatformStream) =>
+        stream?.platform === "Kick" ? (
+          <StreamItem variant="Kick" stream={stream} key={stream.id} />
+        ) : (
+          <StreamItem stream={stream} key={stream.id} />
+        )
+      )}
     </>
   )
 }

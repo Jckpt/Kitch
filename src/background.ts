@@ -55,6 +55,7 @@ const refresh = async () => {
       userTwitchKey
     ])) as PlatformResponse<PlatformStream>
 
+    // workaround, no kick official API yet, might need to setup a backend with redis to not hit rate limit
     const kickStreamers = ["amouranth", "xqc"]
     let kickLivestreams = []
     for (const streamer of kickStreamers) {
@@ -68,7 +69,11 @@ const refresh = async () => {
       kickLivestreams.push(parseKickObject(kickStreamJson))
     }
 
+    console.log("kickLivestreams", kickLivestreams)
+    console.log("refreshedLive", refreshedLive)
     refreshedLive.data = [...refreshedLive.data, ...kickLivestreams]
+    // sort by viewer count
+    refreshedLive.data.sort((a, b) => b.viewer_count - a.viewer_count)
 
     await storageLocal.set("followedLive", refreshedLive)
     chrome.action.setBadgeText({ text: refreshedLive.data.length.toString() })
