@@ -57,20 +57,22 @@ const refresh = async () => {
     ])) as PlatformResponse<PlatformStream>
 
     // workaround, no kick official API yet, might need to setup a backend with redis to not hit rate limit
-    const kickStreamers = ["amouranth", "xqc"]
     let kickLivestreams = []
-    for (const streamer of kickStreamers) {
-      const kickStream = await fetch(
-        `https://kick.com/api/v1/channels/${streamer}`
-      )
-      const kickStreamJson = await kickStream.json()
+    if (kickFollows && kickFollows.length > 0) {
+      console.log("kickFollows", kickFollows)
+      for (const streamer of kickFollows) {
+        const kickStream = await fetch(
+          `https://kick.com/api/v1/channels/${streamer}`
+        )
+        const kickStreamJson = await kickStream.json()
 
-      if (kickStreamJson.livestream === null) continue
+        if (kickStreamJson.livestream === null) continue
 
-      kickLivestreams.push(parseKickObject(kickStreamJson))
+        kickLivestreams.push(parseKickObject(kickStreamJson))
+      }
     }
-
     console.log("kickLivestreams", kickLivestreams)
+
     console.log("refreshedLive", refreshedLive)
     refreshedLive.data = [...refreshedLive.data, ...kickLivestreams]
     // sort by viewer count

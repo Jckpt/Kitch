@@ -8,8 +8,7 @@ import { Button } from "~components/ui/button"
 import { Input } from "~components/ui/input"
 
 const KickMenuTab = () => {
-  const [kickFollows, setKickFollows, { remove }] =
-    useStorage<string[]>("kickFollows")
+  const [kickFollows, setKickFollows] = useStorage<string[]>("kickFollows")
   const [kickNickname, setKickNickname] = useState("")
   console.log(kickFollows)
   console.log(kickNickname)
