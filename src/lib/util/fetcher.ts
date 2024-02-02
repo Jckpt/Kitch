@@ -11,7 +11,8 @@ export const twitchFetcher = async (params) => {
     }
   }
   const response = await fetch(url, headerValue)
-  const data = await response.json()
+  let data = await response.json()
+  data = { ...data, platform: "Twitch" }
   return data
 }
 

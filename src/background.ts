@@ -41,6 +41,7 @@ const refresh = async () => {
     const followedLive =
       await storageLocal.get<PlatformResponse<PlatformStream>>("followedLive")
     const userTwitchKey = await storage.get<UserTwitchKey>("userTwitchKey")
+    const kickFollows = await storage.get<string[]>("kickFollows")
     const notificationsEnabled = await storage.get<boolean>(
       "notificationsEnabled"
     )
