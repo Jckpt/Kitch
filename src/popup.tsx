@@ -48,7 +48,7 @@ function IndexPopup() {
         <div className="basis-12 p-2 h-14 flex-grow-0 flex-shrink flex justify-center items-center border-b border-neutral-950 bg-zinc-900">
           <Input
             type="input"
-            className="w-3/4 border-0 bg-neutral-800"
+            className="w-3/4 rounded-md border-0 bg-neutral-800"
             placeholder="Search"
             value={searchQuery}
             disabled={!twitchLoggedIn}

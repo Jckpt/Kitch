@@ -24,6 +24,7 @@ const StreamItem = ({
   variant = "Twitch"
 }: Props) => {
   const [loaded, setLoaded] = useState(false)
+  if (thumbnail_url === undefined) return null
   return (
     <a
       key={user_login}

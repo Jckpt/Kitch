@@ -14,6 +14,7 @@ const GameItem = ({ game: { name, box_art_url, id } }: Props) => {
   box_art_url = box_art_url.replace("{width}", "80").replace("{height}", "100")
   const [category, setCategory] = useAtom(categoryAtom)
   const [loaded, setLoaded] = useState(false)
+  if (category === undefined) return null
   return (
     <div
       className="p-1 flex justify-center items-center flex-col hover:cursor-pointer hover:bg-neutral-800"

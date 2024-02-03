@@ -46,20 +46,20 @@ const OptionsTab = () => {
 
       {userTwitchKey ? (
         <Button
-          className="w-3/4 hover:border-red-700 hover:bg-red-700 hover:text-white"
+          className="w-3/4 rounded-md hover:border-red-700 hover:bg-red-700 bg-zinc-800 text-primary"
           onClick={twitchLogout}>
           Logout of Twitch
         </Button>
       ) : (
         <Button
-          className="w-3/4 hover:bg-purple-700 hover:border-purple-700 hover:text-white"
+          className="w-3/4 rounded-md hover:bg-purple-700 hover:border-purple-700 bg-zinc-800 text-primary"
           onClick={twitchLogin}>
           Login to Twitch
         </Button>
       )}
 
       <Button
-        className="w-3/4 hover:bg-green-700 hover:border-green-700 hover:text-white"
+        className="w-3/4 rounded-md hover:bg-green-700 hover:border-green-700 bg-zinc-800 text-primary"
         disabled={false}
         onClick={() => setKickMenu(true)}>
         Add Kick follows
