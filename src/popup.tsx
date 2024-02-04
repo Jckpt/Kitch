@@ -1,5 +1,3 @@
-//@ts-ignore
-import Logo from "data-url:./images/icon.png"
 import React, { useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
@@ -35,13 +33,6 @@ function IndexPopup() {
       defaultValue="followed"
       className="h-[32rem] w-96 flex text-white">
       <div className="h-full w-12 bg-zinc-900 pt-3 flex flex-col">
-        <div className="flex items-end justify-center">
-          <img
-            src={Logo}
-            className="w-7 h-7"
-            style={{ imageRendering: "pixelated" }}
-          />
-        </div>
         <SidebarTabs />
       </div>
       <div className="w-full h-full bg-neutral-900 flex flex-col">

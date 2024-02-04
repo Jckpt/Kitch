@@ -47,8 +47,14 @@
     ],
     "permissions": [
       "alarms",
-      "notifications"
+      "notifications",
+      "identity"
     ],
+    "browser_specific_settings": {
+      "gecko": {
+        "id": "$FIREFOX_EXT_ID"
+      }
+    },
     "web_accessible_resources": [
       {
         "resources": [

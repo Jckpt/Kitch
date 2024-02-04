@@ -1,9 +1,16 @@
 import { atom, useAtom } from "jotai"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 
+import { Storage } from "@plasmohq/storage"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { Button } from "~components/ui/button"
+import type { PlatformResponse, PlatformStream } from "~lib/types/twitchTypes"
+import {
+  getTwitchOAuthURL,
+  getTwitchUserId,
+  twitchFetcher
+} from "~lib/util/fetcher"
 
 import { Label } from "../ui/label"
 import { Switch } from "../ui/switch"
@@ -13,22 +20,42 @@ export const kickMenuAtom = atom<boolean>(false)
 
 const OptionsTab = () => {
   const [kickMenu, setKickMenu] = useAtom(kickMenuAtom)
-
-  const [userTwitchKey, _, { remove: twitchLogout }] =
+  const [getFollowedLive, setFollowedLive] = useStorage<
+    PlatformResponse<PlatformStream>
+  >({
+    key: "followedLive",
+    instance: new Storage({ area: "local" })
+  })
+  const [userTwitchKey, setUserTwitchKey, { remove: twitchLogout }] =
     useStorage("userTwitchKey")
+  console.log(userTwitchKey)
   const [notificationsEnabled, setNotificationsEnabled] = useStorage<boolean>(
     "notificationsEnabled"
   )
 
-  const twitchLogin = () => {
-    const BASE_URL = "https://id.twitch.tv/oauth2/authorize"
-    const REDIRECT_URI =
-      "https://twiki-backend.fly.dev/twitch/callback&response_type=token&scope=user:read:follows"
-    const CLIENT_ID = "256lknox4x75bj30rwpctxna2ckbmn"
-    window.open(
-      `${BASE_URL}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`,
-      "_blank"
-    )
+  async function getTwitchAuth() {
+    const data = await chrome.identity.launchWebAuthFlow({
+      interactive: true,
+      url: getTwitchOAuthURL()
+    })
+    const urlObject = new URL(data)
+    const fragment = urlObject.hash.substring(1) // Pomiń znak '#'
+    const fragmentParams = new URLSearchParams(fragment)
+    const clientId = "256lknox4x75bj30rwpctxna2ckbmn"
+    const userCredentials = {
+      user_id: await getTwitchUserId({
+        access_token: fragmentParams.get("access_token"),
+        client_id: clientId
+      }),
+      access_token: fragmentParams.get("access_token"),
+      client_id: clientId
+    }
+    const followedLive = await twitchFetcher([
+      `https://api.twitch.tv/helix/streams/followed?user_id=${userCredentials?.user_id}`,
+      userCredentials
+    ])
+    setUserTwitchKey(userCredentials)
+    setFollowedLive(followedLive)
   }
 
   if (kickMenu) return <KickMenuTab />
@@ -46,20 +73,20 @@ const OptionsTab = () => {
 
       {userTwitchKey ? (
         <Button
-          className="w-3/4 rounded-md hover:border-red-700 hover:bg-red-700 bg-zinc-800 text-primary"
+          className="w-3/4 rounded-md border-0  hover:bg-red-700 bg-zinc-800 text-primary"
           onClick={twitchLogout}>
           Logout of Twitch
         </Button>
       ) : (
         <Button
-          className="w-3/4 rounded-md hover:bg-purple-700 hover:border-purple-700 bg-zinc-800 text-primary"
-          onClick={twitchLogin}>
+          className="w-3/4 rounded-md border-0 hover:bg-purple-700 bg-purple-800 text-primary"
+          onClick={getTwitchAuth}>
           Login to Twitch
         </Button>
       )}
 
       <Button
-        className="w-3/4 rounded-md hover:bg-green-700 hover:border-green-700 bg-zinc-800 text-primary"
+        className="w-3/4 rounded-md border-0 hover:bg-green-700 bg-zinc-800 text-primary"
         disabled={false}
         onClick={() => setKickMenu(true)}>
         Add Kick follows

@@ -1,4 +1,4 @@
-import { IconPlus } from "@tabler/icons-react"
+import { IconPlus, IconX } from "@tabler/icons-react"
 import React, { useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
@@ -47,14 +47,15 @@ const KickMenuTab = () => {
         </Button>
       </div>
       <div className="max-w-full pl-8 pr-8 flex flex-row gap-2 items-center justify-center flex-wrap">
-        {kickFollows?.map((follow) => (
+        {kickFollows?.map((followedStreamer) => (
           <Badge
-            key={follow}
+            key={followedStreamer}
             className=" hover:bg-red-700 hover:cursor-pointer bg-neutral-800 text-primary"
             onClick={() =>
-              setKickFollows(kickFollows.filter((f) => f !== follow))
+              setKickFollows(kickFollows.filter((f) => f !== followedStreamer))
             }>
-            {follow}
+            {followedStreamer}
+            <IconX className="w-2 h-2" />
           </Badge>
         ))}
       </div>

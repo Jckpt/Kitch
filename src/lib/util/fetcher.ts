@@ -16,12 +16,22 @@ export const twitchFetcher = async (params) => {
   return data
 }
 
-export const getTwitchUser = async (credentials: UserTwitchKey) => {
+export const getTwitchUserId = async (credentials) => {
   const data = await twitchFetcher([
     "https://api.twitch.tv/helix/users",
     credentials
   ])
-  return data.data[0]
+  return data.data[0].id
+}
+
+export const getTwitchOAuthURL = () => {
+  console.log(chrome.identity.getRedirectURL())
+  const BASE_URL = "https://id.twitch.tv/oauth2/authorize"
+  const REDIRECT_URI = chrome.identity.getRedirectURL()
+  const CLIENT_ID = "256lknox4x75bj30rwpctxna2ckbmn"
+  const SCOPE = "user:read:follows"
+  const FINAL_URL = `${BASE_URL}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&force_verify=true&response_type=token&scope=${SCOPE}`
+  return FINAL_URL
 }
 
 export const getTwitchStreamer = async (
