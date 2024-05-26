@@ -62,7 +62,7 @@ const refresh = async () => {
       console.log("kickFollows", kickFollows)
       for (const streamer of kickFollows) {
         const kickStream = await fetch(
-          `https://kick.com/api/v1/channels/${streamer}`
+          `https://kitch.pl/api/channels/${streamer}`
         )
         const kickStreamJson = await kickStream.json()
 
