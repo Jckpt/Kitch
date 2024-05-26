@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+redis
+curl_cffi
+async-timeout
+httpx
