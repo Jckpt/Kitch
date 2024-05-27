@@ -59,16 +59,23 @@ const refresh = async () => {
     // workaround, no kick official API yet, might need to setup a backend with redis to not hit rate limit
     let kickLivestreams = []
     if (kickFollows && kickFollows.length > 0) {
-      console.log("kickFollows", kickFollows)
-      for (const streamer of kickFollows) {
-        const kickStream = await fetch(
-          `https://kitch.pl/api/channel/${streamer}`
+      try {
+        const streamersQuery = kickFollows.join(",")
+        const kickStreamsResponse = await fetch(
+          `https://kitch.pl/api/channels?streamers=${streamersQuery}`
         )
-        const kickStreamJson = await kickStream.json()
+        const kickStreamsJson = await kickStreamsResponse.json()
 
-        if (kickStreamJson.livestream === null) continue
+        for (const streamer of kickFollows) {
+          const kickStreamJson = kickStreamsJson[streamer]
 
-        kickLivestreams.push(parseKickObject(kickStreamJson))
+          if (kickStreamJson.error || kickStreamJson.livestream === null)
+            continue
+
+          kickLivestreams.push(parseKickObject(kickStreamJson))
+        }
+      } catch (error) {
+        console.error("Error fetching kick streams:", error)
       }
     }
     console.log("kickLivestreams", kickLivestreams)

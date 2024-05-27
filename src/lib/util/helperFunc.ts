@@ -78,7 +78,7 @@ export function parseKickObject(kickObject) {
     viewer_count: livestream.viewer_count,
     started_at: livestream.created_at,
     language: livestream.language,
-    thumbnail_url: livestream.thumbnail.url.replace("720", "160"),
+    thumbnail_url: livestream.thumbnail.url,
     tag_ids: null,
     is_mature: livestream.is_mature,
     platform: "Kick"
