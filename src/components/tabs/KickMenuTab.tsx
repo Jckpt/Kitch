@@ -10,17 +10,31 @@ import { Input } from "~components/ui/input"
 const KickMenuTab = () => {
   const [kickFollows, setKickFollows] = useStorage<string[]>("kickFollows")
   const [kickNickname, setKickNickname] = useState("")
-  console.log(kickFollows)
-  console.log(kickNickname)
+  const [info, setInfo] = useState("")
   const handleAdd = async (nickname: string) => {
-    if (nickname === "") return
     setKickNickname("")
-    nickname = nickname.toLowerCase()
-    if (kickFollows === undefined) {
-      setKickFollows([nickname])
-    } else {
-      if (kickFollows.includes(nickname)) return
+    if (
+      nickname === "" ||
+      kickFollows.some(
+        (follow) => follow.toLowerCase() == nickname.toLowerCase()
+      )
+    ) {
+      setInfo("Streamer already added")
+      return
+    }
+    try {
+      const kickUser = await fetch(`https://kitch.pl/api/channel/${nickname}`)
+      if (kickUser === null || kickUser.status !== 200) {
+        setInfo("Streamer not found")
+        return
+      }
+      const kickUserData = await kickUser.json()
+
+      nickname = kickUserData.user.username
       setKickFollows([...kickFollows, nickname])
+      setInfo("")
+    } catch (e) {
+      console.error(e)
     }
   }
   const handleAddEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -46,11 +60,12 @@ const KickMenuTab = () => {
           <IconPlus />
         </Button>
       </div>
+      <div className="text-red-500 min-h-[24px]">{info}</div>
       <div className="max-w-full pl-8 pr-8 flex flex-row gap-2 items-center justify-center flex-wrap">
         {kickFollows?.map((followedStreamer) => (
           <Badge
             key={followedStreamer}
-            className=" hover:bg-red-700 hover:cursor-pointer bg-neutral-800 text-primary"
+            className=" hover:bg-red-700 hover:cursor-pointer bg-neutral-800 text-primary flex items-center justify-around gap-1 rounded-md"
             onClick={() =>
               setKickFollows(kickFollows.filter((f) => f !== followedStreamer))
             }>
