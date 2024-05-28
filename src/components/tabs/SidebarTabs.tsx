@@ -24,10 +24,10 @@ const SidebarTabs = () => {
   }
   return (
     <TabsList className="flex bg-zinc-900 flex-col justify-center items-center flex-1 gap-4">
-      <TabsTrigger className="p-1" value="followed">
+      <TabsTrigger className="p-1" value="followed" onClick={handleClick}>
         <IconUsers />
       </TabsTrigger>
-      <TabsTrigger className="p-1" value="top_streams">
+      <TabsTrigger className="p-1" value="top_streams" onClick={handleClick}>
         <IconChartBar />
       </TabsTrigger>
       <TabsTrigger className="p-1" value="categories" onClick={handleClick}>
@@ -37,7 +37,7 @@ const SidebarTabs = () => {
           <IconChevronLeft className="stroke-white" />
         )}
       </TabsTrigger>
-      <TabsTrigger className="p-1" value="search">
+      <TabsTrigger className="p-1" value="search" onClick={handleClick}>
         <IconSearch />
       </TabsTrigger>
       <TabsTrigger className="p-1" value="options" onClick={handleClick}>
