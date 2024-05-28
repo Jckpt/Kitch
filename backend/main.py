@@ -1,10 +1,16 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from redis.asyncio import Redis
+from slowapi.errors import RateLimitExceeded
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
 import json
 from curl_cffi import requests
 
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 redis_client = Redis(host="redis", port=6379, decode_responses=True)
 
 
@@ -21,7 +27,8 @@ app.add_middleware(
 
 
 @app.get("/api/channel/{streamer}")
-async def get_channel_data(streamer: str):
+@limiter.limit("15/minute")
+async def get_channel_data(streamer: str, request: Request):
     try:
         # Check if data or 404 error is in cache
         cached_data = await redis_client.get(streamer)
@@ -90,7 +97,8 @@ async def get_channel_data(streamer: str):
 
 
 @app.get("/api/channels")
-async def get_channels_data(streamers: str):
+@limiter.limit("3/minute")
+async def get_channels_data(streamers: str, request: Request):
     try:
         streamers_list = streamers.split(
             ","

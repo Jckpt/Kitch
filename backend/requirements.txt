@@ -4,3 +4,4 @@ redis
 curl_cffi
 async-timeout
 httpx
+slowapi
