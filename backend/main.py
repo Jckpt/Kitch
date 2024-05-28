@@ -23,11 +23,14 @@ app.add_middleware(
 @app.get("/api/channel/{streamer}")
 async def get_channel_data(streamer: str):
     try:
-        # Check if data is in cache
+        # Check if data or 404 error is in cache
         cached_data = await redis_client.get(streamer)
         if cached_data:
             print(f"Cache hit for streamer {streamer}")
-            return json.loads(cached_data)
+            cached_response = json.loads(cached_data)
+            if "error" in cached_response:
+                raise HTTPException(status_code=404, detail=cached_response["error"])
+            return cached_response
 
         print(f"Cache miss for streamer {streamer}")
         # Fetch data from API
@@ -57,22 +60,28 @@ async def get_channel_data(streamer: str):
             },
         )
 
-        if response.status_code != 200:
+        if response.status_code == 404:
+            error_message = "Channel not found"
+            # Cache the 404 error for 180 seconds
+            await redis_client.setex(
+                streamer, 180, json.dumps({"error": error_message})
+            )
+            raise HTTPException(status_code=404, detail=error_message)
+        elif response.status_code != 200:
             raise HTTPException(
                 status_code=response.status_code,
                 detail="Error fetching data from kick API",
             )
 
         response_data = response.json()
-
         # Process data to include only the necessary fields for the frontend
         parsed_data = parse_kick_object(response_data)
-
         # Cache processed data for 180 seconds (3 minutes)
         await redis_client.setex(streamer, 180, json.dumps(parsed_data))
-
         return parsed_data
 
+    except HTTPException as e:
+        raise e
     except Exception as e:
         print(f"Error fetching data for streamer {streamer}: {str(e)}")
         raise HTTPException(
