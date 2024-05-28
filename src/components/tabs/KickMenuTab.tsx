@@ -14,10 +14,11 @@ const KickMenuTab = () => {
   const handleAdd = async (nickname: string) => {
     setKickNickname("")
     if (
-      nickname === "" ||
-      kickFollows.some(
-        (follow) => follow.toLowerCase() == nickname.toLowerCase()
-      )
+      kickFollows !== undefined &&
+      (nickname === "" ||
+        kickFollows.some(
+          (follow) => follow.toLowerCase() == nickname.toLowerCase()
+        ))
     ) {
       setInfo("Streamer already added")
       return
@@ -31,7 +32,11 @@ const KickMenuTab = () => {
       const kickUserData = await kickUser.json()
 
       nickname = kickUserData.user.username
-      setKickFollows([...kickFollows, nickname])
+      if (kickFollows === undefined) {
+        setKickFollows([nickname])
+      } else {
+        setKickFollows([...kickFollows, nickname])
+      }
       setInfo("")
     } catch (e) {
       console.error(e)

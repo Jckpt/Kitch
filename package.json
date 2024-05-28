@@ -41,9 +41,10 @@
     "typescript": "5.2.2"
   },
   "manifest": {
-    "key": "$CRX_KEY",
     "host_permissions": [
-      "https://*/*"
+      "https://api.twitch.tv/helix/*",
+      "https://kitch.pl/api/*",
+      "https://id.twitch.tv/oauth2/authorize"
     ],
     "permissions": [
       "alarms",
@@ -54,19 +55,6 @@
       "gecko": {
         "id": "$FIREFOX_EXT_ID"
       }
-    },
-    "web_accessible_resources": [
-      {
-        "resources": [
-          "options.html"
-        ],
-        "matches": [
-          "<all_urls>"
-        ],
-        "extension_ids": [
-          "$CRX_ID"
-        ]
-      }
-    ]
+    }
   }
 }

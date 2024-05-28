@@ -50,6 +50,7 @@ const OptionsTab = () => {
       access_token: fragmentParams.get("access_token"),
       client_id: clientId
     }
+    console.log(userCredentials)
     const followedLive = await twitchFetcher([
       `https://api.twitch.tv/helix/streams/followed?user_id=${userCredentials?.user_id}`,
       userCredentials
