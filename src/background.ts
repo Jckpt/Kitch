@@ -15,10 +15,26 @@ import {
   parseKickObject
 } from "~lib/util/helperFunc"
 
-import { getTwitchStreamer, twitchFetcher } from "./lib/util/fetcher"
+import {
+  getTwitchOAuthURL,
+  getTwitchStreamer,
+  getTwitchUserId,
+  twitchFetcher
+} from "./lib/util/fetcher"
 
 chrome.alarms.onAlarm.addListener(() => {
   refresh()
+})
+
+const storage = new Storage()
+const storageLocal = new Storage({
+  area: "local"
+})
+
+storage.watch({
+  userTwitchKey: (c) => {
+    if (c.newValue !== undefined) refresh()
+  }
 })
 
 chrome.runtime.onStartup.addListener(async () => {
@@ -34,10 +50,6 @@ chrome.runtime.onStartup.addListener(async () => {
 const refresh = async () => {
   console.log("Refreshing..")
   try {
-    const storage = new Storage()
-    const storageLocal = new Storage({
-      area: "local"
-    })
     const followedLive =
       await storageLocal.get<PlatformResponse<PlatformStream>>("followedLive")
     const userTwitchKey = await storage.get<UserTwitchKey>("userTwitchKey")
@@ -56,7 +68,6 @@ const refresh = async () => {
       userTwitchKey
     ])) as PlatformResponse<PlatformStream>
 
-    // workaround, no kick official API yet, might need to setup a backend with redis to not hit rate limit
     let kickLivestreams = []
     if (kickFollows && kickFollows.length > 0) {
       try {
@@ -116,6 +127,10 @@ const refresh = async () => {
     }
   } catch (error) {
     console.error("Error fetching Twitch data:", error)
+    if (error.status === 401) {
+      const storage = new Storage()
+      storage.remove("userTwitchKey")
+    }
   } finally {
     console.log("refresh alarm created")
     chrome.alarms.create("refresh", {
@@ -124,4 +139,42 @@ const refresh = async () => {
   }
 }
 
-refresh()
+// on message do authorization
+chrome.runtime.onMessage.addListener(async (request) => {
+  console.log("got message", request)
+  if (request.type === "authorize") {
+    try {
+      chrome.identity.launchWebAuthFlow(
+        {
+          interactive: true,
+          url: getTwitchOAuthURL()
+        },
+        (redirectUrl) => {
+          authorize(redirectUrl)
+        }
+      )
+    } catch (e) {
+      console.error(e)
+    }
+  }
+})
+
+async function authorize(redirectUrl) {
+  const urlObject = new URL(redirectUrl)
+  const fragment = urlObject.hash.substring(1) // Pomiń znak '#'
+  const accessToken = new URLSearchParams(fragment).get("access_token")
+
+  const clientId = "256lknox4x75bj30rwpctxna2ckbmn"
+  const userCredentials = {
+    user_id: await getTwitchUserId({
+      access_token: accessToken,
+      client_id: clientId
+    }),
+    access_token: accessToken,
+    client_id: clientId
+  }
+  console.log(userCredentials)
+
+  const storage = new Storage()
+  await storage.set("userTwitchKey", userCredentials)
+}

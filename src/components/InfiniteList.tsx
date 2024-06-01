@@ -61,6 +61,7 @@ const InfiniteList = ({ searchQuery, fetchUrl, children, className = "" }) => {
   }, [scrollToTop, listRef, isLoading, size])
 
   useEffect(() => {
+    console.log(children)
     setScrollToTop(true) // Trigger scroll to top when children change
   }, [children])
 

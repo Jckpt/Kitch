@@ -86,3 +86,7 @@ export function parseKickObject(kickObject) {
 
   return parsedKickObject
 }
+
+export function sendRuntimeMessage(type: string, ...args: any[]): Promise<any> {
+  return chrome.runtime.sendMessage({ type, args })
+}
