@@ -14,11 +14,10 @@ import KickMenuTab from "./KickMenuTab"
 export const kickMenuAtom = atom<boolean>(false)
 
 const OptionsTab = () => {
-  const [loading, setLoading] = useState(false)
+  const [loading] = useStorage("authLoading")
   const [kickMenu, setKickMenu] = useAtom(kickMenuAtom)
   const [userTwitchKey, setUserTwitchKey, { remove: twitchLogout }] =
     useStorage("userTwitchKey")
-  console.log(userTwitchKey)
   const [notificationsEnabled, setNotificationsEnabled] = useStorage<boolean>(
     "notificationsEnabled"
   )

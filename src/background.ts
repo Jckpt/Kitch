@@ -37,8 +37,18 @@ storage.watch({
   }
 })
 
-chrome.runtime.onStartup.addListener(async () => {
+chrome.runtime.onStartup.addListener(() => {
   console.log("Starting up..")
+  const storageLocal = new Storage({
+    area: "local"
+  })
+  storageLocal.remove("followedLive")
+
+  refresh()
+})
+
+chrome.runtime.onInstalled.addListener(() => {
+  console.log("Installed")
   const storageLocal = new Storage({
     area: "local"
   })
@@ -144,7 +154,8 @@ chrome.runtime.onMessage.addListener(async (request) => {
   console.log("got message", request)
   if (request.type === "authorize") {
     try {
-      chrome.identity.launchWebAuthFlow(
+      await storage.set("authLoading", true)
+      await chrome.identity.launchWebAuthFlow(
         {
           interactive: true,
           url: getTwitchOAuthURL()
@@ -177,4 +188,5 @@ async function authorize(redirectUrl) {
 
   const storage = new Storage()
   await storage.set("userTwitchKey", userCredentials)
+  await storage.set("authLoading", false)
 }

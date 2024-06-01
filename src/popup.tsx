@@ -10,6 +10,7 @@ import "~style.css"
 import { useAtom } from "jotai"
 
 import FollowedTab from "~components/tabs/FollowedTab"
+import LoginTab from "~components/tabs/LoginTab"
 import OptionsTab from "~components/tabs/OptionsTab"
 import SearchTab from "~components/tabs/SearchTab"
 import SidebarTabs from "~components/tabs/SidebarTabs"
@@ -72,7 +73,7 @@ function IndexPopup() {
           </>
         ) : (
           <div className="p-0 m-0 overflow-y-auto flex-grow">
-            <OptionsTab />
+            <LoginTab />
           </div>
         )}
       </div>
