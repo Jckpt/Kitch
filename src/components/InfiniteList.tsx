@@ -14,11 +14,12 @@ const InfiniteList = ({ searchQuery, fetchUrl, children, className = "" }) => {
   const [scrollToTop, setScrollToTop] = useState(false)
 
   const getKey = (pageIndex, previousPageData) => {
+    console.log(pageIndex, previousPageData, fetchUrl)
     if (previousPageData && !previousPageData.data) return null
-
+    console.log("fetching page", pageIndex)
     // first page, we don't have `previousPageData`
     if (pageIndex === 0) return [fetchUrl, userTwitchKey]
-
+    console.log("made it here")
     let apiUrl = fetchUrl
     // Check if the URL already contains a question mark
     if (apiUrl.includes("?")) {
@@ -26,6 +27,7 @@ const InfiniteList = ({ searchQuery, fetchUrl, children, className = "" }) => {
     } else {
       apiUrl += `?after=${previousPageData.pagination.cursor}`
     }
+    console.log(apiUrl, userTwitchKey)
     return [apiUrl, userTwitchKey]
   }
 
@@ -50,7 +52,7 @@ const InfiniteList = ({ searchQuery, fetchUrl, children, className = "" }) => {
         console.log(isLoading, size)
         console.log(list.scrollTop, list.clientHeight, list.scrollHeight)
         if (!isLoading) {
-          setSize(size + 1)
+          setSize((prevSize) => prevSize + 1)
         }
       }
     }

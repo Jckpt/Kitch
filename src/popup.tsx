@@ -75,15 +75,24 @@ function IndexPopup() {
             <TabsContent
               className="overflow-y-auto flex-grow"
               value="top_streams">
-              <TopStreamTab searchQuery={searchQuery} />
+              <TopStreamTab
+                searchQuery={searchQuery}
+                userTwitchKey={userTwitchKey}
+              />
             </TabsContent>
             <TabsContent
               className="overflow-y-auto flex-grow"
               value="categories">
-              <TopCategoriesTab searchQuery={searchQuery} />
+              <TopCategoriesTab
+                searchQuery={searchQuery}
+                userTwitchKey={userTwitchKey}
+              />
             </TabsContent>
             <TabsContent className="overflow-y-auto flex-grow" value="search">
-              <SearchTab searchQuery={searchQuery} />
+              <SearchTab
+                searchQuery={searchQuery}
+                userTwitchKey={userTwitchKey}
+              />
             </TabsContent>
             <TabsContent
               className="p-0 m-0 overflow-y-auto flex-grow"
