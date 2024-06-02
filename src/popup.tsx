@@ -33,6 +33,9 @@ function IndexPopup() {
     setSearchQuery("")
   }
   const handleRefresh = () => {
+    // disable button if already refreshing
+    if (isRefreshing) return
+
     setIsRefreshing(true)
     sendRuntimeMessage("refresh")
     setTimeout(() => {
