@@ -167,6 +167,8 @@ chrome.runtime.onMessage.addListener(async (request) => {
     } catch (e) {
       console.error(e)
     }
+  } else if (request.type === "refresh") {
+    refresh()
   }
 })
 

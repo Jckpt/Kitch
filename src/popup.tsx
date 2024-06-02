@@ -7,6 +7,7 @@ import { Tabs, TabsContent } from "~components/ui/tabs"
 
 import "~style.css"
 
+import { IconRefresh } from "@tabler/icons-react"
 import { useAtom } from "jotai"
 
 import FollowedTab from "~components/tabs/FollowedTab"
@@ -18,15 +19,25 @@ import TopCategoriesTab, {
   categoryAtom
 } from "~components/tabs/TopCategoriesTab"
 import TopStreamTab from "~components/tabs/TopStreamsTab"
+import { Button } from "~components/ui/button"
+import { sendRuntimeMessage } from "~lib/util/helperFunc"
 
 function IndexPopup() {
   const [searchQuery, setSearchQuery] = useState<string>("")
   const [userTwitchKey] = useStorage("userTwitchKey")
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [category, setCategory] = useAtom(categoryAtom)
   const twitchLoggedIn = userTwitchKey !== undefined
   const handleClick = () => {
     setCategory("")
     setSearchQuery("")
+  }
+  const handleRefresh = () => {
+    setIsRefreshing(true)
+    sendRuntimeMessage("refresh")
+    setTimeout(() => {
+      setIsRefreshing(false)
+    }, 1000)
   }
   return (
     <Tabs
@@ -37,7 +48,7 @@ function IndexPopup() {
         <SidebarTabs />
       </div>
       <div className="w-full h-full bg-neutral-900 flex flex-col">
-        <div className="basis-12 p-2 h-14 flex-grow-0 flex-shrink flex justify-center items-center border-b border-neutral-950 bg-zinc-900">
+        <div className="basis-12 p-2 h-14 flex-grow-0 flex-shrink flex justify-around items-center bg-zinc-900 gap-8">
           <Input
             type="input"
             className="w-3/4 rounded-md border-0 bg-neutral-800"
@@ -45,6 +56,12 @@ function IndexPopup() {
             value={searchQuery}
             disabled={!twitchLoggedIn}
             onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <IconRefresh
+            className={`hover:cursor-pointer opacity-75 hover:opacity-100 
+            ${isRefreshing ? "animate-[spin_1s_linear_1]" : ""}
+            `}
+            onClick={handleRefresh}
           />
         </div>
         {twitchLoggedIn ? (

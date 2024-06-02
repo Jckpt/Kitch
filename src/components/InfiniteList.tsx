@@ -47,6 +47,8 @@ const InfiniteList = ({ searchQuery, fetchUrl, children, className = "" }) => {
     const handleScroll = () => {
       if (list && list.scrollTop + list.clientHeight >= list.scrollHeight) {
         // Reached the end of the list, load more data
+        console.log(isLoading, size)
+        console.log(list.scrollTop, list.clientHeight, list.scrollHeight)
         if (!isLoading) {
           setSize(size + 1)
         }
