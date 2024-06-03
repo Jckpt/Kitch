@@ -45,7 +45,9 @@ const TopCategoriesTab = ({ searchQuery, userTwitchKey }) => {
   } = useSWRInfinite(getKey, twitchFetcher)
   console.log(pageArray)
   useEffect(() => {
+    console.log(listRef)
     if (!listRef.current) return
+    console.log(listRef)
     const list = listRef.current
     if (scrollToTop && listRef) {
       list.scrollTop = 0
@@ -78,23 +80,41 @@ const TopCategoriesTab = ({ searchQuery, userTwitchKey }) => {
     )
   }
 
-  if (category !== "") {
+  if (category == "") {
     return (
-      <div ref={listRef} className="overflow-y-auto flex flex-col h-full">
-        {pageArray.map((streams, index) => {
-          // `data` is an array of each page's API response.
-          return streams.data.map((stream) => (
-            <StreamItem stream={stream} key={stream.id} />
-          ))
-        })}
-      </div>
+      <MappedCategories
+        category={category}
+        pageArray={pageArray}
+        listRef={listRef}
+      />
     )
   }
+  return <MappedStreams pageArray={pageArray} listRef={listRef} />
+}
+
+const MappedCategories = ({ category, pageArray, listRef }) => {
+  //console.log(listRef)
   return (
     <div ref={listRef} className="overflow-y-auto grid grid-cols-4 h-full">
       {pageArray.map((games, index) => {
         // `data` is an array of each page's API response.
-        return games.data.map((game) => <GameItem game={game} key={game.id} />)
+        return games.data.map((game) => (
+          <GameItem game={game} category={category} key={game.id} />
+        ))
+      })}
+    </div>
+  )
+}
+
+const MappedStreams = ({ pageArray, listRef }) => {
+  //console.log(listRef)
+  return (
+    <div ref={listRef} className="overflow-y-auto flex flex-col h-full">
+      {pageArray.map((streams, index) => {
+        // `data` is an array of each page's API response.
+        return streams.data.map((stream) => (
+          <StreamItem stream={stream} key={stream.id} />
+        ))
       })}
     </div>
   )

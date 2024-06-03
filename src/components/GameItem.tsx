@@ -8,10 +8,11 @@ import { Skeleton } from "./ui/skeleton"
 
 type Props = {
   game: TwitchGame
+  category: string
 }
 
 const GameItem = ({ game: { name, box_art_url, id } }: Props) => {
-  box_art_url = box_art_url.replace("{width}", "80").replace("{height}", "100")
+  box_art_url = box_art_url?.replace("{width}", "80").replace("{height}", "100")
   const [category, setCategory] = useAtom(categoryAtom)
   const [loaded, setLoaded] = useState(false)
   if (category === undefined) return null
