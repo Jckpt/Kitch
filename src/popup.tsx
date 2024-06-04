@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { useDebounce } from "use-debounce"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
@@ -23,6 +24,8 @@ import { sendRuntimeMessage } from "./lib/util/helperFunc"
 
 function IndexPopup() {
   const [searchQuery, setSearchQuery] = useState<string>("")
+  const [debouncedSearchQuery] = useDebounce(searchQuery, 200)
+
   const [userTwitchKey] = useStorage("userTwitchKey")
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [category, setCategory] = useAtom(categoryAtom)
@@ -50,7 +53,7 @@ function IndexPopup() {
         <SidebarTabs />
       </div>
       <div className="w-full h-full bg-neutral-900 flex flex-col">
-        <div className="basis-12 p-2 h-14 flex-grow-0 flex-shrink flex justify-between items-center bg-zinc-900">
+        <div className="p-2 h-14 flex-grow-0 flex-shrink flex justify-start gap-2 items-center bg-zinc-900">
           <Input
             type="input"
             className="w-3/4 rounded-md border-0 bg-neutral-800"
@@ -75,7 +78,7 @@ function IndexPopup() {
               className="overflow-y-auto flex-grow"
               value="top_streams">
               <TopStreamTab
-                searchQuery={searchQuery}
+                searchQuery={debouncedSearchQuery}
                 userTwitchKey={userTwitchKey}
               />
             </TabsContent>
@@ -84,12 +87,14 @@ function IndexPopup() {
               value="categories">
               <TopCategoriesTab
                 searchQuery={searchQuery}
+                debouncedSearchQuery={debouncedSearchQuery}
                 userTwitchKey={userTwitchKey}
+                key={category}
               />
             </TabsContent>
             <TabsContent className="overflow-y-auto flex-grow" value="search">
               <SearchTab
-                searchQuery={searchQuery}
+                searchQuery={debouncedSearchQuery}
                 userTwitchKey={userTwitchKey}
               />
             </TabsContent>

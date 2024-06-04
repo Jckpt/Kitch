@@ -17,7 +17,7 @@ const GameItem = ({ game: { name, box_art_url, id } }: Props) => {
   if (category === undefined) return null
   return (
     <div
-      className="p-1 flex justify-center items-center flex-col hover:cursor-pointer hover:bg-neutral-800"
+      className="p-1 flex max-h-[121px] items-center flex-col hover:cursor-pointer hover:bg-neutral-800"
       onClick={() => setCategory(id)}>
       <img
         src={box_art_url}

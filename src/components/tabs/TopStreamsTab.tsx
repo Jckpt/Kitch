@@ -12,11 +12,10 @@ const TopStreamsTab = ({ searchQuery, userTwitchKey }) => {
   const [scrollToTop, setScrollToTop] = useState(false)
 
   const getKey = (pageIndex, previousPageData) => {
-    console.log(userTwitchKey)
     if (previousPageData && !previousPageData.data) return null
     // first page, we don't have `previousPageData`
     if (pageIndex === 0) return [fetchUrl, userTwitchKey]
-    console.log("made it here")
+
     let apiUrl = fetchUrl
     // Check if the URL already contains a question mark
     if (apiUrl.includes("?")) {
@@ -24,7 +23,7 @@ const TopStreamsTab = ({ searchQuery, userTwitchKey }) => {
     } else {
       apiUrl += `?after=${previousPageData.pagination.cursor}`
     }
-    console.log(apiUrl, userTwitchKey)
+
     return [apiUrl, userTwitchKey]
   }
 
@@ -34,7 +33,7 @@ const TopStreamsTab = ({ searchQuery, userTwitchKey }) => {
     size,
     setSize
   } = useSWRInfinite(getKey, twitchFetcher)
-  console.log(pageArray)
+
   useEffect(() => {
     if (!listRef.current) return
     const list = listRef.current
@@ -46,8 +45,7 @@ const TopStreamsTab = ({ searchQuery, userTwitchKey }) => {
     const handleScroll = () => {
       if (list && list.scrollTop + list.clientHeight >= list.scrollHeight) {
         // Reached the end of the list, load more data
-        console.log(isLoading, size)
-        console.log(list.scrollTop, list.clientHeight, list.scrollHeight)
+
         if (!isLoading) {
           setSize((prevSize) => prevSize + 1)
         }

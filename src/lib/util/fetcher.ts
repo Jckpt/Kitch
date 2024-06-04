@@ -1,4 +1,4 @@
-import { type UserTwitchKey } from "~lib/types/twitchTypes"
+import { type UserTwitchKey } from "../types/twitchTypes"
 
 export const twitchFetcher = async (params) => {
   const [url, userTwitchKey] = params
@@ -25,7 +25,6 @@ export const getTwitchUserId = async (credentials) => {
 }
 
 export const getTwitchOAuthURL = () => {
-  console.log(chrome.identity.getRedirectURL())
   const BASE_URL = "https://id.twitch.tv/oauth2/authorize"
   const REDIRECT_URI = chrome.identity.getRedirectURL()
   const CLIENT_ID = "256lknox4x75bj30rwpctxna2ckbmn"

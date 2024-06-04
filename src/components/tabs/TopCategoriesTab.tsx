@@ -5,26 +5,22 @@ import useSWRInfinite from "swr/infinite"
 
 import StreamItem from "../../components/StreamItem"
 import { twitchFetcher } from "../../lib/util/fetcher"
+import { categoryUrl } from "../../lib/util/helperFunc"
 import GameItem from "../GameItem"
 
 export const categoryAtom = atom("")
 
-const TopCategoriesTab = ({ searchQuery, userTwitchKey }) => {
+const TopCategoriesTab = ({ searchQuery, userTwitchKey, debouncedSearchQuery }) => {
   // if category is not empty, fetch streams, else fetch games, and render accordingly
   const [category] = useAtom(categoryAtom)
   const listRef = useRef(null)
   const [scrollToTop, setScrollToTop] = useState(false)
-  const fetchUrl =
-    category === ""
-      ? "https://api.twitch.tv/helix/games/top"
-      : `https://api.twitch.tv/helix/streams?game_id=${category}`
-  console.log(category)
+  const fetchUrl = categoryUrl(category, searchQuery)
   const getKey = (pageIndex, previousPageData) => {
-    console.log(userTwitchKey)
     if (previousPageData && !previousPageData.data) return null
     // first page, we don't have `previousPageData`
     if (pageIndex === 0) return [fetchUrl, userTwitchKey]
-    console.log("made it here")
+
     let apiUrl = fetchUrl
     // Check if the URL already contains a question mark
     if (apiUrl.includes("?")) {
@@ -32,7 +28,7 @@ const TopCategoriesTab = ({ searchQuery, userTwitchKey }) => {
     } else {
       apiUrl += `?after=${previousPageData.pagination.cursor}`
     }
-    console.log(apiUrl, userTwitchKey)
+
     return [apiUrl, userTwitchKey]
   }
 
@@ -42,11 +38,10 @@ const TopCategoriesTab = ({ searchQuery, userTwitchKey }) => {
     size,
     setSize
   } = useSWRInfinite(getKey, twitchFetcher)
-  console.log(pageArray)
+
   useEffect(() => {
-    console.log(listRef)
     if (!listRef.current) return
-    console.log(listRef)
+
     const list = listRef.current
     if (scrollToTop && listRef) {
       list.scrollTop = 0
@@ -56,8 +51,7 @@ const TopCategoriesTab = ({ searchQuery, userTwitchKey }) => {
     const handleScroll = () => {
       if (list && list.scrollTop + list.clientHeight >= list.scrollHeight) {
         // Reached the end of the list, load more data
-        console.log(isLoading, size)
-        console.log(list.scrollTop, list.clientHeight, list.scrollHeight)
+
         if (!isLoading) {
           setSize((prevSize) => prevSize + 1)
         }
@@ -71,7 +65,7 @@ const TopCategoriesTab = ({ searchQuery, userTwitchKey }) => {
     }
   }, [scrollToTop, listRef, isLoading, size])
 
-  if (!pageArray) {
+  if (!pageArray || searchQuery !== debouncedSearchQuery) {
     return (
       <div className="flex justify-center items-center h-full">
         <IconLoader2 className="h-8 w-8 animate-spin" />
@@ -92,25 +86,23 @@ const TopCategoriesTab = ({ searchQuery, userTwitchKey }) => {
 }
 
 const MappedCategories = ({ category, pageArray, listRef }) => {
-  //console.log(listRef)
   return (
-    <div ref={listRef} className="overflow-y-auto grid grid-cols-4 h-full">
-      {pageArray.map((games, index) => {
-        // `data` is an array of each page's API response.
-        return games.data.map((game) => (
-          <GameItem game={game} category={category} key={game.id} />
-        ))
-      })}
+    <div ref={listRef} className="overflow-y-auto h-full">
+      <div className="grid grid-cols-4 w-full">
+        {pageArray.map((games) => {
+          return games.data.map((game) => (
+            <GameItem game={game} category={category} key={game.id} />
+          ))
+        })}
+      </div>
     </div>
   )
 }
 
 const MappedStreams = ({ pageArray, listRef }) => {
-  //console.log(listRef)
   return (
     <div ref={listRef} className="overflow-y-auto flex flex-col h-full">
-      {pageArray.map((streams, index) => {
-        // `data` is an array of each page's API response.
+      {pageArray.map((streams) => {
         return streams.data.map((stream) => (
           <StreamItem stream={stream} key={stream.id} />
         ))

@@ -37,7 +37,6 @@ storage.watch({
 })
 
 chrome.runtime.onStartup.addListener(() => {
-  console.log("Starting up..")
   const storageLocal = new Storage({
     area: "local"
   })
@@ -47,7 +46,6 @@ chrome.runtime.onStartup.addListener(() => {
 })
 
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("Installed")
   const storageLocal = new Storage({
     area: "local"
   })
@@ -57,7 +55,6 @@ chrome.runtime.onInstalled.addListener(() => {
 })
 
 const refresh = async () => {
-  console.log("Refreshing..")
   try {
     const followedLive =
       await storageLocal.get<PlatformResponse<PlatformStream>>("followedLive")
@@ -68,7 +65,6 @@ const refresh = async () => {
     )
 
     if (!userTwitchKey) {
-      console.log("No userTwitchKey")
       return
     }
 
@@ -98,9 +94,7 @@ const refresh = async () => {
         console.error("Error fetching kick streams:", error)
       }
     }
-    console.log("kickLivestreams", kickLivestreams)
 
-    console.log("refreshedLive", refreshedLive)
     refreshedLive.data = [...refreshedLive.data, ...kickLivestreams]
     // sort by viewer count
     refreshedLive.data.sort((a, b) => b.viewer_count - a.viewer_count)
@@ -109,7 +103,6 @@ const refresh = async () => {
     chrome.action.setBadgeText({ text: refreshedLive.data.length.toString() })
     chrome.action.setBadgeBackgroundColor({ color: "#737373" })
     if (!followedLive) {
-      console.log("No followedLive")
       return
     }
 
@@ -119,7 +112,6 @@ const refresh = async () => {
     )
 
     if (!notificationsEnabled || newLiveChannels.length <= 0) {
-      console.log("Notifications disabled or no followed channels")
       return
     }
     if (newLiveChannels.length == 1) {
@@ -150,7 +142,6 @@ const refresh = async () => {
 
 // on message do authorization
 chrome.runtime.onMessage.addListener(async (request) => {
-  console.log("got message", request)
   if (request.type === "authorize") {
     try {
       await storage.set("authLoading", true)
@@ -185,7 +176,6 @@ async function authorize(redirectUrl) {
     access_token: accessToken,
     client_id: clientId
   }
-  console.log(userCredentials)
 
   const storage = new Storage()
   await storage.set("userTwitchKey", userCredentials)

@@ -1,4 +1,4 @@
-import type { PlatformStream } from "~lib/types/twitchTypes"
+import type { PlatformStream } from "../types/twitchTypes"
 
 export const justWentLive = (oldChannels, newChannels) => {
   const newLiveChannels = newChannels.filter((newChannel) => {
@@ -89,4 +89,16 @@ export function parseKickObject(kickObject) {
 
 export function sendRuntimeMessage(type: string, ...args: any[]): Promise<any> {
   return chrome.runtime.sendMessage({ type, args })
+}
+
+export function categoryUrl(category, searchQuery) {
+  if (category !== "") {
+    return `https://api.twitch.tv/helix/streams?game_id=${category}`
+  }
+  if (category === "" && searchQuery === "") {
+    return "https://api.twitch.tv/helix/games/top"
+  }
+  if (category === "" && searchQuery !== "") {
+    return `https://api.twitch.tv/helix/search/categories?query=${searchQuery}`
+  }
 }
