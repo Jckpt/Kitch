@@ -82,7 +82,7 @@ async def get_channel_data(streamer: str, request: Request):
 
         response_data = response.json()
         # Process data to include only the necessary fields for the frontend
-        parsed_data = parse_kick_object(response_data)
+        parsed_data = parse_kick_stream_object(response_data)
         # Cache processed data for 180 seconds (3 minutes)
         await redis_client.setex(streamer, 180, json.dumps(parsed_data))
         return parsed_data
@@ -152,7 +152,7 @@ async def get_channels_data(streamers: str, request: Request):
                     response_data = response.json()
 
                     # Process data to include only the necessary fields for the frontend
-                    parsed_data = parse_kick_object(response_data)
+                    parsed_data = parse_kick_stream_object(response_data)
 
                     # Cache processed data for 180 seconds (3 minutes)
                     await redis_client.setex(streamer, 180, json.dumps(parsed_data))
@@ -173,7 +173,156 @@ async def get_channels_data(streamers: str, request: Request):
         )
 
 
-def parse_kick_object(kickObject):
+@app.get("/api/subcategories")
+@limiter.limit("10/minute")
+async def get_subcategories(request: Request, page: int = 1, limit: int = 20):
+    try:
+        cache_key = f"subcategories_{page}_{limit}"
+        # Check if data is in cache
+        cached_data = await redis_client.get(cache_key)
+        if cached_data:
+            print(f"Cache hit for subcategories page {page}, limit {limit}")
+            return json.loads(cached_data)
+
+        print(f"Cache miss for subcategories page {page}, limit {limit}")
+        # Fetch data from API
+        response = requests.get(
+            url=f"https://kick.com/api/v1/subcategories?page={page}&limit={limit}",
+            impersonate="chrome120",
+            headers={
+                "accept": "application/json",
+                "accept-language": "en,en-US;q=0.9",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+            },
+        )
+
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail="Error fetching data from kick API",
+            )
+
+        response_data = response.json()
+        return_data = {
+            "current_page": response_data.get("current_page"),
+            "next_page_url": response_data.get("next_page_url"),
+            "per_page": response_data.get("per_page"),
+            "prev_page_url": response_data.get("prev_page_url"),
+            "to": response_data.get("to"),
+            "total": response_data.get("total"),
+            "data": parse_kick_category_object(response_data.get("data")),
+        }
+
+        # Cache data for 180 seconds (3 minutes)
+        await redis_client.setex(cache_key, 180, json.dumps(response_data))
+        return return_data
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        print(f"Error fetching subcategories for page {page}, limit {limit}: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail="An error occurred while fetching data"
+        )
+
+
+@app.get("/api/livestreams")
+@limiter.limit("10/minute")
+async def get_livestreams(
+    request: Request,
+    page: int = 1,
+    limit: int = 32,
+    subcategory: str = "",
+    sort: str = "desc",
+):
+    try:
+        cache_key = f"livestreams_{page}_{limit}_{subcategory}_{sort}"
+        # Check if data is in cache
+        cached_data = await redis_client.get(cache_key)
+        if cached_data:
+            print(
+                f"Cache hit for livestreams page {page}, limit {limit}, subcategory {subcategory}, sort {sort}"
+            )
+            return json.loads(cached_data)
+
+        print(
+            f"Cache miss for livestreams page {page}, limit {limit}, subcategory {subcategory}, sort {sort}"
+        )
+        # Fetch data from API
+        response = requests.get(
+            url=f"https://kick.com/stream/livestreams/en?page={page}&limit={limit}&subcategory={subcategory}&sort={sort}",
+            impersonate="chrome120",
+            headers={
+                "accept": "application/json",
+                "accept-language": "en,en-US;q=0.9",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+            },
+        )
+
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail="Error fetching data from kick API",
+            )
+
+        response_data = response.json()
+        return_data = {
+            "current_page": response_data.get("current_page"),
+            "first_page_url": response_data.get("first_page_url"),
+            "from": response_data.get("from"),
+            "next_page_url": response_data.get("next_page_url"),
+            "per_page": response_data.get("per_page"),
+            "prev_page_url": response_data.get("prev_page_url"),
+            "to": response_data.get("to"),
+            "data": parse_kick_stream_array_object(response_data.get("data")),
+        }
+        # Cache data for 180 seconds (3 minutes)
+        await redis_client.setex(cache_key, 180, json.dumps(response_data))
+        return return_data
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        print(
+            f"Error fetching livestreams for page {page}, limit {limit}, subcategory {subcategory}, sort {sort}: {str(e)}"
+        )
+        raise HTTPException(
+            status_code=500, detail="An error occurred while fetching data"
+        )
+
+
+def parse_kick_category_object(categoryObject):
+    parsed_category_object = []
+    for category in categoryObject:
+        parsed_category_object.append(
+            {
+                "id": category.get("id"),
+                "name": category.get("name"),
+                "slug": category.get("slug"),
+                "box_art_url": add_string_before_extension(
+                    category.get("banner").get("url")
+                ),
+            }
+        )
+
+    return parsed_category_object
+
+
+def add_string_before_extension(url, string_to_add="___banner_245_327"):
+    # Znajdujemy pozycję wystąpienia ".webp" w URL
+    position = url.rfind(".webp")
+
+    # Jeśli ".webp" nie jest znaleziony, zwróć oryginalny URL
+    if position == -1:
+        return url
+
+    # Tworzymy nowy URL dodając string przed ".webp"
+    new_url = url[:position] + string_to_add + url[position:]
+
+    return new_url
+
+
+def parse_kick_stream_object(kickObject):
     livestream = kickObject.get("livestream")
 
     parsed_kick_object = {
@@ -204,6 +353,42 @@ def parse_kick_object(kickObject):
             else None
         ),
     }
+
+    return parsed_kick_object
+
+
+def parse_kick_stream_array_object(kickObject):
+    parsed_kick_object = []
+    for stream in kickObject:
+        parsed_kick_object.append(
+            {
+                "id": stream.get("id"),
+                "slug": stream.get("slug"),
+                "channel_id": stream.get("channel_id"),
+                "is_live": stream.get("is_live"),
+                "start_time": stream.get("start_time"),
+                "livestream": (
+                    {
+                        "categories": (
+                            [
+                                {
+                                    "id": stream["categories"][0]["id"],
+                                    "name": stream["categories"][0]["name"],
+                                }
+                            ]
+                        ),
+                        "session_title": stream.get("session_title"),
+                        "viewer_count": stream.get("viewers"),
+                        "created_at": stream.get("created_at"),
+                        "language": stream.get("language"),
+                        "thumbnail": {
+                            "url": stream["thumbnail"]["src"].replace("720", "160")
+                        },
+                        "is_mature": stream.get("is_mature"),
+                    }
+                ),
+            }
+        )
 
     return parsed_kick_object
 
