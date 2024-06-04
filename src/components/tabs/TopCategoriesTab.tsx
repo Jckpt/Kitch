@@ -3,9 +3,8 @@ import { atom, useAtom } from "jotai"
 import React, { useEffect, useRef, useState } from "react"
 import useSWRInfinite from "swr/infinite"
 
-import StreamItem from "~components/StreamItem"
-import { twitchFetcher } from "~lib/util/fetcher"
-
+import StreamItem from "../../components/StreamItem"
+import { twitchFetcher } from "../../lib/util/fetcher"
 import GameItem from "../GameItem"
 
 export const categoryAtom = atom("")

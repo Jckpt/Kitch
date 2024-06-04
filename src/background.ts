@@ -7,20 +7,19 @@ import {
   type PlatformResponse,
   type PlatformStream,
   type UserTwitchKey
-} from "~lib/types/twitchTypes"
-import {
-  createNotification,
-  createNotificationMultipleStreams,
-  justWentLive,
-  parseKickObject
-} from "~lib/util/helperFunc"
-
+} from "./lib/types/twitchTypes"
 import {
   getTwitchOAuthURL,
   getTwitchStreamer,
   getTwitchUserId,
   twitchFetcher
 } from "./lib/util/fetcher"
+import {
+  createNotification,
+  createNotificationMultipleStreams,
+  justWentLive,
+  parseKickObject
+} from "./lib/util/helperFunc"
 
 chrome.alarms.onAlarm.addListener(() => {
   refresh()

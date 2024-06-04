@@ -4,8 +4,8 @@ import useSWRInfinite from "swr/infinite"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
-import { cn } from "~lib/util"
-import { twitchFetcher } from "~lib/util/fetcher"
+import { cn } from "../lib/util"
+import { twitchFetcher } from "../lib/util/fetcher"
 
 const InfiniteList = ({ searchQuery, fetchUrl, children, className = "" }) => {
   const [userTwitchKey] = useStorage("userTwitchKey")

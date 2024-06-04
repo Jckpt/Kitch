@@ -4,9 +4,8 @@ import React, { useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
-import { Button } from "~components/ui/button"
-import { sendRuntimeMessage } from "~lib/util/helperFunc"
-
+import { Button } from "../../components/ui/button"
+import { sendRuntimeMessage } from "../../lib/util/helperFunc"
 import { Label } from "../ui/label"
 import { Switch } from "../ui/switch"
 import KickMenuTab from "./KickMenuTab"

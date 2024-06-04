@@ -1,6 +1,6 @@
 import React from "react"
 
-import type { TwitchUser } from "~lib/types/twitchTypes"
+import type { TwitchUser } from "../lib/types/twitchTypes"
 
 type Props = {
   user: TwitchUser

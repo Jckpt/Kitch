@@ -2,25 +2,24 @@ import React, { useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
-import { Input } from "~components/ui/input"
-import { Tabs, TabsContent } from "~components/ui/tabs"
+import { Input } from "./components/ui/input"
+import { Tabs, TabsContent } from "./components/ui/tabs"
 
-import "~style.css"
+import "./style.css"
 
 import { IconRefresh } from "@tabler/icons-react"
 import { useAtom } from "jotai"
 
-import FollowedTab from "~components/tabs/FollowedTab"
-import LoginTab from "~components/tabs/LoginTab"
-import OptionsTab from "~components/tabs/OptionsTab"
-import SearchTab from "~components/tabs/SearchTab"
-import SidebarTabs from "~components/tabs/SidebarTabs"
+import FollowedTab from "./components/tabs/FollowedTab"
+import LoginTab from "./components/tabs/LoginTab"
+import OptionsTab from "./components/tabs/OptionsTab"
+import SearchTab from "./components/tabs/SearchTab"
+import SidebarTabs from "./components/tabs/SidebarTabs"
 import TopCategoriesTab, {
   categoryAtom
-} from "~components/tabs/TopCategoriesTab"
-import TopStreamTab from "~components/tabs/TopStreamsTab"
-import { Button } from "~components/ui/button"
-import { sendRuntimeMessage } from "~lib/util/helperFunc"
+} from "./components/tabs/TopCategoriesTab"
+import TopStreamTab from "./components/tabs/TopStreamsTab"
+import { sendRuntimeMessage } from "./lib/util/helperFunc"
 
 function IndexPopup() {
   const [searchQuery, setSearchQuery] = useState<string>("")

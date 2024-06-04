@@ -9,8 +9,7 @@ import {
 import { useAtom } from "jotai"
 import React from "react"
 
-import { TabsList, TabsTrigger } from "~components/ui/tabs"
-
+import { TabsList, TabsTrigger } from "../../components/ui/tabs"
 import { kickMenuAtom } from "./OptionsTab"
 import { categoryAtom } from "./TopCategoriesTab"
 

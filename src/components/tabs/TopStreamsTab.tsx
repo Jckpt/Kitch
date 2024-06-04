@@ -2,8 +2,7 @@ import { IconLoader2 } from "@tabler/icons-react"
 import React, { useEffect, useRef, useState } from "react"
 import useSWRInfinite from "swr/infinite"
 
-import { twitchFetcher } from "~lib/util/fetcher"
-
+import { twitchFetcher } from "../../lib/util/fetcher"
 import StreamItem from "../StreamItem"
 
 const TopStreamsTab = ({ searchQuery, userTwitchKey }) => {

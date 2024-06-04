@@ -2,9 +2,8 @@ import { IconUser } from "@tabler/icons-react"
 import clsx from "clsx"
 import React, { useState } from "react"
 
-import type { PlatformStream } from "~lib/types/twitchTypes"
-import { cn } from "~lib/util"
-
+import type { PlatformStream } from "../lib/types/twitchTypes"
+import { cn } from "../lib/util"
 import { Skeleton } from "./ui/skeleton"
 
 type Props = {

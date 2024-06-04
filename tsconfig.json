@@ -6,13 +6,12 @@
   "include": [
     ".plasmo/index.d.ts",
     "./**/*.ts",
-    "./**/*.tsx"
-, "src/lib/util/fetcher.js", "tailwind.config.js", "postcss.config.js"  ],
+    "./**/*.tsx",
+    "./src/lib/util/fetcher.js", "tailwind.config.js", "postcss.config.js" ],
   "compilerOptions": {
-    "jsx": "react",
     "paths": {
       "~*": [
-        "./src/*"
+        "./*"
       ]
     },
     "baseUrl": "."

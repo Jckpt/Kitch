@@ -1,11 +1,11 @@
 import { IconLoader2 } from "@tabler/icons-react"
-import logo from "data-base64:~assets/icon.png"
+import logo from "data-base64:../../../assets/icon.png"
 import React from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
-import { Button } from "~components/ui/button"
-import { sendRuntimeMessage } from "~lib/util/helperFunc"
+import { Button } from "../../components/ui/button"
+import { sendRuntimeMessage } from "../../lib/util/helperFunc"
 
 const LoginTab = () => {
   const [loading] = useStorage("authLoading")

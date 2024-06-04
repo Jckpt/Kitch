@@ -4,8 +4,7 @@ import React from "react"
 import { Storage } from "@plasmohq/storage"
 import { useStorage } from "@plasmohq/storage/hook"
 
-import type { PlatformStream } from "~lib/types/twitchTypes"
-
+import type { PlatformStream } from "../../lib/types/twitchTypes"
 import StreamItem from "../StreamItem"
 
 const FollowedTab = ({ searchQuery }) => {

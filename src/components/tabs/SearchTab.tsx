@@ -2,9 +2,8 @@ import { IconLoader2 } from "@tabler/icons-react"
 import React, { useEffect, useRef, useState } from "react"
 import useSWRInfinite from "swr/infinite"
 
-import InfiniteList from "~components/InfiniteList"
-import { twitchFetcher } from "~lib/util/fetcher"
-
+import InfiniteList from "../../components/InfiniteList"
+import { twitchFetcher } from "../../lib/util/fetcher"
 import UserItem from "../UserItem"
 
 const SearchTab = ({ searchQuery, userTwitchKey }) => {

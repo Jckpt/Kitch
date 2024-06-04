@@ -3,9 +3,9 @@ import React, { useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
-import { Badge } from "~components/ui/badge"
-import { Button } from "~components/ui/button"
-import { Input } from "~components/ui/input"
+import { Badge } from "../../components/ui/badge"
+import { Button } from "../../components/ui/button"
+import { Input } from "../../components/ui/input"
 
 const KickMenuTab = () => {
   const [kickFollows, setKickFollows] = useStorage<string[]>("kickFollows")
