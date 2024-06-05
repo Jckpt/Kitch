@@ -232,8 +232,12 @@ async def get_livestreams(
             f"Cache miss for livestreams page {page}, limit {limit}, subcategory {subcategory}, sort {sort}"
         )
         # Fetch data from API
+        url = f"https://kick.com/stream/livestreams/en?page={page}&limit={limit}&sort={sort}"
+        if subcategory:
+            url += f"&subcategory={subcategory}"
+
         response = requests.get(
-            url=f"https://kick.com/stream/livestreams/en?page={page}&limit={limit}&subcategory={subcategory}&sort={sort}",
+            url=url,
             impersonate="chrome120",
             headers={
                 "accept": "application/json",
@@ -279,9 +283,8 @@ def parse_kick_category_object(categoryObject):
     for category in categoryObject:
         parsed_category_object.append(
             {
-                "id": category.get("id"),
+                "id": category.get("slug"),
                 "name": category.get("name"),
-                "slug": category.get("slug"),
                 "box_art_url": extract_link(category.get("banner").get("responsive")),
             }
         )
@@ -308,7 +311,7 @@ def parse_kick_stream_object(kickObject):
         "id": kickObject.get("id"),
         "user_id": kickObject.get("user_id"),
         "slug": kickObject.get("slug"),
-        "user": {"username": kickObject.get("user", {}).get("username")},
+        "user": {"username": kickObject.get("user").get("username")},
         "livestream": (
             {
                 "categories": (
@@ -336,38 +339,33 @@ def parse_kick_stream_object(kickObject):
     return parsed_kick_object
 
 
+def parse_kick_stream_twitch_format(kickObject):
+
+    parsed_kick_object = {
+        "id": kickObject.get("id"),
+        "user_id": kickObject.get("channel").get("user_id"),
+        "user_login": kickObject.get("channel").get("slug"),
+        "user_name": kickObject.get("channel").get("user").get("username"),
+        "game_id": kickObject["categories"][0]["id"],
+        "game_name": kickObject["categories"][0]["name"],
+        "title": kickObject.get("session_title"),
+        "viewer_count": kickObject.get("viewer_count"),
+        "started_at": kickObject.get("created_at"),
+        "language": kickObject.get("language"),
+        "thumbnail_url": kickObject["thumbnail"]["src"].replace("720", "160"),
+        "is_mature": kickObject.get("is_mature"),
+        "platform": "Kick",
+        "is_live": kickObject.get("is_live"),
+        "type": "live",
+    }
+
+    return parsed_kick_object
+
+
 def parse_kick_stream_array_object(kickObject):
     parsed_kick_object = []
     for stream in kickObject:
-        parsed_kick_object.append(
-            {
-                "id": stream.get("id"),
-                "slug": stream.get("slug"),
-                "channel_id": stream.get("channel_id"),
-                "is_live": stream.get("is_live"),
-                "start_time": stream.get("start_time"),
-                "livestream": (
-                    {
-                        "categories": (
-                            [
-                                {
-                                    "id": stream["categories"][0]["id"],
-                                    "name": stream["categories"][0]["name"],
-                                }
-                            ]
-                        ),
-                        "session_title": stream.get("session_title"),
-                        "viewer_count": stream.get("viewers"),
-                        "created_at": stream.get("created_at"),
-                        "language": stream.get("language"),
-                        "thumbnail": {
-                            "url": stream["thumbnail"]["src"].replace("720", "160")
-                        },
-                        "is_mature": stream.get("is_mature"),
-                    }
-                ),
-            }
-        )
+        parsed_kick_object.append(parse_kick_stream_twitch_format(stream))
 
     return parsed_kick_object
 

@@ -1,4 +1,4 @@
-import { type UserTwitchKey } from "../types/twitchTypes"
+import { type PlatformStream, type UserTwitchKey } from "../types/twitchTypes"
 
 export const twitchFetcher = async (params) => {
   const [url, userTwitchKey] = params
@@ -45,10 +45,40 @@ export const getTwitchStreamer = async (
   return data.data[0]
 }
 
-export const kickCategoriesFetch = async (url) => {
+export const kickFetcher = async (url) => {
   if (url === null) return
   const response = await fetch(url)
   let data = await response.json()
   console.log(data)
   return data
+}
+
+function parseKickObject(kickObject) {
+  const {
+    id,
+    user_id,
+    slug,
+    user: { username },
+    livestream
+  } = kickObject
+  console.log(username, slug, livestream)
+  const parsedKickObject = {
+    id,
+    user_id,
+    user_login: slug,
+    user_name: username,
+    game_id: livestream.categories[0]?.id,
+    game_name: livestream.categories[0]?.name,
+    type: "live",
+    title: livestream.session_title,
+    viewer_count: livestream.viewer_count,
+    started_at: livestream.created_at,
+    language: livestream.language,
+    thumbnail_url: livestream.thumbnail.url,
+    tag_ids: null,
+    is_mature: livestream.is_mature,
+    platform: "Kick"
+  } as PlatformStream
+
+  return parsedKickObject
 }

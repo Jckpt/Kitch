@@ -4,23 +4,26 @@ import React, { useEffect, useRef, useState } from "react"
 import useSWRInfinite from "swr/infinite"
 
 import { categoryAtom } from "~src/lib/util"
-import { kickCategoriesFetch } from "~src/lib/util/fetcher"
+import { kickFetcher } from "~src/lib/util/fetcher"
 
-import GameItem from "./GameItem"
-import StreamItem from "./StreamItem"
+import { MappedCategories, MappedStreams } from "./Mapped"
 
 const KickCategories = ({ searchQuery, debouncedSearchQuery }) => {
   const [category] = useAtom(categoryAtom)
   const listRef = useRef(null)
   const [scrollToTop, setScrollToTop] = useState(false)
-  const fetchUrl = "http://localhost:3000/api/subcategories"
+  const fetchUrl =
+    category === ""
+      ? "http://localhost:3000/api/subcategories"
+      : `http://localhost:3000/api/livestreams?subcategory=${category}`
   const getKey = (pageIndex, previousPageData) => {
     // first page, we don't have `previousPageData`
+    console.log(pageIndex)
     if (pageIndex === 0) return fetchUrl
-    return previousPageData.next_page_url.replace(
-      "https://kick.com/api/v1/",
-      "http://localhost:3000/api/"
-    )
+    if (fetchUrl.includes("?")) {
+      return `${fetchUrl}&page=${pageIndex}`
+    }
+    return `${fetchUrl}?page=${pageIndex}`
   }
 
   const {
@@ -28,7 +31,7 @@ const KickCategories = ({ searchQuery, debouncedSearchQuery }) => {
     isLoading,
     size,
     setSize
-  } = useSWRInfinite(getKey, kickCategoriesFetch)
+  } = useSWRInfinite(getKey, kickFetcher)
 
   console.log(pageArray)
 
@@ -75,32 +78,8 @@ const KickCategories = ({ searchQuery, debouncedSearchQuery }) => {
       />
     )
   }
-  return <MappedStreams pageArray={pageArray} listRef={listRef} />
-}
-
-const MappedCategories = ({ category, pageArray, listRef }) => {
   return (
-    <div ref={listRef} className="overflow-y-auto h-full">
-      <div className="grid grid-cols-4 w-full">
-        {pageArray.map((games) => {
-          return games.data.map((game) => (
-            <GameItem game={game} category={category} key={game.id} />
-          ))
-        })}
-      </div>
-    </div>
-  )
-}
-
-const MappedStreams = ({ pageArray, listRef }) => {
-  return (
-    <div ref={listRef} className="overflow-y-auto flex flex-col h-full">
-      {pageArray.map((streams) => {
-        return streams.data.map((stream) => (
-          <StreamItem stream={stream} key={stream.id} />
-        ))
-      })}
-    </div>
+    <MappedStreams pageArray={pageArray} listRef={listRef} variant="Kick" />
   )
 }
 

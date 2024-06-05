@@ -7,8 +7,7 @@ import { categoryAtom } from "~src/lib/util"
 
 import { twitchFetcher } from "../lib/util/fetcher"
 import { categoryUrl } from "../lib/util/helperFunc"
-import GameItem from "./GameItem"
-import StreamItem from "./StreamItem"
+import { MappedCategories, MappedStreams } from "./Mapped"
 
 const TwitchCategories = ({
   searchQuery,
@@ -85,32 +84,8 @@ const TwitchCategories = ({
       />
     )
   }
-  return <MappedStreams pageArray={pageArray} listRef={listRef} />
-}
-
-const MappedCategories = ({ category, pageArray, listRef }) => {
   return (
-    <div ref={listRef} className="overflow-y-auto h-full">
-      <div className="grid grid-cols-4 w-full">
-        {pageArray.map((games) => {
-          return games.data.map((game) => (
-            <GameItem game={game} category={category} key={game.id} />
-          ))
-        })}
-      </div>
-    </div>
-  )
-}
-
-const MappedStreams = ({ pageArray, listRef }) => {
-  return (
-    <div ref={listRef} className="overflow-y-auto flex flex-col h-full">
-      {pageArray.map((streams) => {
-        return streams.data.map((stream) => (
-          <StreamItem stream={stream} key={stream.id} />
-        ))
-      })}
-    </div>
+    <MappedStreams pageArray={pageArray} listRef={listRef} variant="Twitch" />
   )
 }
 

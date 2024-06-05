@@ -65,7 +65,7 @@ export function parseKickObject(kickObject) {
     user: { username },
     livestream
   } = kickObject
-
+  console.log(username, slug, livestream)
   const parsedKickObject = {
     id,
     user_id,
