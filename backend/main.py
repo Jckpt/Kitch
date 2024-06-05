@@ -1,3 +1,4 @@
+import re
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from redis.asyncio import Redis
@@ -158,7 +159,6 @@ async def get_channels_data(streamers: str, request: Request):
 
 
 @app.get("/api/subcategories")
-@limiter.limit("10/minute")
 async def get_subcategories(request: Request, page: int = 1, limit: int = 20):
     try:
         cache_key = f"subcategories_{page}_{limit}"
@@ -198,7 +198,7 @@ async def get_subcategories(request: Request, page: int = 1, limit: int = 20):
         }
 
         # Cache data for 180 seconds (3 minutes)
-        await redis_client.setex(cache_key, 180, json.dumps(response_data))
+        await redis_client.setex(cache_key, 180, json.dumps(return_data))
         return return_data
 
     except HTTPException as e:
@@ -211,7 +211,6 @@ async def get_subcategories(request: Request, page: int = 1, limit: int = 20):
 
 
 @app.get("/api/livestreams")
-@limiter.limit("10/minute")
 async def get_livestreams(
     request: Request,
     page: int = 1,
@@ -261,7 +260,7 @@ async def get_livestreams(
             "data": parse_kick_stream_array_object(response_data.get("data")),
         }
         # Cache data for 180 seconds (3 minutes)
-        await redis_client.setex(cache_key, 180, json.dumps(response_data))
+        await redis_client.setex(cache_key, 180, json.dumps(return_data))
         return return_data
 
     except HTTPException as e:
@@ -283,27 +282,23 @@ def parse_kick_category_object(categoryObject):
                 "id": category.get("id"),
                 "name": category.get("name"),
                 "slug": category.get("slug"),
-                "box_art_url": add_string_before_extension(
-                    category.get("banner").get("url")
-                ),
+                "box_art_url": extract_link(category.get("banner").get("responsive")),
             }
         )
 
     return parsed_category_object
 
 
-def add_string_before_extension(url, string_to_add="___banner_245_327"):
-    # Znajdujemy pozycję wystąpienia ".webp" w URL
-    position = url.rfind(".webp")
-
-    # Jeśli ".webp" nie jest znaleziony, zwróć oryginalny URL
-    if position == -1:
-        return url
-
-    # Tworzymy nowy URL dodając string przed ".webp"
-    new_url = url[:position] + string_to_add + url[position:]
-
-    return new_url
+def extract_link(text):
+    parts = text.split(", ")
+    if len(parts) < 2:
+        return parts[0]
+    else:
+        # Get the second last element
+        second_last_element = parts[-2]
+        # Use regex to remove the pattern of {digits}w at the end of the string
+        cleaned_element = re.sub(r"\s\d{2,}w$", "", second_last_element)
+        return cleaned_element
 
 
 def parse_kick_stream_object(kickObject):
