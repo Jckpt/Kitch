@@ -44,3 +44,11 @@ export const getTwitchStreamer = async (
 
   return data.data[0]
 }
+
+export const kickCategoriesFetch = async (url) => {
+  if (url === null) return
+  const response = await fetch(url)
+  let data = await response.json()
+  console.log(data)
+  return data
+}

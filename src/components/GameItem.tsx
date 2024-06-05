@@ -1,8 +1,9 @@
 import { useAtom } from "jotai"
 import React, { useState } from "react"
 
+import { categoryAtom } from "~src/lib/util"
+
 import type { TwitchGame } from "../lib/types/twitchTypes"
-import { categoryAtom } from "./tabs/TopCategoriesTab"
 import { Skeleton } from "./ui/skeleton"
 
 type Props = {

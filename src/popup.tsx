@@ -16,10 +16,9 @@ import LoginTab from "./components/tabs/LoginTab"
 import OptionsTab from "./components/tabs/OptionsTab"
 import SearchTab from "./components/tabs/SearchTab"
 import SidebarTabs from "./components/tabs/SidebarTabs"
-import TopCategoriesTab, {
-  categoryAtom
-} from "./components/tabs/TopCategoriesTab"
+import TopCategoriesTab from "./components/tabs/TopCategoriesTab"
 import TopStreamTab from "./components/tabs/TopStreamsTab"
+import { categoryAtom } from "./lib/util"
 import { sendRuntimeMessage } from "./lib/util/helperFunc"
 
 function IndexPopup() {
@@ -90,6 +89,7 @@ function IndexPopup() {
                 debouncedSearchQuery={debouncedSearchQuery}
                 userTwitchKey={userTwitchKey}
                 key={category}
+                platform={"kick"}
               />
             </TabsContent>
             <TabsContent className="overflow-y-auto flex-grow" value="search">
