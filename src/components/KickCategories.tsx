@@ -14,8 +14,8 @@ const KickCategories = ({ searchQuery, debouncedSearchQuery }) => {
   const [scrollToTop, setScrollToTop] = useState(false)
   const fetchUrl =
     category === ""
-      ? "http://localhost:3000/api/subcategories"
-      : `http://localhost:3000/api/livestreams?subcategory=${category}`
+      ? "https://kitch.pl/api/subcategories"
+      : `https://kitch.pl/api/livestreams?subcategory=${category}`
   const getKey = (pageIndex, previousPageData) => {
     // first page, we don't have `previousPageData`
     console.log(pageIndex)
