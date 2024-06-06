@@ -1,29 +1,30 @@
 import { IconLoader2 } from "@tabler/icons-react"
-import { useAtom } from "jotai"
 import React, { useEffect, useRef, useState } from "react"
 import useSWRInfinite from "swr/infinite"
 
-import { categoryAtom } from "~src/lib/util"
-import { kickFetcher } from "~src/lib/util/fetcher"
+import { twitchFetcher } from "../lib/util/fetcher"
+import StreamItem from "./StreamItem"
 
-import { MappedCategories, MappedStreams } from "./Mapped"
+const TwitchStreams = ({ searchQuery, userTwitchKey }) => {
+  const fetchUrl = "https://api.twitch.tv/helix/streams"
 
-const KickCategories = ({ searchQuery, debouncedSearchQuery }) => {
-  const [category] = useAtom(categoryAtom)
   const listRef = useRef(null)
   const [scrollToTop, setScrollToTop] = useState(false)
-  const fetchUrl =
-    category === ""
-      ? "http://localhost:3000/api/subcategories"
-      : `http://localhost:3000/api/livestreams?subcategory=${category}`
+
   const getKey = (pageIndex, previousPageData) => {
+    if (previousPageData && !previousPageData.data) return null
     // first page, we don't have `previousPageData`
-    console.log(pageIndex)
-    if (pageIndex === 0) return fetchUrl
-    if (fetchUrl.includes("?")) {
-      return `${fetchUrl}&page=${pageIndex + 1}`
+    if (pageIndex === 0) return [fetchUrl, userTwitchKey]
+
+    let apiUrl = fetchUrl
+    // Check if the URL already contains a question mark
+    if (apiUrl.includes("?")) {
+      apiUrl += `&after=${previousPageData.pagination.cursor}`
+    } else {
+      apiUrl += `?after=${previousPageData.pagination.cursor}`
     }
-    return `${fetchUrl}?page=${pageIndex + 1}`
+
+    return [apiUrl, userTwitchKey]
   }
 
   const {
@@ -31,13 +32,10 @@ const KickCategories = ({ searchQuery, debouncedSearchQuery }) => {
     isLoading,
     size,
     setSize
-  } = useSWRInfinite(getKey, kickFetcher)
-
-  console.log(pageArray)
+  } = useSWRInfinite(getKey, twitchFetcher)
 
   useEffect(() => {
     if (!listRef.current) return
-
     const list = listRef.current
     if (scrollToTop && listRef) {
       list.scrollTop = 0
@@ -61,7 +59,7 @@ const KickCategories = ({ searchQuery, debouncedSearchQuery }) => {
     }
   }, [scrollToTop, listRef, isLoading, size])
 
-  if (!pageArray || searchQuery !== debouncedSearchQuery) {
+  if (!pageArray) {
     return (
       <div className="flex justify-center items-center h-full">
         <IconLoader2 className="h-8 w-8 animate-spin" />
@@ -69,18 +67,16 @@ const KickCategories = ({ searchQuery, debouncedSearchQuery }) => {
     )
   }
 
-  if (category == "") {
-    return (
-      <MappedCategories
-        category={category}
-        pageArray={pageArray}
-        listRef={listRef}
-      />
-    )
-  }
   return (
-    <MappedStreams pageArray={pageArray} listRef={listRef} variant="Kick" />
+    <div ref={listRef} className="overflow-y-auto flex flex-col h-full">
+      {pageArray.map((streams, index) => {
+        // `data` is an array of each page's API response.
+        return streams.data.map((stream) => (
+          <StreamItem stream={stream} key={stream.id} />
+        ))
+      })}
+    </div>
   )
 }
 
-export default KickCategories
+export default TwitchStreams

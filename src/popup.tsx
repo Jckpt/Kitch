@@ -28,10 +28,15 @@ function IndexPopup() {
   const [userTwitchKey] = useStorage("userTwitchKey")
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [category, setCategory] = useAtom(categoryAtom)
+  const [platform, setPlatform] = useState("twitch")
   const twitchLoggedIn = userTwitchKey !== undefined
   const handleClick = () => {
     setCategory("")
     setSearchQuery("")
+  }
+  const handleChangePlatform = () => {
+    setPlatform((prev) => (prev === "twitch" ? "kick" : "twitch"))
+    setCategory("")
   }
   const handleRefresh = () => {
     // disable button if already refreshing
@@ -52,7 +57,13 @@ function IndexPopup() {
         <SidebarTabs />
       </div>
       <div className="w-full h-full bg-neutral-900 flex flex-col">
-        <div className="p-2 h-14 flex-grow-0 flex-shrink flex justify-start gap-2 items-center bg-zinc-900">
+        <div className="p-2 h-14 flex-grow-0 flex-shrink flex justify-between gap-2 items-center bg-zinc-900">
+          <IconRefresh
+            className={`hover:cursor-pointer opacity-75 hover:opacity-100 
+            ${isRefreshing ? "animate-[spin_1s_linear_1]" : ""}
+            `}
+            onClick={handleChangePlatform}
+          />
           <Input
             type="input"
             className="w-3/4 rounded-md border-0 bg-neutral-800"
@@ -79,6 +90,9 @@ function IndexPopup() {
               <TopStreamTab
                 searchQuery={debouncedSearchQuery}
                 userTwitchKey={userTwitchKey}
+                platform={platform}
+                debouncedSearchQuery={debouncedSearchQuery}
+                key={platform}
               />
             </TabsContent>
             <TabsContent
@@ -89,7 +103,7 @@ function IndexPopup() {
                 debouncedSearchQuery={debouncedSearchQuery}
                 userTwitchKey={userTwitchKey}
                 key={category}
-                platform={"kick"}
+                platform={platform}
               />
             </TabsContent>
             <TabsContent className="overflow-y-auto flex-grow" value="search">

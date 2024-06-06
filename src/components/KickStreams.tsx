@@ -1,24 +1,17 @@
 import { IconLoader2 } from "@tabler/icons-react"
-import { useAtom } from "jotai"
 import React, { useEffect, useRef, useState } from "react"
 import useSWRInfinite from "swr/infinite"
 
-import { categoryAtom } from "~src/lib/util"
 import { kickFetcher } from "~src/lib/util/fetcher"
 
-import { MappedCategories, MappedStreams } from "./Mapped"
+import { MappedStreams } from "./Mapped"
 
-const KickCategories = ({ searchQuery, debouncedSearchQuery }) => {
-  const [category] = useAtom(categoryAtom)
+const KickStreams = ({ searchQuery, debouncedSearchQuery }) => {
   const listRef = useRef(null)
   const [scrollToTop, setScrollToTop] = useState(false)
-  const fetchUrl =
-    category === ""
-      ? "http://localhost:3000/api/subcategories"
-      : `http://localhost:3000/api/livestreams?subcategory=${category}`
+  const fetchUrl = "http://localhost:3000/api/livestreams"
   const getKey = (pageIndex, previousPageData) => {
     // first page, we don't have `previousPageData`
-    console.log(pageIndex)
     if (pageIndex === 0) return fetchUrl
     if (fetchUrl.includes("?")) {
       return `${fetchUrl}&page=${pageIndex + 1}`
@@ -69,18 +62,9 @@ const KickCategories = ({ searchQuery, debouncedSearchQuery }) => {
     )
   }
 
-  if (category == "") {
-    return (
-      <MappedCategories
-        category={category}
-        pageArray={pageArray}
-        listRef={listRef}
-      />
-    )
-  }
   return (
     <MappedStreams pageArray={pageArray} listRef={listRef} variant="Kick" />
   )
 }
 
-export default KickCategories
+export default KickStreams
