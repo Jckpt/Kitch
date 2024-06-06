@@ -9,7 +9,7 @@ import { MappedStreams } from "./Mapped"
 const KickStreams = ({ searchQuery, debouncedSearchQuery }) => {
   const listRef = useRef(null)
   const [scrollToTop, setScrollToTop] = useState(false)
-  const fetchUrl = "http://localhost:3000/api/livestreams"
+  const fetchUrl = "https://kitch.pl/api/livestreams"
   const getKey = (pageIndex, previousPageData) => {
     // first page, we don't have `previousPageData`
     if (pageIndex === 0) return fetchUrl
