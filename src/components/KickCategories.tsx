@@ -20,6 +20,8 @@ const KickCategories = ({ searchQuery, debouncedSearchQuery }) => {
     // first page, we don't have `previousPageData`
     console.log(pageIndex)
     if (pageIndex === 0) return fetchUrl
+    if (previousPageData.reached_end) return null
+
     if (fetchUrl.includes("?")) {
       return `${fetchUrl}&page=${pageIndex + 1}`
     }

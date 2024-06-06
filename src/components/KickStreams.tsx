@@ -13,6 +13,8 @@ const KickStreams = ({ searchQuery, debouncedSearchQuery }) => {
   const getKey = (pageIndex, previousPageData) => {
     // first page, we don't have `previousPageData`
     if (pageIndex === 0) return fetchUrl
+    if (previousPageData.reached_end) return null
+
     if (fetchUrl.includes("?")) {
       return `${fetchUrl}&page=${pageIndex + 1}`
     }

@@ -8,7 +8,11 @@ import { Tabs, TabsContent } from "./components/ui/tabs"
 
 import "./style.css"
 
-import { IconRefresh } from "@tabler/icons-react"
+import {
+  IconBrandKickstarter,
+  IconBrandTwitch,
+  IconRefresh
+} from "@tabler/icons-react"
 import { useAtom } from "jotai"
 
 import FollowedTab from "./components/tabs/FollowedTab"
@@ -58,12 +62,17 @@ function IndexPopup() {
       </div>
       <div className="w-full h-full bg-neutral-900 flex flex-col">
         <div className="p-2 h-14 flex-grow-0 flex-shrink flex justify-between gap-2 items-center bg-zinc-900">
-          <IconRefresh
-            className={`hover:cursor-pointer opacity-75 hover:opacity-100 
-            ${isRefreshing ? "animate-[spin_1s_linear_1]" : ""}
-            `}
-            onClick={handleChangePlatform}
-          />
+          {platform === "twitch" ? (
+            <IconBrandTwitch
+              className={`hover:cursor-pointer opacity-75 hover:opacity-100 `}
+              onClick={handleChangePlatform}
+            />
+          ) : platform === "kick" ? (
+            <IconBrandKickstarter
+              className={`hover:cursor-pointer opacity-75 hover:opacity-100 `}
+              onClick={handleChangePlatform}
+            />
+          ) : null}
           <Input
             type="input"
             className="w-3/4 rounded-md border-0 bg-neutral-800"
