@@ -187,6 +187,16 @@ async def get_subcategories(request: Request, page: int = 1, limit: int = 20):
             )
 
         response_data = response.json()
+
+        if response_data.get("current_page") != page or response_data.get("data") == []:
+            # return json response with empty data
+            response_end_list = {
+                "reached_end": True,
+                "data": [],
+            }
+            await redis_client.setex(cache_key, 180, json.dumps(response_end_list))
+            return response_end_list
+
         return_data = {
             "current_page": response_data.get("current_page"),
             "next_page_url": response_data.get("next_page_url"),
@@ -194,6 +204,7 @@ async def get_subcategories(request: Request, page: int = 1, limit: int = 20):
             "prev_page_url": response_data.get("prev_page_url"),
             "to": response_data.get("to"),
             "total": response_data.get("total"),
+            "reached_end": False,
             "data": parse_kick_category_object(response_data.get("data")),
         }
 
@@ -253,6 +264,16 @@ async def get_livestreams(
             )
 
         response_data = response.json()
+
+        if response_data.get("current_page") != page or response_data.get("data") == []:
+            # return json response with empty data
+            response_end_list = {
+                "reached_end": True,
+                "data": [],
+            }
+            await redis_client.setex(cache_key, 180, json.dumps(response_end_list))
+            return response_end_list
+
         return_data = {
             "current_page": response_data.get("current_page"),
             "first_page_url": response_data.get("first_page_url"),
@@ -261,6 +282,7 @@ async def get_livestreams(
             "per_page": response_data.get("per_page"),
             "prev_page_url": response_data.get("prev_page_url"),
             "to": response_data.get("to"),
+            "reached_end": False,
             "data": parse_kick_stream_array_object(response_data.get("data")),
         }
         # Cache data for 180 seconds (3 minutes)
@@ -285,14 +307,17 @@ def parse_kick_category_object(categoryObject):
             {
                 "id": category.get("slug"),
                 "name": category.get("name"),
-                "box_art_url": extract_link(category.get("banner").get("responsive")),
+                "box_art_url": extract_link(category),
             }
         )
 
     return parsed_category_object
 
 
-def extract_link(text):
+def extract_link(category):
+    if category.get("banner") is None:
+        return None
+    text = category.get("banner").get("responsive")
     parts = text.split(", ")
     if len(parts) < 2:
         return parts[0]
