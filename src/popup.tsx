@@ -63,14 +63,14 @@ function IndexPopup() {
       </div>
       <div className="w-full h-full bg-neutral-900 flex flex-col">
         <div className="p-2 h-12 flex-grow-0 flex-shrink flex justify-between gap-2 items-center bg-zinc-900">
-          {platform === "twitch" ? (
+          {platform === "twitch" || currentTab === "search" ? (
             <IconBrandTwitch
-              className={`${currentTab === "followed" ? "opacity-20" : "hover:cursor-pointer opacity-75 hover:opacity-100"}`}
+              className={`${currentTab === "followed" || currentTab === "search" ? "opacity-20" : "hover:cursor-pointer opacity-75 hover:opacity-100"}`}
               onClick={handleChangePlatform}
             />
           ) : platform === "kick" ? (
             <IconBrandKickstarter
-              className={`${currentTab === "followed" ? "opacity-20" : "hover:cursor-pointer opacity-75 hover:opacity-100"}`}
+              className={`${currentTab === "followed" || currentTab === "search" ? "opacity-20" : "hover:cursor-pointer opacity-75 hover:opacity-100"}`}
               onClick={handleChangePlatform}
             />
           ) : null}
