@@ -47,7 +47,9 @@ const StreamItem = ({
       </div>
       <div className="flex w-full flex-col pl-1.5">
         <div className="flex justify-between">
-          <h1 className="text-white text-sm font-bold">{user_name}</h1>
+          <h1 className="text-white text-sm font-bold overflow-ellipsis overflow-hidden w-40">
+            {user_name}
+          </h1>
           <div
             className={cn("flex flex-row items-center", {
               "text-red-500": variant === "Twitch",
