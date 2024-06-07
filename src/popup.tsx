@@ -35,11 +35,14 @@ function IndexPopup() {
   const [currentTab] = useAtom(currentTabAtom)
   const [platform, setPlatform] = useState("twitch")
   const twitchLoggedIn = userTwitchKey !== undefined
-  const handleClick = () => {
+  const blacklistedTabs = ["followed", "search", "options"]
+  const handleTabsClick = () => {
     setCategory("")
     setSearchQuery("")
   }
   const handleChangePlatform = () => {
+    if (blacklistedTabs.includes(currentTab)) return
+
     setPlatform((prev) => (prev === "twitch" ? "kick" : "twitch"))
     setCategory("")
   }
@@ -55,7 +58,7 @@ function IndexPopup() {
   }
   return (
     <Tabs
-      onValueChange={handleClick}
+      onValueChange={handleTabsClick}
       defaultValue="followed"
       className="h-[32rem] w-96 flex text-white">
       <div className="h-full w-12 bg-zinc-900 pt-3 flex flex-col">
@@ -63,14 +66,14 @@ function IndexPopup() {
       </div>
       <div className="w-full h-full bg-neutral-900 flex flex-col">
         <div className="p-2 h-12 flex-grow-0 flex-shrink flex justify-between gap-2 items-center bg-zinc-900">
-          {platform === "twitch" || currentTab === "search" ? (
+          {platform === "twitch" || blacklistedTabs.includes(currentTab) ? (
             <IconBrandTwitch
-              className={`${currentTab === "followed" || currentTab === "search" ? "opacity-20" : "hover:cursor-pointer opacity-75 hover:opacity-100"}`}
+              className={`${blacklistedTabs.includes(currentTab) ? "opacity-20" : "hover:cursor-pointer opacity-75 hover:opacity-100"}`}
               onClick={handleChangePlatform}
             />
           ) : platform === "kick" ? (
             <IconBrandKickstarter
-              className={`${currentTab === "followed" || currentTab === "search" ? "opacity-20" : "hover:cursor-pointer opacity-75 hover:opacity-100"}`}
+              className={`${blacklistedTabs.includes(currentTab) ? "opacity-20" : "hover:cursor-pointer opacity-75 hover:opacity-100"}`}
               onClick={handleChangePlatform}
             />
           ) : null}

@@ -17,7 +17,7 @@ import { kickMenuAtom } from "./OptionsTab"
 const SidebarTabs = () => {
   const [category, setCategory] = useAtom(categoryAtom)
   const [kickMenu, setKickMenu] = useAtom(kickMenuAtom)
-  const [currentTab, setCurrentTab] = useAtom(currentTabAtom)
+  const [_, setCurrentTab] = useAtom(currentTabAtom)
 
   const handleClick = (tabName) => {
     if (category !== "") setCategory("")
