@@ -22,7 +22,7 @@ import SearchTab from "./components/tabs/SearchTab"
 import SidebarTabs from "./components/tabs/SidebarTabs"
 import TopCategoriesTab from "./components/tabs/TopCategoriesTab"
 import TopStreamTab from "./components/tabs/TopStreamsTab"
-import { categoryAtom } from "./lib/util"
+import { categoryAtom, currentTabAtom } from "./lib/util"
 import { sendRuntimeMessage } from "./lib/util/helperFunc"
 
 function IndexPopup() {
@@ -32,6 +32,7 @@ function IndexPopup() {
   const [userTwitchKey] = useStorage("userTwitchKey")
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [category, setCategory] = useAtom(categoryAtom)
+  const [currentTab] = useAtom(currentTabAtom)
   const [platform, setPlatform] = useState("twitch")
   const twitchLoggedIn = userTwitchKey !== undefined
   const handleClick = () => {
@@ -61,15 +62,15 @@ function IndexPopup() {
         <SidebarTabs />
       </div>
       <div className="w-full h-full bg-neutral-900 flex flex-col">
-        <div className="p-2 h-14 flex-grow-0 flex-shrink flex justify-between gap-2 items-center bg-zinc-900">
+        <div className="p-2 h-12 flex-grow-0 flex-shrink flex justify-between gap-2 items-center bg-zinc-900">
           {platform === "twitch" ? (
             <IconBrandTwitch
-              className={`hover:cursor-pointer opacity-75 hover:opacity-100 `}
+              className={`${currentTab === "followed" ? "opacity-20" : "hover:cursor-pointer opacity-75 hover:opacity-100"}`}
               onClick={handleChangePlatform}
             />
           ) : platform === "kick" ? (
             <IconBrandKickstarter
-              className={`hover:cursor-pointer opacity-75 hover:opacity-100 `}
+              className={`${currentTab === "followed" ? "opacity-20" : "hover:cursor-pointer opacity-75 hover:opacity-100"}`}
               onClick={handleChangePlatform}
             />
           ) : null}

@@ -1,7 +1,7 @@
 {
   "name": "kitch",
   "displayName": "Kitch",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "description": "See who is currently live on Twitch and Kick!",
   "author": "jckpt",
   "scripts": {
