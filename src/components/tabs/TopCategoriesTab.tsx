@@ -1,6 +1,6 @@
 import { useAtom } from "jotai"
 
-import { categoryAtom } from "~src/lib/util"
+import { categoryAtom, platformAtom } from "~src/lib/util"
 
 import KickCategories from "../KickCategories"
 import TwitchCategories from "../TwitchCategories"
@@ -8,10 +8,10 @@ import TwitchCategories from "../TwitchCategories"
 const TopCategoriesTab = ({
   searchQuery,
   userTwitchKey,
-  debouncedSearchQuery,
-  platform
+  debouncedSearchQuery
 }) => {
   const [category] = useAtom(categoryAtom)
+  const [platform] = useAtom(platformAtom)
   // if category is not empty, fetch streams, else fetch games, and render accordingly
   if (platform === "twitch") {
     return (

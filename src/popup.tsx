@@ -8,6 +8,7 @@ import { Tabs, TabsContent } from "./components/ui/tabs"
 
 import "./style.css"
 
+import { useAutoAnimate } from "@formkit/auto-animate/react"
 import {
   IconBrandKickstarter,
   IconBrandTwitch,
@@ -15,6 +16,7 @@ import {
 } from "@tabler/icons-react"
 import { useAtom } from "jotai"
 
+import PlatformIcon from "./components/PlatformIcon"
 import FollowedTab from "./components/tabs/FollowedTab"
 import LoginTab from "./components/tabs/LoginTab"
 import OptionsTab from "./components/tabs/OptionsTab"
@@ -22,7 +24,7 @@ import SearchTab from "./components/tabs/SearchTab"
 import SidebarTabs from "./components/tabs/SidebarTabs"
 import TopCategoriesTab from "./components/tabs/TopCategoriesTab"
 import TopStreamTab from "./components/tabs/TopStreamsTab"
-import { categoryAtom, currentTabAtom } from "./lib/util"
+import { categoryAtom, platformAtom } from "./lib/util"
 import { sendRuntimeMessage } from "./lib/util/helperFunc"
 
 function IndexPopup() {
@@ -32,20 +34,14 @@ function IndexPopup() {
   const [userTwitchKey] = useStorage("userTwitchKey")
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [category, setCategory] = useAtom(categoryAtom)
-  const [currentTab] = useAtom(currentTabAtom)
-  const [platform, setPlatform] = useState("twitch")
+  const [platform] = useAtom(platformAtom)
   const twitchLoggedIn = userTwitchKey !== undefined
-  const blacklistedTabs = ["followed", "search", "options"]
+  const [parent] = useAutoAnimate({ duration: 300 })
   const handleTabsClick = () => {
     setCategory("")
     setSearchQuery("")
   }
-  const handleChangePlatform = () => {
-    if (blacklistedTabs.includes(currentTab)) return
 
-    setPlatform((prev) => (prev === "twitch" ? "kick" : "twitch"))
-    setCategory("")
-  }
   const handleRefresh = () => {
     // disable button if already refreshing
     if (isRefreshing) return
@@ -65,18 +61,10 @@ function IndexPopup() {
         <SidebarTabs />
       </div>
       <div className="w-full h-full bg-neutral-900 flex flex-col">
-        <div className="p-2 h-12 flex-grow-0 flex-shrink flex justify-between gap-2 items-center bg-zinc-900">
-          {platform === "twitch" ? (
-            <IconBrandTwitch
-              className={`${blacklistedTabs.includes(currentTab) ? "opacity-20" : "hover:cursor-pointer opacity-75 hover:opacity-100"}`}
-              onClick={handleChangePlatform}
-            />
-          ) : platform === "kick" ? (
-            <IconBrandKickstarter
-              className={`${blacklistedTabs.includes(currentTab) ? "opacity-20" : "hover:cursor-pointer opacity-75 hover:opacity-100"}`}
-              onClick={handleChangePlatform}
-            />
-          ) : null}
+        <div
+          className="p-2 h-12 flex-grow-0 flex-shrink flex justify-between gap-2 items-center bg-zinc-900"
+          ref={parent}>
+          <PlatformIcon />
           <Input
             type="input"
             className="w-3/4 rounded-md border-0 bg-neutral-800"
@@ -103,7 +91,6 @@ function IndexPopup() {
               <TopStreamTab
                 searchQuery={debouncedSearchQuery}
                 userTwitchKey={userTwitchKey}
-                platform={platform}
                 debouncedSearchQuery={debouncedSearchQuery}
                 key={platform}
               />
@@ -116,7 +103,6 @@ function IndexPopup() {
                 debouncedSearchQuery={debouncedSearchQuery}
                 userTwitchKey={userTwitchKey}
                 key={category}
-                platform={platform}
               />
             </TabsContent>
             <TabsContent className="overflow-y-auto flex-grow" value="search">

@@ -8,3 +8,4 @@ export function cn(...inputs: ClassValue[]) {
 
 export const categoryAtom = atom("")
 export const currentTabAtom = atom("followed")
+export const platformAtom = atom("twitch")
