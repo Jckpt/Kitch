@@ -37,7 +37,7 @@ function IndexPopup() {
       <div className="h-full w-12 bg-zinc-900 pt-3 flex flex-col">
         <SidebarTabs />
       </div>
-      <div className="w-full h-full bg-neutral-900 flex flex-col">
+      <div className="w-full bg-neutral-900 flex flex-col">
         <TopBar twitchLoggedIn={twitchLoggedIn} />
         {twitchLoggedIn ? (
           <>

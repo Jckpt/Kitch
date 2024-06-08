@@ -15,7 +15,7 @@ const TopBar = ({ twitchLoggedIn }) => {
 
   return (
     <div
-      className="p-2 h-12 flex-grow-0 flex-shrink flex justify-between gap-2 items-center bg-zinc-900"
+      className="pt-3 pb-3 flex-grow-0 flex-shrink flex justify-evenly items-center bg-zinc-900"
       ref={parent}>
       <PlatformIcon />
       <Input
