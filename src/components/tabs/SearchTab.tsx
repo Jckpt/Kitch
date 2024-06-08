@@ -73,7 +73,7 @@ const SearchTab = ({ userTwitchKey }) => {
     )
   }
 
-  if (debouncedSearchQuery === "") {
+  if (debouncedSearchQuery === "" || searchQuery === "") {
     return (
       <div className="flex justify-center items-center text-sm grow h-full">
         Search for a channel
