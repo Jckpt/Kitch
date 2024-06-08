@@ -1,13 +1,17 @@
 import { IconLoader2 } from "@tabler/icons-react"
+import { useAtom } from "jotai"
 import React from "react"
 
 import { Storage } from "@plasmohq/storage"
 import { useStorage } from "@plasmohq/storage/hook"
 
+import { searchQueryAtom } from "~src/lib/util"
+
 import type { PlatformStream } from "../../lib/types/twitchTypes"
 import StreamItem from "../StreamItem"
 
-const FollowedTab = ({ searchQuery }) => {
+const FollowedTab = () => {
+  const [searchQuery] = useAtom(searchQueryAtom)
   const [followedLive] = useStorage({
     key: "followedLive",
     instance: new Storage({ area: "local" })

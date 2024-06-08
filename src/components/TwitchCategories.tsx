@@ -2,22 +2,22 @@ import { IconLoader2 } from "@tabler/icons-react"
 import { useAtom } from "jotai"
 import React, { useEffect, useRef, useState } from "react"
 import useSWRInfinite from "swr/infinite"
+import { useDebounce } from "use-debounce"
 
-import { categoryAtom } from "~src/lib/util"
+import { categoryAtom, searchQueryAtom } from "~src/lib/util"
 
 import { twitchFetcher } from "../lib/util/fetcher"
 import { categoryUrl } from "../lib/util/helperFunc"
 import { MappedCategories, MappedStreams } from "./Mapped"
 
-const TwitchCategories = ({
-  searchQuery,
-  userTwitchKey,
-  debouncedSearchQuery
-}) => {
+const TwitchCategories = ({ userTwitchKey }) => {
   const [category] = useAtom(categoryAtom)
+  const [searchQuery] = useAtom(searchQueryAtom)
+  const [debouncedSearchQuery] = useDebounce(searchQuery, 200)
+
   const listRef = useRef(null)
   const [scrollToTop, setScrollToTop] = useState(false)
-  const fetchUrl = categoryUrl(category, searchQuery)
+  const fetchUrl = categoryUrl(category, debouncedSearchQuery)
   const getKey = (pageIndex, previousPageData) => {
     if (previousPageData && !previousPageData.data) return null
     // first page, we don't have `previousPageData`

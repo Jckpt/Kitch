@@ -8,7 +8,7 @@ import { kickFetcher } from "~src/lib/util/fetcher"
 
 import { MappedCategories, MappedStreams } from "./Mapped"
 
-const KickCategories = ({ searchQuery, debouncedSearchQuery }) => {
+const KickCategories = () => {
   const [category] = useAtom(categoryAtom)
   const listRef = useRef(null)
   const [scrollToTop, setScrollToTop] = useState(false)
@@ -63,7 +63,7 @@ const KickCategories = ({ searchQuery, debouncedSearchQuery }) => {
     }
   }, [scrollToTop, listRef, isLoading, size])
 
-  if (!pageArray || searchQuery !== debouncedSearchQuery) {
+  if (!pageArray) {
     return (
       <div className="flex justify-center items-center h-full">
         <IconLoader2 className="h-8 w-8 animate-spin" />

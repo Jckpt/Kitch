@@ -1,56 +1,33 @@
-import React, { useState } from "react"
-import { useDebounce } from "use-debounce"
+import React from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
-import { Input } from "./components/ui/input"
 import { Tabs, TabsContent } from "./components/ui/tabs"
 
 import "./style.css"
 
-import { useAutoAnimate } from "@formkit/auto-animate/react"
-import {
-  IconBrandKickstarter,
-  IconBrandTwitch,
-  IconRefresh
-} from "@tabler/icons-react"
 import { useAtom } from "jotai"
 
-import PlatformIcon from "./components/PlatformIcon"
 import FollowedTab from "./components/tabs/FollowedTab"
 import LoginTab from "./components/tabs/LoginTab"
 import OptionsTab from "./components/tabs/OptionsTab"
 import SearchTab from "./components/tabs/SearchTab"
 import SidebarTabs from "./components/tabs/SidebarTabs"
+import TopBar from "./components/tabs/TopBar"
 import TopCategoriesTab from "./components/tabs/TopCategoriesTab"
 import TopStreamTab from "./components/tabs/TopStreamsTab"
-import { categoryAtom, platformAtom } from "./lib/util"
-import { sendRuntimeMessage } from "./lib/util/helperFunc"
+import { categoryAtom, platformAtom, searchQueryAtom } from "./lib/util"
 
 function IndexPopup() {
-  const [searchQuery, setSearchQuery] = useState<string>("")
-  const [debouncedSearchQuery] = useDebounce(searchQuery, 200)
+  const [_, setSearchQuery] = useAtom(searchQueryAtom)
+  const [platform] = useAtom(platformAtom)
+  const [category, setCategory] = useAtom(categoryAtom)
 
   const [userTwitchKey] = useStorage("userTwitchKey")
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const [category, setCategory] = useAtom(categoryAtom)
-  const [platform] = useAtom(platformAtom)
   const twitchLoggedIn = userTwitchKey !== undefined
-  const [parent] = useAutoAnimate({ duration: 300 })
   const handleTabsClick = () => {
     setCategory("")
     setSearchQuery("")
-  }
-
-  const handleRefresh = () => {
-    // disable button if already refreshing
-    if (isRefreshing) return
-
-    setIsRefreshing(true)
-    sendRuntimeMessage("refresh")
-    setTimeout(() => {
-      setIsRefreshing(false)
-    }, 1000)
   }
   return (
     <Tabs
@@ -61,55 +38,24 @@ function IndexPopup() {
         <SidebarTabs />
       </div>
       <div className="w-full h-full bg-neutral-900 flex flex-col">
-        <div
-          className="p-2 h-12 flex-grow-0 flex-shrink flex justify-between gap-2 items-center bg-zinc-900"
-          ref={parent}>
-          <PlatformIcon />
-          <Input
-            type="input"
-            className="w-3/4 rounded-md border-0 bg-neutral-800"
-            placeholder="Search"
-            value={searchQuery}
-            disabled={!twitchLoggedIn}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <IconRefresh
-            className={`hover:cursor-pointer opacity-75 hover:opacity-100 
-            ${isRefreshing ? "animate-[spin_1s_linear_1]" : ""}
-            `}
-            onClick={handleRefresh}
-          />
-        </div>
+        <TopBar twitchLoggedIn={twitchLoggedIn} />
         {twitchLoggedIn ? (
           <>
             <TabsContent className="overflow-y-auto flex-grow" value="followed">
-              <FollowedTab searchQuery={searchQuery} />
+              <FollowedTab />
             </TabsContent>
             <TabsContent
               className="overflow-y-auto flex-grow"
               value="top_streams">
-              <TopStreamTab
-                searchQuery={debouncedSearchQuery}
-                userTwitchKey={userTwitchKey}
-                debouncedSearchQuery={debouncedSearchQuery}
-                key={platform}
-              />
+              <TopStreamTab userTwitchKey={userTwitchKey} key={platform} />
             </TabsContent>
             <TabsContent
               className="overflow-y-auto flex-grow"
               value="categories">
-              <TopCategoriesTab
-                searchQuery={searchQuery}
-                debouncedSearchQuery={debouncedSearchQuery}
-                userTwitchKey={userTwitchKey}
-                key={category}
-              />
+              <TopCategoriesTab userTwitchKey={userTwitchKey} key={category} />
             </TabsContent>
             <TabsContent className="overflow-y-auto flex-grow" value="search">
-              <SearchTab
-                searchQuery={debouncedSearchQuery}
-                userTwitchKey={userTwitchKey}
-              />
+              <SearchTab userTwitchKey={userTwitchKey} />
             </TabsContent>
             <TabsContent
               className="p-0 m-0 overflow-y-auto flex-grow"

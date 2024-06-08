@@ -5,7 +5,7 @@ import useSWRInfinite from "swr/infinite"
 import { twitchFetcher } from "../lib/util/fetcher"
 import StreamItem from "./StreamItem"
 
-const TwitchStreams = ({ searchQuery, userTwitchKey }) => {
+const TwitchStreams = ({ userTwitchKey }) => {
   const fetchUrl = "https://api.twitch.tv/helix/streams"
 
   const listRef = useRef(null)
