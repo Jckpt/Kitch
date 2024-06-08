@@ -66,7 +66,7 @@ function IndexPopup() {
       </div>
       <div className="w-full h-full bg-neutral-900 flex flex-col">
         <div className="p-2 h-12 flex-grow-0 flex-shrink flex justify-between gap-2 items-center bg-zinc-900">
-          {platform === "twitch" || blacklistedTabs.includes(currentTab) ? (
+          {platform === "twitch" ? (
             <IconBrandTwitch
               className={`${blacklistedTabs.includes(currentTab) ? "opacity-20" : "hover:cursor-pointer opacity-75 hover:opacity-100"}`}
               onClick={handleChangePlatform}
