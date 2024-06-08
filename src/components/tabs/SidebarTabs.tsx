@@ -29,19 +29,19 @@ const SidebarTabs = () => {
       <TabsTrigger
         className="p-1"
         value="followed"
-        onClick={() => handleClick("followed")}>
+        onMouseDown={() => handleClick("followed")}>
         <IconUsers />
       </TabsTrigger>
       <TabsTrigger
         className="p-1"
         value="top_streams"
-        onClick={() => handleClick("top_streams")}>
+        onMouseDown={() => handleClick("top_streams")}>
         <IconChartBar />
       </TabsTrigger>
       <TabsTrigger
         className="p-1"
         value="categories"
-        onClick={() => handleClick("categories")}>
+        onMouseDown={() => handleClick("categories")}>
         {category === "" ? (
           <IconDeviceGamepad />
         ) : (
@@ -51,13 +51,13 @@ const SidebarTabs = () => {
       <TabsTrigger
         className="p-1"
         value="search"
-        onClick={() => handleClick("search")}>
+        onMouseDown={() => handleClick("search")}>
         <IconSearch />
       </TabsTrigger>
       <TabsTrigger
         className="p-1"
         value="options"
-        onClick={() => handleClick("options")}>
+        onMouseDown={() => handleClick("options")}>
         {kickMenu === false ? (
           <IconChartCandle />
         ) : (
