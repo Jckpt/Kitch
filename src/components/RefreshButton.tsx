@@ -20,22 +20,22 @@ const RefreshButton = () => {
   }
   if (currentTab === "followed") {
     return (
-      <>
+      <span className={isRefreshing ? "animate-[spin_1s_linear_1]" : ""}>
         <IconRefresh
-          className={`transition-all ease-in-out duration-300 hover:cursor-pointer opacity-75 hover:opacity-100 
-      ${isRefreshing ? "animate-[spin_1s_linear_1]" : ""}
+          className={`transition-opacity ease-in-out duration-300 hover:cursor-pointer opacity-75 hover:opacity-100 
+      
       `}
           onClick={handleRefresh}
         />
-      </>
+      </span>
     )
   }
   return (
-    <>
+    <span className={isRefreshing ? "animate-[spin_1s_linear_1]" : ""}>
       <IconRefresh
-        className={`transition-all ease-in-out duration-300 opacity-20 ${isRefreshing ? "animate-[spin_1s_linear_1]" : ""} `}
+        className={`transition-opacity ease-in-out duration-300 opacity-20 ${isRefreshing ? "animate-[spin_1s_linear_1]" : ""} `}
       />
-    </>
+    </span>
   )
 }
 
