@@ -1,3 +1,5 @@
+import { reduce } from "lodash-es"
+
 import type { PlatformStream } from "../types/twitchTypes"
 
 export const justWentLive = (oldChannels, newChannels) => {
@@ -101,4 +103,12 @@ export function categoryUrl(category, searchQuery) {
   if (category === "" && searchQuery !== "") {
     return `https://api.twitch.tv/helix/search/categories?query=${searchQuery}`
   }
+}
+
+export function template(input: string, data) {
+  return reduce(
+    data,
+    (result, value, key) => result.replace(key, String(value)),
+    input
+  )
 }

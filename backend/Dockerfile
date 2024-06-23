@@ -1,5 +1,5 @@
 # Użyj oficjalnego obrazu Python jako bazowego
-FROM python:3.11-slim
+FROM python:3.11-alpine
 
 # Ustaw katalog roboczy
 WORKDIR /app

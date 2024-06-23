@@ -48,7 +48,7 @@ const KickMenuTab = () => {
     }
   }
   return (
-    <div className="flex flex-col h-full gap-4 items-center justify-center">
+    <div className="flex flex-col h-full overflow-y-auto gap-4 items-center justify-center">
       <div className="w-full flex flex-row items-center justify-center gap-[1px]">
         <Input
           type="input"

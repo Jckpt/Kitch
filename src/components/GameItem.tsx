@@ -1,5 +1,5 @@
 import { useAtom } from "jotai"
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 
 import { categoryAtom } from "~src/lib/util"
 
@@ -12,7 +12,10 @@ type Props = {
 }
 
 const GameItem = ({ game: { name, box_art_url, id } }: Props) => {
-  box_art_url = box_art_url?.replace("{width}", "80").replace("{height}", "100")
+  const gameThumbnail = useMemo(
+    () => box_art_url.replace("{width}x{height}", "80x100"),
+    []
+  )
   const [category, setCategory] = useAtom(categoryAtom)
   const [loaded, setLoaded] = useState(false)
   if (category === undefined) return null
@@ -21,7 +24,7 @@ const GameItem = ({ game: { name, box_art_url, id } }: Props) => {
       className="p-1 flex max-h-[121px] items-center flex-col hover:cursor-pointer hover:bg-neutral-800"
       onClick={() => setCategory(id)}>
       <img
-        src={box_art_url}
+        src={gameThumbnail}
         style={{ display: loaded ? "block" : "none" }}
         className="rounded-md h-[95px] w-[76px]"
         onLoad={() => setLoaded(true)}

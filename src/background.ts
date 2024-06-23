@@ -37,18 +37,12 @@ storage.watch({
 })
 
 chrome.runtime.onStartup.addListener(() => {
-  const storageLocal = new Storage({
-    area: "local"
-  })
   storageLocal.remove("followedLive")
 
   refresh()
 })
 
 chrome.runtime.onInstalled.addListener(() => {
-  const storageLocal = new Storage({
-    area: "local"
-  })
   storageLocal.remove("followedLive")
 
   refresh()
@@ -132,12 +126,11 @@ const refresh = async () => {
       const storage = new Storage()
       storage.remove("userTwitchKey")
     }
-  } finally {
-    console.log("refresh alarm created")
-    chrome.alarms.create("refresh", {
-      delayInMinutes: 1.5
-    })
   }
+  console.log("refresh alarm created")
+  chrome.alarms.create("refresh", {
+    delayInMinutes: 1.5
+  })
 }
 
 // on message do authorization

@@ -1,6 +1,8 @@
 import { IconUser } from "@tabler/icons-react"
 import clsx from "clsx"
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
+
+import { template } from "~src/lib/util/helperFunc"
 
 import type { PlatformStream } from "../lib/types/twitchTypes"
 import { cn } from "../lib/util"
@@ -23,6 +25,16 @@ const StreamItem = ({
   variant = "Twitch"
 }: Props) => {
   const [loaded, setLoaded] = useState(false)
+  const previewImage = useMemo(() => {
+    const url = new URL(
+      template(thumbnail_url, {
+        "{height}": 54,
+        "{width}": 96
+      })
+    )
+
+    return url.href
+  }, [thumbnail_url])
   if (thumbnail_url === undefined) return null
   return (
     <a
@@ -37,7 +49,7 @@ const StreamItem = ({
       className="bg-neutral-900 items-center flex justify-start p-2 hover:bg-neutral-800">
       <div className="h-[54px] w-[96px] flex items-center rounded-sm">
         <img
-          src={thumbnail_url.replace("{width}x{height}", "96x54")}
+          src={previewImage}
           alt="stream preview"
           className="h-[54px] w-[96px] max-w-none rounded-sm"
           style={{ display: loaded ? "block" : "none" }}
