@@ -50,6 +50,10 @@ chrome.runtime.onInstalled.addListener(() => {
 
 const refresh = async () => {
   try {
+    console.log("refresh alarm created")
+    chrome.alarms.create("refresh", {
+      delayInMinutes: 1.5
+    })
     const followedLive =
       await storageLocal.get<PlatformResponse<PlatformStream>>("followedLive")
     const userTwitchKey = await storage.get<UserTwitchKey>("userTwitchKey")
@@ -127,10 +131,6 @@ const refresh = async () => {
       storage.remove("userTwitchKey")
     }
   }
-  console.log("refresh alarm created")
-  chrome.alarms.create("refresh", {
-    delayInMinutes: 1.5
-  })
 }
 
 // on message do authorization
