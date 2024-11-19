@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 * {
   font-family: Helvetica;
 }
@@ -31,7 +31,7 @@
     --ring: 240 4.9% 83.9%;
     --radius: 0.5rem;
   }
- 
+
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -59,18 +59,37 @@
 
 /* width */
 ::-webkit-scrollbar {
-    width: 3px;
+  width: 3px;
 }
-  
-  
+
+
 /* Handle */
 ::-webkit-scrollbar-thumb {
-    background: #555;
-    width: 1px;
-    border-radius: 5px;
+  background: #555;
+  width: 1px;
+  border-radius: 5px;
 }
-  
+
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-    background: #777;
+  background: #777;
+}
+
+/* Firefox-specific styles */
+@-moz-document url-prefix() {
+  .h-32 {
+    height: 512px !important;
+    /* 32rem = 512px */
+  }
+
+  .w-96 {
+    width: 384px !important;
+    /* 24rem = 384px */
+  }
+}
+
+body {
+  font-size: 75% !important;
+  font-family: Helvetica !important;
+  background-color: #18181b !important;
 }

@@ -134,22 +134,31 @@ const refresh = async () => {
   }
 }
 
+// Nasłuchiwanie na aktualizacje zakładek
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  console.log(tab.url);
+  if (changeInfo.status === "complete" && tab.url?.startsWith("https://kitch.pl/")) {
+    try {
+      await authorize(tab.url)
+      // Zamknij zakładkę po autoryzacji
+    } catch (e) {
+      console.error("Błąd podczas autoryzacji:", e)
+      await storage.set("authLoading", false)
+    }
+  }
+})
+
 // on message do authorization
 chrome.runtime.onMessage.addListener(async (request) => {
   if (request.type === "authorize") {
     try {
       await storage.set("authLoading", true)
-      await chrome.identity.launchWebAuthFlow(
-        {
-          interactive: true,
-          url: getTwitchOAuthURL()
-        },
-        (redirectUrl) => {
-          authorize(redirectUrl)
-        }
-      )
+      const authUrl = getTwitchOAuthURL()
+      // Otwórz nową zakładkę z URL autoryzacji
+      chrome.tabs.create({ url: authUrl })
     } catch (e) {
-      console.error(e)
+      console.error("Błąd podczas autoryzacji:", e)
+      await storage.set("authLoading", false)
     }
   } else if (request.type === "refresh") {
     refresh()
@@ -157,21 +166,32 @@ chrome.runtime.onMessage.addListener(async (request) => {
 })
 
 async function authorize(redirectUrl) {
-  const urlObject = new URL(redirectUrl)
-  const fragment = urlObject.hash.substring(1) // Pomiń znak '#'
-  const accessToken = new URLSearchParams(fragment).get("access_token")
+  try {
+    console.log(redirectUrl);
+    const urlObject = new URL(redirectUrl)
+    const fragment = urlObject.hash.substring(1)
+    const accessToken = new URLSearchParams(fragment).get("access_token")
 
-  const clientId = "256lknox4x75bj30rwpctxna2ckbmn"
-  const userCredentials = {
-    user_id: await getTwitchUserId({
+    if (!accessToken) {
+      throw new Error("Nie udało się uzyskać tokena dostępu")
+    }
+
+    const clientId = "256lknox4x75bj30rwpctxna2ckbmn"
+    const userCredentials = {
+      user_id: await getTwitchUserId({
+        access_token: accessToken,
+        client_id: clientId
+      }),
       access_token: accessToken,
       client_id: clientId
-    }),
-    access_token: accessToken,
-    client_id: clientId
-  }
+    }
 
-  const storage = new Storage()
-  await storage.set("userTwitchKey", userCredentials)
-  await storage.set("authLoading", false)
+    const storage = new Storage()
+    await storage.set("userTwitchKey", userCredentials)
+    await storage.set("authLoading", false)
+  } catch (e) {
+    console.error("Błąd autoryzacji:", e)
+    const storage = new Storage()
+    await storage.set("authLoading", false)
+  }
 }

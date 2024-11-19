@@ -26,7 +26,7 @@ export const getTwitchUserId = async (credentials) => {
 
 export const getTwitchOAuthURL = () => {
   const BASE_URL = "https://id.twitch.tv/oauth2/authorize"
-  const REDIRECT_URI = chrome.identity.getRedirectURL()
+  const REDIRECT_URI = "https://kitch.pl/"
   const CLIENT_ID = "256lknox4x75bj30rwpctxna2ckbmn"
   const SCOPE = "user:read:follows"
   const FINAL_URL = `${BASE_URL}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&force_verify=true&response_type=token&scope=${SCOPE}`
