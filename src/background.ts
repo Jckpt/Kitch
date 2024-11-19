@@ -126,9 +126,10 @@ const refresh = async () => {
     }
   } catch (error) {
     console.error("Error fetching Twitch data:", error)
-    if (error.status === 401) {
+    if (error.status === 401 || error.message.includes("not iterable")) {
       const storage = new Storage()
       storage.remove("userTwitchKey")
+      storage.remove("followedLive")
     }
   }
 }
