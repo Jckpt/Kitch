@@ -1,7 +1,7 @@
 {
   "name": "kitch",
   "displayName": "Kitch",
-  "version": "0.9.8.2",
+  "version": "0.9.9",
   "description": "Follow your favorite streamers on Kick and Twitch",
   "author": "jckpt",
   "scripts": {
