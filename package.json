@@ -1,7 +1,7 @@
 {
   "name": "kitch",
   "displayName": "Kitch",
-  "version": "0.9.8",
+  "version": "0.9.8.2",
   "description": "Follow your favorite streamers on Kick and Twitch",
   "author": "jckpt",
   "scripts": {
@@ -48,14 +48,12 @@
   "manifest": {
     "host_permissions": [
       "https://api.twitch.tv/helix/*",
-      "https://kitch.pl/api/*",
+      "https://kitch.pl/*",
       "https://id.twitch.tv/oauth2/authorize"
     ],
     "permissions": [
       "alarms",
-      "notifications",
-      "identity",
-      "tabs"
+      "notifications"
     ],
     "browser_specific_settings": {
       "gecko": {
