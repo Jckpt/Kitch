@@ -7,6 +7,7 @@ import { template } from "~src/lib/util/helperFunc"
 import type { PlatformStream } from "../lib/types/twitchTypes"
 import { cn } from "../lib/util"
 import { Skeleton } from "./ui/skeleton"
+import StreamUptime from "./StreamUptime"
 
 type Props = {
   stream: PlatformStream
@@ -20,7 +21,8 @@ const StreamItem = ({
     viewer_count,
     title,
     game_name,
-    thumbnail_url
+    thumbnail_url,
+    started_at
   },
   variant = "Twitch"
 }: Props) => {
@@ -35,6 +37,9 @@ const StreamItem = ({
 
     return url.href
   }, [thumbnail_url])
+
+  console.log(started_at)
+
   if (thumbnail_url === undefined) return null
   return (
     <a
@@ -47,7 +52,7 @@ const StreamItem = ({
       target="_blank"
       rel="noopener noreferrer"
       className="bg-neutral-900 items-center flex justify-start p-2 hover:bg-neutral-800">
-      <div className="h-[54px] w-[96px] flex items-center rounded-sm">
+      <div className="h-[54px] w-[96px] flex items-center rounded-sm relative">
         <img
           src={previewImage}
           alt="stream preview"
@@ -56,6 +61,7 @@ const StreamItem = ({
           onLoad={() => setLoaded(true)}
         />
         {!loaded && <Skeleton className={`h-[54px] w-[96px] bg-neutral-700`} />}
+        <StreamUptime startedAt={started_at} />
       </div>
       <div className="flex w-full flex-col pl-1.5">
         <div className="flex justify-between">
