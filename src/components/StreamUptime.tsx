@@ -1,24 +1,31 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from "react"
 
 type Props = {
   startedAt: string
 }
 
 const StreamUptime = ({ startedAt }: Props) => {
-  const [uptime, setUptime] = useState('')
+  const [uptime, setUptime] = useState("")
 
   useEffect(() => {
     const calculateUptime = () => {
       const now = new Date()
       const start = new Date(startedAt)
-      const diffMs = now.getTime() - start.getTime()
-      
+
+      // Adjust for the user's time zone
+      const nowUtc = new Date(now.toLocaleString("en-US", { timeZone: "UTC" }))
+      const startUtc = new Date(
+        start.toLocaleString("en-US", { timeZone: "UTC" })
+      )
+
+      const diffMs = nowUtc.getTime() - startUtc.getTime()
+
       const hours = Math.floor(diffMs / (1000 * 60 * 60))
       const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60))
       const seconds = Math.floor((diffMs % (1000 * 60)) / 1000)
-      
-      const padZero = (num: number) => num.toString().padStart(2, '0')
-      
+
+      const padZero = (num: number) => num.toString().padStart(2, "0")
+
       return `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`
     }
 
@@ -37,4 +44,4 @@ const StreamUptime = ({ startedAt }: Props) => {
   )
 }
 
-export default React.memo(StreamUptime) 
+export default React.memo(StreamUptime)
