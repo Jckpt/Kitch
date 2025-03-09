@@ -349,7 +349,7 @@ def parse_kick_stream_object(kickObject):
                 ),
                 "session_title": (livestream.get("session_title")),
                 "viewer_count": livestream.get("viewer_count"),
-                "created_at": livestream.get("created_at"),
+                "created_at": livestream.get("created_at").replace(" ", "T") + "Z",
                 "language": livestream.get("language"),
                 "thumbnail": {
                     "url": livestream["thumbnail"]["url"].replace("720", "160")
@@ -375,7 +375,7 @@ def parse_kick_stream_twitch_format(kickObject):
         "game_name": kickObject["categories"][0]["name"],
         "title": kickObject.get("session_title"),
         "viewer_count": kickObject.get("viewer_count"),
-        "started_at": kickObject.get("created_at"),
+        "started_at": kickObject.get("created_at").replace(" ", "T") + "Z",
         "language": kickObject.get("language"),
         "thumbnail_url": kickObject["thumbnail"]["src"].replace("720", "160"),
         "is_mature": kickObject.get("is_mature"),
