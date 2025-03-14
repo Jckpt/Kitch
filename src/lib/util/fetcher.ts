@@ -29,30 +29,49 @@ export const getTwitchOAuthURL = () => {
   const REDIRECT_URI = "https://kitch.pl/"
   const CLIENT_ID = "256lknox4x75bj30rwpctxna2ckbmn"
   const SCOPE = "user:read:follows"
-  const FINAL_URL = `${BASE_URL}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&force_verify=true&response_type=token&scope=${SCOPE}`
+  const FINAL_URL = `${BASE_URL}
+                    ?client_id=${CLIENT_ID}&
+                    redirect_uri=${REDIRECT_URI}&
+                    force_verify=true&
+                    response_type=token&
+                    scope=${SCOPE}`
   return FINAL_URL
 }
 
-export function getKickOAuthURL(): string {
-  // Implement the logic to generate the Kick OAuth URL
-  // Replace with the actual Kick OAuth URL
+function generateRandomString(length: number): string {
+  const possible =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+  let text = ""
+  for (let i = 0; i < length; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length))
+  }
+  return text
+}
+
+async function generateCodeChallenge(verifier: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(verifier)
+  const digest = await crypto.subtle.digest("SHA-256", data)
+  return btoa(String.fromCharCode(...new Uint8Array(digest)))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "")
+}
+
+export async function getKickOAuthURL(): Promise<string> {
   const BASE_URL = "https://id.kick.com/oauth/authorize"
   const REDIRECT_URI = "https://kitch.pl/"
   const CLIENT_ID = "01JMF9B77CK8B7JEN6XTM13PQK"
   const SCOPE = "user:read"
-  const CODE_CHALLENGE = "YOUR_CODE_CHALLENGE"
+  const STATE = generateRandomString(32)
+  const CODE_VERIFIER = generateRandomString(64)
+  const CODE_CHALLENGE = await generateCodeChallenge(CODE_VERIFIER)
   const CODE_CHALLENGE_METHOD = "S256"
-  const STATE = "YOUR_STATE"
-  const FINAL_URL = `${BASE_URL}
-  ?response_type=code&
-  client_id=${CLIENT_ID}&
-  redirect_uri=${REDIRECT_URI}&
-  scope=${SCOPE}&
-  code_challenge=${CODE_CHALLENGE}&
-  code_challenge_method=${CODE_CHALLENGE_METHOD}&
-  state=${STATE}`
 
-  console.log(FINAL_URL)
+  // Store code_verifier for later use during token exchange
+  await chrome.storage.local.set({ code_verifier: CODE_VERIFIER })
+
+  const FINAL_URL = `${BASE_URL}?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${SCOPE}&code_challenge=${CODE_CHALLENGE}&code_challenge_method=${CODE_CHALLENGE_METHOD}&state=${STATE}`
 
   return FINAL_URL
 }
