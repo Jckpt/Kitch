@@ -4,6 +4,8 @@ import React from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
+import { sendRuntimeMessage } from "~src/lib/util/helperFunc"
+
 import { Button } from "../../components/ui/button"
 import { Label } from "../ui/label"
 import { Switch } from "../ui/switch"
@@ -13,6 +15,7 @@ export const kickMenuAtom = atom<boolean>(false)
 
 const OptionsTab = () => {
   const [kickMenu, setKickMenu] = useAtom(kickMenuAtom)
+  const [loading] = useStorage("authLoading")
   const [userTwitchKey, _, { remove: twitchLogout }] =
     useStorage("userTwitchKey")
   const [notificationsEnabled, setNotificationsEnabled] = useStorage<boolean>(
@@ -43,6 +46,16 @@ const OptionsTab = () => {
         disabled={false}
         onClick={() => setKickMenu(true)}>
         Add Kick follows
+      </Button>
+
+      <Button
+        className="w-3/4 rounded-md border-0 hover:bg-green-700 bg-green-800 text-primary"
+        onClick={() => sendRuntimeMessage("authorizeKick")}>
+        {loading ? (
+          <IconLoader2 className="h-6 w-6 animate-spin" />
+        ) : (
+          "Login with Kick"
+        )}
       </Button>
     </div>
   )

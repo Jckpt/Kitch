@@ -33,6 +33,12 @@ export const getTwitchOAuthURL = () => {
   return FINAL_URL
 }
 
+export function getKickOAuthURL(): string {
+  // Implement the logic to generate the Kick OAuth URL
+  // Replace with the actual Kick OAuth URL
+  return "YOUR_KICK_OAUTH_URL"
+}
+
 export const getTwitchStreamer = async (
   credentials: UserTwitchKey,
   user_id: string

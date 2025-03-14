@@ -9,6 +9,7 @@ import {
   type UserTwitchKey
 } from "./lib/types/twitchTypes"
 import {
+  getKickOAuthURL,
   getTwitchOAuthURL,
   getTwitchStreamer,
   getTwitchUserId,
@@ -136,8 +137,11 @@ const refresh = async () => {
 
 // Nasłuchiwanie na aktualizacje zakładek
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  console.log(tab.url);
-  if (changeInfo.status === "complete" && tab.url?.startsWith("https://kitch.pl/")) {
+  console.log(tab.url)
+  if (
+    changeInfo.status === "complete" &&
+    tab.url?.startsWith("https://kitch.pl/")
+  ) {
     try {
       await authorize(tab.url)
       // Zamknij zakładkę po autoryzacji
@@ -160,6 +164,16 @@ chrome.runtime.onMessage.addListener(async (request) => {
       console.error("Błąd podczas autoryzacji:", e)
       await storage.set("authLoading", false)
     }
+  } else if (request.type === "authorizeKick") {
+    try {
+      await storage.set("authLoading", true)
+      const authUrl = getKickOAuthURL() // You need to define this function
+      // Otwórz nową zakładkę z URL autoryzacji
+      chrome.tabs.create({ url: authUrl })
+    } catch (e) {
+      console.error("Błąd podczas autoryzacji Kick:", e)
+      await storage.set("authLoading", false)
+    }
   } else if (request.type === "refresh") {
     refresh()
   }
@@ -167,7 +181,7 @@ chrome.runtime.onMessage.addListener(async (request) => {
 
 async function authorize(redirectUrl) {
   try {
-    console.log(redirectUrl);
+    console.log(redirectUrl)
     const urlObject = new URL(redirectUrl)
     const fragment = urlObject.hash.substring(1)
     const accessToken = new URLSearchParams(fragment).get("access_token")
