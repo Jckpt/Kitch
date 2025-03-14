@@ -166,13 +166,13 @@ chrome.runtime.onMessage.addListener(async (request) => {
     }
   } else if (request.type === "authorizeKick") {
     try {
-      await storage.set("authLoading", true)
+      await storage.set("authLoadingKick", true)
       const authUrl = getKickOAuthURL() // You need to define this function
       // Otwórz nową zakładkę z URL autoryzacji
       chrome.tabs.create({ url: authUrl })
     } catch (e) {
       console.error("Błąd podczas autoryzacji Kick:", e)
-      await storage.set("authLoading", false)
+      await storage.set("authLoadingKick", false)
     }
   } else if (request.type === "refresh") {
     refresh()

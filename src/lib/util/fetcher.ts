@@ -36,7 +36,25 @@ export const getTwitchOAuthURL = () => {
 export function getKickOAuthURL(): string {
   // Implement the logic to generate the Kick OAuth URL
   // Replace with the actual Kick OAuth URL
-  return "YOUR_KICK_OAUTH_URL"
+  const BASE_URL = "https://id.kick.com/oauth/authorize"
+  const REDIRECT_URI = "https://kitch.pl/"
+  const CLIENT_ID = "01JMF9B77CK8B7JEN6XTM13PQK"
+  const SCOPE = "user:read"
+  const CODE_CHALLENGE = "YOUR_CODE_CHALLENGE"
+  const CODE_CHALLENGE_METHOD = "S256"
+  const STATE = "YOUR_STATE"
+  const FINAL_URL = `${BASE_URL}
+  ?response_type=code&
+  client_id=${CLIENT_ID}&
+  redirect_uri=${REDIRECT_URI}&
+  scope=${SCOPE}&
+  code_challenge=${CODE_CHALLENGE}&
+  code_challenge_method=${CODE_CHALLENGE_METHOD}&
+  state=${STATE}`
+
+  console.log(FINAL_URL)
+
+  return FINAL_URL
 }
 
 export const getTwitchStreamer = async (
