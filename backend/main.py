@@ -14,7 +14,7 @@ limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-redis_client = Redis(host="localhost", port=6379, decode_responses=True)
+redis_client = Redis(host="redis", port=6379, decode_responses=True)
 
 load_dotenv()
 
