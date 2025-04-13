@@ -20,7 +20,7 @@ import { categoryAtom, platformAtom, searchQueryAtom } from "./lib/util"
 
 function IndexPopup() {
   const [_, setSearchQuery] = useAtom(searchQueryAtom)
-  const [platform] = useAtom(platformAtom)
+  const [platform, setPlatform] = useAtom(platformAtom)
   const [category, setCategory] = useAtom(categoryAtom)
 
   const [userTwitchKey] = useStorage("userTwitchKey")
@@ -29,6 +29,7 @@ function IndexPopup() {
     setCategory("")
     setSearchQuery("")
   }
+
   return (
     <Tabs
       onValueChange={handleTabsClick}
@@ -39,7 +40,7 @@ function IndexPopup() {
       </div>
       <div className="w-full bg-neutral-900 flex flex-col">
         <TopBar twitchLoggedIn={twitchLoggedIn} />
-        {twitchLoggedIn ? (
+        {true ? (
           <>
             <TabsContent className="overflow-y-auto flex-grow" value="followed">
               <FollowedTab />

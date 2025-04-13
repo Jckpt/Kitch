@@ -9,7 +9,9 @@ import {
 import { useAtom } from "jotai"
 import React from "react"
 
-import { categoryAtom, currentTabAtom } from "~src/lib/util"
+import { useStorage } from "@plasmohq/storage/hook"
+
+import { categoryAtom, currentTabAtom, platformAtom } from "~src/lib/util"
 
 import { TabsList, TabsTrigger } from "../../components/ui/tabs"
 import { kickMenuAtom } from "./OptionsTab"
@@ -18,8 +20,15 @@ const SidebarTabs = () => {
   const [category, setCategory] = useAtom(categoryAtom)
   const [kickMenu, setKickMenu] = useAtom(kickMenuAtom)
   const [_, setCurrentTab] = useAtom(currentTabAtom)
+  const [platform, setPlatform] = useAtom(platformAtom)
+  //usertwitchkey
+  const [userTwitchKey] = useStorage("userTwitchKey")
+  const twitchLoggedIn = userTwitchKey !== undefined
 
   const handleClick = (tabName) => {
+    if (!twitchLoggedIn) {
+      setPlatform("kick")
+    }
     if (category !== "") setCategory("")
     if (kickMenu) setKickMenu(false)
     if (tabName) setCurrentTab(tabName)

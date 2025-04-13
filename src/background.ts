@@ -62,14 +62,24 @@ const refresh = async () => {
       "notificationsEnabled"
     )
 
-    if (!userTwitchKey) {
+    if (!userTwitchKey && kickFollows?.length === 0) {
+      console.log("No userTwitchKey or kickFollows found")
       return
     }
 
-    let refreshedLive = (await twitchFetcher([
-      `https://api.twitch.tv/helix/streams/followed?user_id=${userTwitchKey?.user_id}`,
-      userTwitchKey
-    ])) as PlatformResponse<PlatformStream>
+    let refreshedLive: PlatformResponse<PlatformStream> = {
+      data: [],
+      pagination: {
+        cursor: null
+      },
+      platform: "twitch"
+    }
+    if (userTwitchKey) {
+      refreshedLive = (await twitchFetcher([
+        `https://api.twitch.tv/helix/streams/followed?user_id=${userTwitchKey?.user_id}`,
+        userTwitchKey
+      ])) as PlatformResponse<PlatformStream>
+    }
 
     let kickLivestreams = []
     if (kickFollows && kickFollows.length > 0) {
@@ -79,13 +89,13 @@ const refresh = async () => {
           `https://kitch.pl/api/channels?streamers=${streamersQuery}`
         )
         const kickStreamsJson = await kickStreamsResponse.json()
+        console.log("Kick stream data1:", kickStreamsJson)
 
         for (const streamer of kickFollows) {
           const kickStreamJson = kickStreamsJson[streamer]
-
           if (kickStreamJson.error || kickStreamJson.livestream === null)
             continue
-
+          console.log("Kick stream data:", kickStreamJson)
           kickLivestreams.push(parseKickObject(kickStreamJson))
         }
       } catch (error) {
@@ -136,8 +146,11 @@ const refresh = async () => {
 
 // Nasłuchiwanie na aktualizacje zakładek
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  console.log(tab.url);
-  if (changeInfo.status === "complete" && tab.url?.startsWith("https://kitch.pl/")) {
+  console.log(tab.url)
+  if (
+    changeInfo.status === "complete" &&
+    tab.url?.startsWith("https://kitch.pl/")
+  ) {
     try {
       await authorize(tab.url)
       // Zamknij zakładkę po autoryzacji
@@ -162,12 +175,19 @@ chrome.runtime.onMessage.addListener(async (request) => {
     }
   } else if (request.type === "refresh") {
     refresh()
+  } else if (request.type === "logout") {
+    const storage = new Storage()
+    await storage.remove("userTwitchKey")
+    await storage.remove("followedLive")
+    await storage.remove("authLoading")
+    // set badge to 0
+    chrome.action.setBadgeText({ text: "0" })
   }
 })
 
 async function authorize(redirectUrl) {
   try {
-    console.log(redirectUrl);
+    console.log(redirectUrl)
     const urlObject = new URL(redirectUrl)
     const fragment = urlObject.hash.substring(1)
     const accessToken = new URLSearchParams(fragment).get("access_token")

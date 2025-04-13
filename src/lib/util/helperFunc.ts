@@ -60,19 +60,14 @@ export function createNotificationMultipleStreams(newLiveChannels, iconUrl) {
 }
 
 export function parseKickObject(kickObject) {
-  const {
-    id,
-    user_id,
-    slug,
-    user: { username },
-    livestream
-  } = kickObject
-  console.log(username, slug, livestream)
+  const { id, user_id, slug, user, livestream } = kickObject
+  console.log("siema")
+  console.log(user?.username, slug, livestream)
   const parsedKickObject = {
     id,
     user_id,
     user_login: slug,
-    user_name: username,
+    user_name: user?.username,
     game_id: livestream.categories[0]?.id,
     game_name: livestream.categories[0]?.name,
     type: "live",

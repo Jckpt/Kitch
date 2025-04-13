@@ -2,7 +2,10 @@ import { IconLoader2 } from "@tabler/icons-react"
 import { atom, useAtom } from "jotai"
 import React from "react"
 
+import { Storage } from "@plasmohq/storage"
 import { useStorage } from "@plasmohq/storage/hook"
+
+import { sendRuntimeMessage } from "~src/lib/util/helperFunc"
 
 import { Button } from "../../components/ui/button"
 import { Label } from "../ui/label"
@@ -15,9 +18,14 @@ const OptionsTab = () => {
   const [kickMenu, setKickMenu] = useAtom(kickMenuAtom)
   const [userTwitchKey, _, { remove: twitchLogout }] =
     useStorage("userTwitchKey")
+  const [followedLive, blank, { remove: eraseFollows }] = useStorage({
+    key: "followedLive",
+    instance: new Storage({ area: "local" })
+  })
   const [notificationsEnabled, setNotificationsEnabled] = useStorage<boolean>(
     "notificationsEnabled"
   )
+  const twitchLoggedIn = userTwitchKey !== undefined
 
   if (kickMenu) return <KickMenuTab />
 
@@ -31,13 +39,23 @@ const OptionsTab = () => {
         />
         <Label htmlFor="notifications-option">Stream Notifications</Label>
       </div>
-
-      <Button
-        className="w-3/4 rounded-md border-0  hover:bg-red-700 bg-zinc-800 text-primary"
-        onClick={twitchLogout}>
-        Logout of Twitch
-      </Button>
-
+      {twitchLoggedIn ? (
+        <Button
+          className="w-3/4 rounded-md border-0  hover:bg-red-700 bg-zinc-800 text-primary"
+          onClick={() => {
+            twitchLogout()
+            eraseFollows()
+            sendRuntimeMessage("logout")
+          }}>
+          Logout of Twitch
+        </Button>
+      ) : (
+        <Button
+          className="w-3/4 rounded-md border-0 hover:bg-purple-700 bg-purple-800 text-primary"
+          onClick={() => sendRuntimeMessage("authorize")}>
+          Login with Twitch
+        </Button>
+      )}
       <Button
         className="w-3/4 rounded-md border-0 hover:bg-green-700 bg-zinc-800 text-primary"
         disabled={false}
