@@ -35,17 +35,6 @@ app.add_middleware(
 @app.get("/api/channel/{streamer}")
 async def get_channel_data(streamer: str, request: Request):
     try:
-        # Check cache first
-        cached_data = await redis_client.get(streamer)
-        if cached_data:
-            print(f"Cache hit for streamer {streamer}")
-            cached_response = json.loads(cached_data)
-            if "error" in cached_response:
-                raise HTTPException(status_code=404, detail=cached_response["error"])
-            return cached_response
-
-        print(f"Cache miss for streamer {streamer}")
-
         # First get user_id from channels API
         response = requests.get(
             url=f"https://api.kick.com/public/v1/channels?slug={streamer}",

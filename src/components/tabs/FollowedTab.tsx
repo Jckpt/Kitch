@@ -21,6 +21,8 @@ const FollowedTab = () => {
     stream.user_name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
+  console.log("followedLive", filteredStreams)
+
   if (followedLive?.length === 0) {
     return (
       <div className="flex justify-center items-center h-full">
@@ -31,6 +33,11 @@ const FollowedTab = () => {
 
   return (
     <>
+      {(filteredStreams?.length === 0 || filteredStreams === undefined) && (
+        <div className="flex justify-center items-center h-full">
+          <p className="text-white">No streams found</p>
+        </div>
+      )}
       {filteredStreams?.map((stream: PlatformStream) =>
         stream?.platform === "Kick" ? (
           <StreamItem variant="Kick" stream={stream} key={stream.id} />
