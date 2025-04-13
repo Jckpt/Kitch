@@ -14,7 +14,7 @@ limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-redis_client = Redis(host="redis", port=6379, decode_responses=True)
+redis_client = Redis(host="localhost", port=6379, decode_responses=True)
 
 load_dotenv()
 
@@ -35,7 +35,7 @@ app.add_middleware(
 @app.get("/api/channel/{streamer}")
 async def get_channel_data(streamer: str, request: Request):
     try:
-        # Check if data or 404 error is in cache
+        # Check cache first
         cached_data = await redis_client.get(streamer)
         if cached_data:
             print(f"Cache hit for streamer {streamer}")
@@ -45,52 +45,55 @@ async def get_channel_data(streamer: str, request: Request):
             return cached_response
 
         print(f"Cache miss for streamer {streamer}")
-        # Fetch data from API
+
+        # First get user_id from channels API
         response = requests.get(
-            url=f"https://kick.com/api/v1/channels/{streamer}",
-            impersonate="chrome120",
-            headers={
-                "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-                "accept-language": "en,en-US;q=0.9,pl-PL;q=0.8,pl;q=0.7",
-                "cache-control": "max-age=0",
-                "priority": "u=0, i",
-                "sec-ch-ua": '"Google Chrome";v="125", "Chromium";v="125", "Not.A/Brand";v="24"',
-                "sec-ch-ua-arch": '"x86"',
-                "sec-ch-ua-bitness": '"64"',
-                "sec-ch-ua-full-version": '"125.0.6422.78"',
-                "sec-ch-ua-full-version-list": '"Google Chrome";v="125.0.6422.78", "Chromium";v="125.0.6422.78", "Not.A/Brand";v="24.0.0.0"',
-                "sec-ch-ua-mobile": "?0",
-                "sec-ch-ua-model": '""',
-                "sec-ch-ua-platform": '"Windows"',
-                "sec-ch-ua-platform-version": '"15.0.0"',
-                "sec-fetch-dest": "document",
-                "sec-fetch-mode": "navigate",
-                "sec-fetch-site": "none",
-                "sec-fetch-user": "?1",
-                "upgrade-insecure-requests": "1",
-                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-            },
+            url=f"https://api.kick.com/public/v1/channels?slug={streamer}",
+            headers={"Authorization": f"Bearer {KICK_API_KEY}"},
         )
 
         if response.status_code == 404:
-            error_message = "Channel not found"
-            # Cache the 404 error for 180 seconds
-            await redis_client.setex(
-                streamer, 180, json.dumps({"error": error_message})
-            )
-            raise HTTPException(status_code=404, detail=error_message)
-        elif response.status_code != 200:
+            error_data = {"error": "Channel not found"}
+            await redis_client.setex(streamer, 180, json.dumps(error_data))
+            raise HTTPException(status_code=404, detail="Channel not found")
+
+        if response.status_code != 200:
             raise HTTPException(
                 status_code=response.status_code,
                 detail="Error fetching data from kick API",
             )
 
-        response_data = response.json()
-        # Process data to include only the necessary fields for the frontend
-        parsed_data = parse_kick_stream_object(response_data)
-        # Cache processed data for 180 seconds (3 minutes)
-        await redis_client.setex(streamer, 180, json.dumps(parsed_data))
-        return parsed_data
+        channel_data = response.json()
+        if not channel_data.get("data"):
+            error_data = {"error": "Channel not found"}
+            await redis_client.setex(streamer, 180, json.dumps(error_data))
+            raise HTTPException(status_code=404, detail="Channel not found")
+
+        user_id = channel_data["data"][0].get("broadcaster_user_id")
+
+        # Get username from users API
+        response = requests.get(
+            url=f"https://api.kick.com/public/v1/users?id={user_id}",
+            headers={"Authorization": f"Bearer {KICK_API_KEY}"},
+        )
+
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail="Error fetching user data from kick API",
+            )
+
+        user_data = response.json()
+        if not user_data.get("data"):
+            error_data = {"error": "User not found"}
+            await redis_client.setex(streamer, 180, json.dumps(error_data))
+            raise HTTPException(status_code=404, detail="User not found")
+
+        result = {"user": {"username": user_data["data"][0]["name"]}}
+
+        # Cache the result for 180 seconds
+        await redis_client.setex(streamer, 180, json.dumps(result))
+        return result
 
     except HTTPException as e:
         raise e
