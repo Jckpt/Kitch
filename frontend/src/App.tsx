@@ -32,7 +32,7 @@ const Boarding = () => (
         <h1 className="text-4xl font-bold text-white mb-2">Kitch</h1>
         <p className="text-[#a1a1a1] text-lg">
           Follow your favorite streamers<br />
-          on Kick and Twitch
+          on <span className="text-[#53fc19]">Kick</span> and <span className="text-[#a970ff]">Twitch</span>
         </p>
       </div>
       <div className="space-y-4 max-w-[300px]">
