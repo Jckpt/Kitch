@@ -1,7 +1,58 @@
 import { IconBrandChrome, IconBrandFirefox } from "@tabler/icons-react"
 import { useEffect, useState } from "react"
-
 import "./App.css"
+
+const Authentication = ({ hasToken }: { hasToken: boolean }) => (
+  <div className="bg-[#1f1f1f] backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] border border-[#242424] p-10 transition-all duration-300 hover:shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] md:w-1/2">
+    {hasToken ? (
+      <div className="text-center text-zinc-100 space-y-4">
+        <h2 className="text-3xl font-semibold tracking-tight">
+          Successfully Authenticated
+        </h2>
+        <p className="text-zinc-400">You can now close this window</p>
+      </div>
+    ) : (
+      <div className="text-center text-zinc-100 space-y-6">
+        <h2 className="text-3xl font-semibold tracking-tight">
+          Authentication Required
+        </h2>
+        <p className="text-zinc-400">
+          Please wait while we complete the authentication process...
+        </p>
+        <div className="animate-spin h-10 w-10 border-3 border-zinc-600 border-t-white rounded-full mx-auto"></div>
+      </div>
+    )}
+  </div>
+)
+
+const Boarding = () => (
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+    <div className="space-y-8">
+      <div className="max-w-[300px]">
+        <h1 className="text-4xl font-bold text-white mb-2">Kitch</h1>
+        <p className="text-[#a1a1a1] text-lg">
+          Follow your favorite streamers<br />
+          on Kick and Twitch
+        </p>
+      </div>
+      <div className="space-y-4 max-w-[300px]">
+        <a href="https://chromewebstore.google.com/detail/kitch-kick-twitch-notific/afinpfknmmcbkmbgjcoljffonbmkccnl?hl=en" 
+           className="flex items-center space-x-3 text-white bg-[#242424] hover:bg-[#2f2f2f] transition-all rounded-lg px-6 py-3 w-full border border-[#333333] hover:border-[#404040] shadow-lg hover:shadow-xl">
+          <IconBrandChrome size={24} />
+          <span>Add to Chrome</span>
+        </a>
+        <a href="https://addons.mozilla.org/en-US/firefox/addon/kitch/" 
+           className="flex items-center space-x-3 text-white bg-[#242424] hover:bg-[#2f2f2f] transition-all rounded-lg px-6 py-3 w-full border border-[#333333] hover:border-[#404040] shadow-lg hover:shadow-xl">
+          <IconBrandFirefox size={24} />
+          <span>Add to Firefox</span>
+        </a>
+      </div>
+    </div>
+    <div className="hidden md:block bg-[#1f1f1f]/30 rounded-2xl aspect-square w-full max-w-md mx-auto">
+      {/* Placeholder for image */}
+    </div>
+  </div>
+)
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -16,59 +67,25 @@ function App() {
   }, [])
 
   return (
-    <div
-      className="min-h-screen w-screen bg-gradient-to-bl from-[#00FF7F] via-purple-500 to-[#6441a5]"
-      style={{ fontFamily: "Helvetica" }}>
-      <div className="container mx-auto px-4 h-screen flex flex-col items-center justify-center">
-        <div className="max-w-md w-full space-y-8">
-          <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-2xl p-8">
-            {isAuthenticated ? (
-              <div className="text-center text-white">
-                <h2 className="text-2xl font-bold mb-4">
-                  Successfully Authenticated!
-                </h2>
-                <p>You can now close this window</p>
-              </div>
-            ) : hasToken ? (
-              <div className="text-center text-white">
-                <h2 className="text-2xl font-bold mb-4">
-                  Authentication Required
-                </h2>
-                <p className="mb-6">
-                  Please wait while we complete the authentication process...
-                </p>
-                <div className="animate-spin h-8 w-8 border-4 border-white border-t-transparent rounded-full mx-auto"></div>
-              </div>
-            ) : (
-              <div className="text-center text-white">
-                <h2 className="text-2xl font-bold mb-4">Get Kitch</h2>
-                <p className="mb-6">for your preferred browser:</p>
-                <div className="space-y-4">
-                  <a
-                    href="https://chromewebstore.google.com/detail/kitch/afinpfknmmcbkmbgjcoljffonbmkccnl?hl=en"
-                    className="flex items-center justify-center w-full py-2 px-4 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-                    target="_blank"
-                    rel="noopener noreferrer">
-                    <div className="flex items-center">
-                      <IconBrandChrome className="mr-2 w-5 h-5" />
-                      <span>Chrome Web Store</span>
-                    </div>
-                  </a>
-                  <a
-                    href="https://addons.mozilla.org/en-US/firefox/addon/kitch/"
-                    className="flex items-center justify-center w-full py-2 px-4 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-                    target="_blank"
-                    rel="noopener noreferrer">
-                    <div className="flex items-center">
-                      <IconBrandFirefox className="mr-2 w-5 h-5" />
-                      <span>Firefox Add-ons</span>
-                    </div>
-                  </a>
-                </div>
-              </div>
-            )}
-          </div>
+    <div className="overscroll-none min-h-screen w-screen bg-gradient-to-br from-[#181818] via-[#1f1f1f] to-[#242424]">
+      <div className="container mx-auto px-4 h-screen flex flex-col items-center justify-center relative">
+        <div className={`w-full max-w-5xl ${isAuthenticated || hasToken ? 'max-w-md' : ''}`}>
+          {isAuthenticated || hasToken ? (
+            <div className="space-y-8 flex flex-col items-center">
+              <Authentication hasToken={isAuthenticated} />
+            </div>
+          ) : (
+            <Boarding />
+          )}
         </div>
+        <a 
+          href="https://github.com/jckpt" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="absolute bottom-4 text-[#a1a1a1] hover:text-white transition-colors text-sm"
+        >
+          made by me
+        </a>
       </div>
     </div>
   )
