@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import "./App.css"
 
 const Authentication = ({ hasToken }: { hasToken: boolean }) => (
-  <div className="bg-[#1f1f1f] backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] border border-[#242424] p-10 transition-all duration-300 hover:shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] md:w-1/2">
+  <div className="bg-[#1f1f1f] backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] border border-[#242424] p-10 transition-all duration-300 hover:shadow-[0_8px_32px_0_rgba(0,0,0,0.4)]">
     {hasToken ? (
       <div className="text-center text-zinc-100 space-y-4">
         <h2 className="text-3xl font-semibold tracking-tight">
@@ -55,10 +55,10 @@ const Boarding = () => (
     </div>
     <div className="hidden md:flex rounded-2xl aspect-square w-full max-w-md mx-auto justify-center items-center">
       <img
-        src="/render.png"
+        src="https://i.imgur.com/UMqt5u8.png"
         alt="Kitch"
         draggable="false"
-        className="w-3/4 h-3/4 mb-14"
+        className="w-3/4 h-3/4 mb-14 float-animation"
       />
     </div>
   </div>
