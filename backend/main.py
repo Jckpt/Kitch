@@ -1,6 +1,5 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from redis.asyncio import Redis
 import json
 from curl_cffi import requests
 import os
@@ -9,11 +8,10 @@ from parsers import (
     parse_kick_category_object,
     parse_public_kick_stream_object,
     parse_kick_stream_array_object,
-    parse_kick_response_data  # dodaj nowy import
+    parse_kick_response_data
 )
 
 app = FastAPI()
-redis_client = Redis(host="localhost", port=6379, decode_responses=True)
 
 load_dotenv()
 
@@ -42,7 +40,6 @@ async def get_channel_data(streamer: str, request: Request):
 
         if response.status_code == 404:
             error_data = {"error": "Channel not found"}
-            await redis_client.setex(streamer, 180, json.dumps(error_data))
             raise HTTPException(status_code=404, detail="Channel not found")
 
         if response.status_code != 200:
@@ -54,7 +51,6 @@ async def get_channel_data(streamer: str, request: Request):
         channel_data = response.json()
         if not channel_data.get("data"):
             error_data = {"error": "Channel not found"}
-            await redis_client.setex(streamer, 180, json.dumps(error_data))
             raise HTTPException(status_code=404, detail="Channel not found")
 
         user_id = channel_data["data"][0].get("broadcaster_user_id")
@@ -74,13 +70,9 @@ async def get_channel_data(streamer: str, request: Request):
         user_data = response.json()
         if not user_data.get("data"):
             error_data = {"error": "User not found"}
-            await redis_client.setex(streamer, 180, json.dumps(error_data))
             raise HTTPException(status_code=404, detail="User not found")
 
         result = {"user": {"username": user_data["data"][0]["name"]}}
-
-        # Cache the result for 180 seconds
-        await redis_client.setex(streamer, 180, json.dumps(result))
         return result
 
     except HTTPException as e:
@@ -108,20 +100,6 @@ async def get_channels_data(streamers: str, request: Request):
 
         # Process each chunk
         for chunk in streamer_chunks:
-            # Check cache first for each streamer in chunk
-            for streamer in chunk[:]:  # Create a copy of the list for iteration
-                cached_data = await redis_client.get(streamer)
-                if cached_data:
-                    print(f"Cache hit for streamer {streamer}")
-                    parsed_data = json.loads(cached_data)
-                    temp_slug_to_data[streamer.lower()] = parsed_data
-                    if "error" not in parsed_data:
-                        user_ids.add(str(parsed_data.get("user_id")))
-                    chunk.remove(streamer)
-
-            if not chunk:  # Skip if all streamers were in cache
-                continue
-
             # Build URL with multiple slug parameters (max 50)
             slug_params = "&".join([f"slug={streamer.lower()}" for streamer in chunk])
             url = f"https://api.kick.com/public/v1/channels?{slug_params}"
@@ -150,8 +128,6 @@ async def get_channels_data(streamers: str, request: Request):
                 if broadcaster_id := streamer_data.get("broadcaster_user_id"):
                     user_ids.add(str(broadcaster_id))
 
-                # Cache the parsed data
-                await redis_client.setex(streamer, 180, json.dumps(parsed_data))
                 temp_slug_to_data[streamer.lower()] = parsed_data
 
             # Handle not found streamers
@@ -162,7 +138,6 @@ async def get_channels_data(streamers: str, request: Request):
                 if streamer.lower() not in response_streamers:
                     error_data = {"error": "Streamer not found"}
                     temp_slug_to_data[streamer.lower()] = error_data
-                    await redis_client.setex(streamer, 180, json.dumps(error_data))
 
         # Fetch proper usernames for all collected user_ids
         if user_ids:
@@ -200,13 +175,6 @@ async def get_channels_data(streamers: str, request: Request):
 @app.get("/api/subcategories")
 async def get_subcategories(request: Request, page: int = 1, limit: int = 20):
     try:
-        cache_key = f"subcategories_{page}_{limit}"
-        # Check if data is in cache
-        cached_data = await redis_client.get(cache_key)
-        if cached_data:
-            print(f"Cache hit for subcategories page {page}, limit {limit}")
-            return json.loads(cached_data)
-
         print(f"Cache miss for subcategories page {page}, limit {limit}")
         # Fetch data from API
         response = requests.get(
@@ -233,7 +201,6 @@ async def get_subcategories(request: Request, page: int = 1, limit: int = 20):
                 "reached_end": True,
                 "data": [],
             }
-            await redis_client.setex(cache_key, 180, json.dumps(response_end_list))
             return response_end_list
 
         return_data = {
@@ -246,9 +213,6 @@ async def get_subcategories(request: Request, page: int = 1, limit: int = 20):
             "reached_end": False,
             "data": parse_kick_category_object(response_data.get("data")),
         }
-
-        # Cache data for 180 seconds (3 minutes)
-        await redis_client.setex(cache_key, 180, json.dumps(return_data))
         return return_data
 
     except HTTPException as e:
@@ -269,15 +233,6 @@ async def get_livestreams(
     sort: str = "desc",
 ):
     try:
-        cache_key = f"livestreams_{page}_{limit}_{subcategory}_{sort}"
-        # Check if data is in cache
-        cached_data = await redis_client.get(cache_key)
-        if cached_data:
-            print(
-                f"Cache hit for livestreams page {page}, limit {limit}, subcategory {subcategory}, sort {sort}"
-            )
-            return json.loads(cached_data)
-
         print(
             f"Cache miss for livestreams page {page}, limit {limit}, subcategory {subcategory}, sort {sort}"
         )
@@ -309,11 +264,9 @@ async def get_livestreams(
                 "reached_end": True,
                 "data": [],
             }
-            await redis_client.setex(cache_key, 180, json.dumps(response_end_list))
             return response_end_list
 
         return_data = parse_kick_response_data(response_data, parse_kick_stream_array_object)
-        await redis_client.setex(cache_key, 180, json.dumps(return_data))
         return return_data
 
     except HTTPException as e:
