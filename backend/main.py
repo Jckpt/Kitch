@@ -10,12 +10,22 @@ from parsers import (
     parse_kick_stream_array_object,
     parse_kick_response_data,
 )
+import ssl
+import redis
 
 app = FastAPI()
 
 load_dotenv()
 
 KICK_API_KEY = os.getenv("KICK_API_KEY")
+PROXY_URL = os.getenv("PROXY_URL")
+BRIGHTDATA_API_KEY = os.getenv("BRIGHTDATA_API_KEY")
+proxies = {"http": PROXY_URL, "https": PROXY_URL}
+
+ssl._create_default_https_context = ssl._create_unverified_context
+
+# Redis client initialization
+redis_client = redis.Redis(host="redis", port=6379, db=0, decode_responses=True)
 
 # Ustawienie zezwoleń CORS
 app.add_middleware(
@@ -175,28 +185,37 @@ async def get_channels_data(streamers: str, request: Request):
 @app.get("/api/subcategories")
 async def get_subcategories(request: Request, page: int = 1, limit: int = 20):
     try:
+        # Try to get data from Redis
+        cache_key = f"subcategories:{page}:{limit}"
+        cached_data = redis_client.get(cache_key)
+
+        if cached_data:
+            return json.loads(cached_data)
+
         print(f"Cache miss for subcategories page {page}, limit {limit}")
-        # Fetch data from API
-        response = requests.get(
-            url=f"https://kick.com/api/v1/subcategories?page={page}&limit={limit}",
-            impersonate="chrome120",
+
+        response = requests.post(
+            url="https://api.brightdata.com/request",
             headers={
-                "accept": "application/json",
-                "accept-language": "en,en-US;q=0.9",
-                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {BRIGHTDATA_API_KEY}",
+            },
+            json={
+                "zone": "web_unlocker1",
+                "url": f"https://kick.com/api/v1/subcategories?page={page}&limit={limit}",
+                "format": "raw",
             },
         )
 
         if response.status_code != 200:
             raise HTTPException(
                 status_code=response.status_code,
-                detail="Error fetching data from kick API",
+                detail="Error fetching data from Brightdata API",
             )
 
         response_data = response.json()
 
         if response_data.get("current_page") != page or response_data.get("data") == []:
-            # return json response with empty data
             response_end_list = {
                 "reached_end": True,
                 "data": [],
@@ -213,6 +232,10 @@ async def get_subcategories(request: Request, page: int = 1, limit: int = 20):
             "reached_end": False,
             "data": parse_kick_category_object(response_data.get("data")),
         }
+
+        # Cache the data for 5 minutes
+        redis_client.setex(cache_key, 300, json.dumps(return_data))
+
         return return_data
 
     except HTTPException as e:

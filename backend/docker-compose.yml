@@ -10,7 +10,7 @@ services:
     depends_on:
       - redis
 
-  # redis:
-  #   image: "redis:alpine"
-  #   ports:
-  #     - "6379:6379"
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
