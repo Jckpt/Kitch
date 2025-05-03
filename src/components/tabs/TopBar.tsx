@@ -17,7 +17,7 @@ const TopBar = ({ twitchLoggedIn }) => {
     <div
       className="pt-3 pb-3 flex-grow-0 flex-shrink flex justify-evenly items-center bg-zinc-900"
       ref={parent}>
-      <PlatformIcon />
+      <PlatformIcon disabled={!twitchLoggedIn} />
       <Input
         type="input"
         className="w-3/4 rounded-md border-0 bg-neutral-800"

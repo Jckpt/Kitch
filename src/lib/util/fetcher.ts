@@ -49,7 +49,6 @@ export const kickFetcher = async (url) => {
   if (url === null) return
   const response = await fetch(url)
   let data = await response.json()
-  console.log(data)
   return data
 }
 
@@ -61,7 +60,6 @@ function parseKickObject(kickObject) {
     user: { username },
     livestream
   } = kickObject
-  console.log(username, slug, livestream)
   const parsedKickObject = {
     id,
     user_id,

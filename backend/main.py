@@ -8,7 +8,7 @@ from parsers import (
     parse_kick_category_object,
     parse_public_kick_stream_object,
     parse_kick_stream_array_object,
-    parse_kick_response_data
+    parse_kick_response_data,
 )
 
 app = FastAPI()
@@ -266,7 +266,9 @@ async def get_livestreams(
             }
             return response_end_list
 
-        return_data = parse_kick_response_data(response_data, parse_kick_stream_array_object)
+        return_data = parse_kick_response_data(
+            response_data, parse_kick_stream_array_object
+        )
         return return_data
 
     except HTTPException as e:
@@ -275,6 +277,132 @@ async def get_livestreams(
         print(
             f"Error fetching livestreams for page {page}, limit {limit}, subcategory {subcategory}, sort {sort}: {str(e)}"
         )
+        raise HTTPException(
+            status_code=500, detail="An error occurred while fetching data"
+        )
+
+
+@app.get("/api/v2/livestreams")
+async def get_livestreams_v2(request: Request):
+    try:
+        category_id = request.query_params.get("category_id", "")
+        if category_id:
+            url = f"https://api.kick.com/public/v1/livestreams?category_id={category_id}&limit=100&sort=viewer_count"
+        else:
+            url = (
+                "https://api.kick.com/public/v1/livestreams?limit=100&sort=viewer_count"
+            )
+
+        response = requests.get(
+            url=url, headers={"Authorization": f"Bearer {KICK_API_KEY}"}
+        )
+
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail="Error fetching data from kick API",
+            )
+
+        response_data = response.json()
+
+        return response_data
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        print(f"Error fetching v2 livestreams: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail="An error occurred while fetching data"
+        )
+
+
+@app.get("/api/v2/categories")
+async def get_categories_v2(request: Request):
+    try:
+        query = request.query_params.get("query", "")
+        page = request.query_params.get("page", 1)
+        if query:
+            url = f"https://api.kick.com/public/v1/categories?q={query}"
+        else:
+            # Default to fetching all categories if no query is provided
+            url = "https://api.kick.com/public/v1/categories"
+
+        response = requests.get(
+            url=url, headers={"Authorization": f"Bearer {KICK_API_KEY}"}
+        )
+
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail="Error fetching data from kick API",
+            )
+
+        response_data = response.json()
+
+        return response_data
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        print(f"Error fetching v2 livestreams: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail="An error occurred while fetching data"
+        )
+
+
+@app.get("/api/v2/channels")
+async def get_channels_data_v2(streamers: str, request: Request):
+    try:
+        streamers_list = streamers.split(",")
+        temp_slug_to_data = {}  # Temporary storage for mapping slugs to data
+
+        # Split streamers into chunks of 50
+        def chunk_list(lst, chunk_size):
+            return [lst[i : i + chunk_size] for i in range(0, len(lst), chunk_size)]
+
+        streamer_chunks = chunk_list(streamers_list, 50)
+
+        # Process each chunk
+        for chunk in streamer_chunks:
+            # Build URL with multiple slug parameters (max 50)
+            slug_params = "&".join([f"slug={streamer.lower()}" for streamer in chunk])
+            url = f"https://api.kick.com/public/v1/channels?{slug_params}"
+
+            # Fetch data for current chunk
+            response = requests.get(
+                url=url,
+                headers={"Authorization": f"Bearer {KICK_API_KEY}"},
+            )
+
+            print(f"response: {response}")
+
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=response.status_code,
+                    detail=f"Error fetching data from kick API for chunk: {chunk}",
+                )
+
+            response_data = response.json()
+
+            # Process each streamer's data from the response
+            for streamer_data in response_data.get("data", []):
+                streamer = streamer_data.get("slug")
+                parsed_data = parse_public_kick_stream_object(streamer_data)
+                temp_slug_to_data[streamer.lower()] = parsed_data
+
+            # Handle not found streamers
+            response_streamers = {
+                data.get("slug").lower() for data in response_data.get("data", [])
+            }
+            for streamer in chunk:
+                if streamer.lower() not in response_streamers:
+                    error_data = {"error": "Streamer not found"}
+                    temp_slug_to_data[streamer.lower()] = error_data
+
+        return temp_slug_to_data
+
+    except Exception as e:
+        print(f"Error fetching data for streamers {streamers}: {str(e)}")
         raise HTTPException(
             status_code=500, detail="An error occurred while fetching data"
         )
@@ -307,4 +435,5 @@ async def fetch_user_details(user_ids: list) -> dict:
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=3000)

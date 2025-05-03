@@ -52,7 +52,7 @@ const refresh = async () => {
   try {
     console.log("refresh alarm created")
     chrome.alarms.create("refresh", {
-      delayInMinutes: 1.5
+      delayInMinutes: 3
     })
     const followedLive =
       await storageLocal.get<PlatformResponse<PlatformStream>>("followedLive")
@@ -86,17 +86,16 @@ const refresh = async () => {
       try {
         const streamersQuery = kickFollows.join(",")
         const kickStreamsResponse = await fetch(
-          `https://kitch.pl/api/channels?streamers=${streamersQuery}`
+          `https://kitch.pl/api/v2/channels?streamers=${streamersQuery}`
         )
         const kickStreamsJson = await kickStreamsResponse.json()
-        console.log("Kick stream data1:", kickStreamsJson)
 
         for (const streamer of kickFollows) {
-          const kickStreamJson = kickStreamsJson[streamer]
+          const kickStreamJson = kickStreamsJson[streamer.toLowerCase()]
           if (kickStreamJson.error || kickStreamJson.livestream === null)
             continue
-          console.log("Kick stream data:", kickStreamJson)
-          kickLivestreams.push(parseKickObject(kickStreamJson))
+
+          kickLivestreams.push(parseKickObject(kickStreamJson, streamer))
         }
       } catch (error) {
         console.error("Error fetching kick streams:", error)
@@ -146,7 +145,6 @@ const refresh = async () => {
 
 // Nasłuchiwanie na aktualizacje zakładek
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  console.log(tab.url)
   if (
     changeInfo.status === "complete" &&
     tab.url?.startsWith("https://kitch.pl/")
@@ -180,14 +178,12 @@ chrome.runtime.onMessage.addListener(async (request) => {
     await storage.remove("userTwitchKey")
     await storage.remove("followedLive")
     await storage.remove("authLoading")
-    // set badge to 0
-    chrome.action.setBadgeText({ text: "0" })
+    refresh()
   }
 })
 
 async function authorize(redirectUrl) {
   try {
-    console.log(redirectUrl)
     const urlObject = new URL(redirectUrl)
     const fragment = urlObject.hash.substring(1)
     const accessToken = new URLSearchParams(fragment).get("access_token")

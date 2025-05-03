@@ -51,13 +51,13 @@ const OptionsTab = () => {
         </Button>
       ) : (
         <Button
-          className="w-3/4 rounded-md border-0 hover:bg-purple-700 bg-purple-800 text-primary"
+          className="w-3/4 rounded-md border-0 hover:bg-purple-800 bg-purple-700 text-primary"
           onClick={() => sendRuntimeMessage("authorize")}>
           Login with Twitch
         </Button>
       )}
       <Button
-        className="w-3/4 rounded-md border-0 hover:bg-green-700 bg-zinc-800 text-primary"
+        className="w-3/4 rounded-md border-0 hover:bg-green-800 bg-green-700 text-primary"
         disabled={false}
         onClick={() => setKickMenu(true)}>
         Add Kick follows

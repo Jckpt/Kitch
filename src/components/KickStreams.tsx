@@ -3,13 +3,14 @@ import React, { useEffect, useRef, useState } from "react"
 import useSWRInfinite from "swr/infinite"
 
 import { kickFetcher } from "~src/lib/util/fetcher"
+import { transformKickData } from "~src/lib/util/helperFunc"
 
 import { MappedStreams } from "./Mapped"
 
 const KickStreams = () => {
   const listRef = useRef(null)
   const [scrollToTop, setScrollToTop] = useState(false)
-  const fetchUrl = "https://kitch.pl/api/livestreams"
+  const fetchUrl = "https://kitch.pl/api/v2/livestreams"
   const getKey = (pageIndex, previousPageData) => {
     // first page, we don't have `previousPageData`
     if (pageIndex === 0) return fetchUrl
@@ -26,35 +27,36 @@ const KickStreams = () => {
     isLoading,
     size,
     setSize
-  } = useSWRInfinite(getKey, kickFetcher)
+  } = useSWRInfinite(getKey, async (...args) => {
+    const data = await kickFetcher(...args)
+    return transformKickData(data)
+  })
 
-  console.log(pageArray)
+  // useEffect(() => {
+  //   if (!listRef.current) return
 
-  useEffect(() => {
-    if (!listRef.current) return
+  //   const list = listRef.current
+  //   if (scrollToTop && listRef) {
+  //     list.scrollTop = 0
+  //     setScrollToTop(false)
+  //   }
 
-    const list = listRef.current
-    if (scrollToTop && listRef) {
-      list.scrollTop = 0
-      setScrollToTop(false)
-    }
+  //   const handleScroll = () => {
+  //     if (list && list.scrollTop + list.clientHeight >= list.scrollHeight) {
+  //       // Reached the end of the list, load more data
 
-    const handleScroll = () => {
-      if (list && list.scrollTop + list.clientHeight >= list.scrollHeight) {
-        // Reached the end of the list, load more data
+  //       if (!isLoading) {
+  //         setSize((prevSize) => prevSize + 1)
+  //       }
+  //     }
+  //   }
 
-        if (!isLoading) {
-          setSize((prevSize) => prevSize + 1)
-        }
-      }
-    }
+  //   list?.addEventListener("scroll", handleScroll)
 
-    list?.addEventListener("scroll", handleScroll)
-
-    return () => {
-      list?.removeEventListener("scroll", handleScroll)
-    }
-  }, [scrollToTop, listRef, isLoading, size])
+  //   return () => {
+  //     list?.removeEventListener("scroll", handleScroll)
+  //   }
+  // }, [scrollToTop, listRef, isLoading, size])
 
   if (!pageArray) {
     return (

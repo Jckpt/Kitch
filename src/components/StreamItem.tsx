@@ -6,8 +6,8 @@ import { template } from "~src/lib/util/helperFunc"
 
 import type { PlatformStream } from "../lib/types/twitchTypes"
 import { cn } from "../lib/util"
-import { Skeleton } from "./ui/skeleton"
 import StreamUptime from "./StreamUptime"
+import { Skeleton } from "./ui/skeleton"
 
 type Props = {
   stream: PlatformStream
@@ -18,9 +18,9 @@ const StreamItem = ({
   stream: {
     user_login,
     user_name,
-    viewer_count,
-    title,
-    game_name,
+    viewer_count = 0,
+    title = "",
+    game_name = "",
     thumbnail_url,
     started_at
   },
@@ -28,17 +28,20 @@ const StreamItem = ({
 }: Props) => {
   const [loaded, setLoaded] = useState(false)
   const previewImage = useMemo(() => {
+    if (!thumbnail_url) return ""
+
+    // For Kick URLs, use them directly
+    if (variant === "Kick") return thumbnail_url
+
+    // For Twitch URLs, use the template
     const url = new URL(
       template(thumbnail_url, {
         "{height}": 54,
         "{width}": 96
       })
     )
-
     return url.href
-  }, [thumbnail_url])
-
-  console.log(started_at)
+  }, [thumbnail_url, variant])
 
   if (thumbnail_url === undefined) return null
   return (

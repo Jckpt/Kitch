@@ -32,11 +32,7 @@ const TwitchStreams = ({ userTwitchKey }) => {
     isLoading,
     size,
     setSize
-  } = useSWRInfinite(getKey, twitchFetcher, {
-    refreshInterval: 1000 // odświeżaj co sekundę
-  })
-
-  console.log(pageArray);
+  } = useSWRInfinite(getKey, twitchFetcher)
 
   useEffect(() => {
     if (!listRef.current) return

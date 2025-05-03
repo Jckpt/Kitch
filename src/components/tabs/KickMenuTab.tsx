@@ -11,6 +11,8 @@ const KickMenuTab = () => {
   const [kickFollows, setKickFollows] = useStorage<string[]>("kickFollows")
   const [kickNickname, setKickNickname] = useState("")
   const [info, setInfo] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+
   const handleAdd = async (nickname: string) => {
     setKickNickname("")
     if (
@@ -23,6 +25,7 @@ const KickMenuTab = () => {
       setInfo("Streamer already added")
       return
     }
+    setIsLoading(true)
     try {
       const kickUser = await fetch(`https://kitch.pl/api/channel/${nickname}`)
       if (kickUser === null || kickUser.status !== 200) {
@@ -40,6 +43,8 @@ const KickMenuTab = () => {
       setInfo("")
     } catch (e) {
       console.error(e)
+    } finally {
+      setIsLoading(false)
     }
   }
   const handleAddEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -61,8 +66,13 @@ const KickMenuTab = () => {
         <Button
           className="w-2/12 rounded-r-md border-0 bg-zinc-700 hover:bg-zinc-600 text-primary"
           onClick={() => handleAdd(kickNickname)}
+          disabled={isLoading}
           size="icon">
-          <IconPlus />
+          {isLoading ? (
+            <div className="animate-spin h-4 w-4 border-2 border-white rounded-full border-t-transparent" />
+          ) : (
+            <IconPlus />
+          )}
         </Button>
       </div>
       <div className="text-red-500 min-h-[24px]">{info}</div>

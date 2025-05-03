@@ -1,16 +1,18 @@
 import re
 
+
 def parse_kick_category_object(categoryObject):
     parsed_category_object = []
     for category in categoryObject:
         parsed_category_object.append(
             {
-                "id": category.get("slug"),
+                "id": category.get("id"),
                 "name": category.get("name"),
                 "box_art_url": extract_link(category),
             }
         )
     return parsed_category_object
+
 
 def extract_link(category):
     if category.get("banner") is None:
@@ -24,14 +26,13 @@ def extract_link(category):
         cleaned_element = re.sub(r"\s\d{2,}w$", "", second_last_element)
         return cleaned_element
 
+
 def parse_public_kick_stream_object(kickObject):
     parsed_kick_object = {
         "id": kickObject.get("broadcaster_user_id"),
         "user_id": kickObject.get("broadcaster_user_id"),
         "slug": kickObject.get("slug"),
-        "user": {
-            "username": kickObject.get("slug")
-        },
+        "user": {"username": kickObject.get("slug")},
         "livestream": (
             {
                 "categories": (
@@ -55,6 +56,7 @@ def parse_public_kick_stream_object(kickObject):
         ),
     }
     return parsed_kick_object
+
 
 def parse_kick_stream_object(kickObject):
     livestream = kickObject.get("livestream")
@@ -88,6 +90,7 @@ def parse_kick_stream_object(kickObject):
     }
     return parsed_kick_object
 
+
 def parse_kick_stream_twitch_format(kickObject):
     parsed_kick_object = {
         "id": kickObject.get("id"),
@@ -108,8 +111,10 @@ def parse_kick_stream_twitch_format(kickObject):
     }
     return parsed_kick_object
 
+
 def parse_kick_stream_array_object(kickObject):
     return [parse_kick_stream_twitch_format(stream) for stream in kickObject]
+
 
 def parse_kick_response_data(response_data):
     return {

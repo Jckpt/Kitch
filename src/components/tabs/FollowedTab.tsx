@@ -21,8 +21,6 @@ const FollowedTab = () => {
     stream.user_name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  console.log("followedLive", filteredStreams)
-
   if (followedLive?.length === 0) {
     return (
       <div className="flex justify-center items-center h-full">
