@@ -309,6 +309,16 @@ async def get_livestreams(
 async def get_livestreams_v2(request: Request):
     try:
         category_id = request.query_params.get("category_id", "")
+
+        # Create cache key based on category_id
+        cache_key = (
+            f"livestreams_v2:{category_id}" if category_id else "livestreams_v2:all"
+        )
+        cached_data = redis_client.get(cache_key)
+
+        if cached_data:
+            return json.loads(cached_data)
+
         if category_id:
             url = f"https://api.kick.com/public/v1/livestreams?category_id={category_id}&limit=100&sort=viewer_count"
         else:
@@ -327,6 +337,9 @@ async def get_livestreams_v2(request: Request):
             )
 
         response_data = response.json()
+
+        # Cache the successful response for 5 minutes
+        redis_client.setex(cache_key, 300, json.dumps(response_data))
 
         return response_data
 

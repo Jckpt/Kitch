@@ -52,7 +52,7 @@ const refresh = async () => {
   try {
     console.log("refresh alarm created")
     chrome.alarms.create("refresh", {
-      delayInMinutes: 3
+      delayInMinutes: 4
     })
     const followedLive =
       await storageLocal.get<PlatformResponse<PlatformStream>>("followedLive")
