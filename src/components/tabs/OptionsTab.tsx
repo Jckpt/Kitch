@@ -1,9 +1,8 @@
 import { IconLoader2 } from "@tabler/icons-react"
 import { atom, useAtom } from "jotai"
-import React from "react"
+import React, { useEffect, useState } from "react"
 
 import { Storage } from "@plasmohq/storage"
-import { useStorage } from "@plasmohq/storage/hook"
 
 import { sendRuntimeMessage } from "~src/lib/util/helperFunc"
 
@@ -15,21 +14,46 @@ import KickMenuTab from "./KickMenuTab"
 export const kickMenuAtom = atom<boolean>(false)
 
 const OptionsTab = () => {
+  const storage = new Storage()
+  const localStorageInstance = new Storage({ area: "local" })
   const [kickMenu, setKickMenu] = useAtom(kickMenuAtom)
-  const [userTwitchKey, _, { remove: twitchLogout }] =
-    useStorage("userTwitchKey")
-  const [followedLive, blank, { remove: eraseFollows }] = useStorage({
-    key: "followedLive",
-    instance: new Storage({ area: "local" })
-  })
-  const [notificationsEnabled, setNotificationsEnabled] = useStorage<boolean>(
-    "notificationsEnabled"
-  )
-  const twitchLoggedIn = userTwitchKey !== undefined
+  const [userTwitchKey, setUserTwitchKey] = useState<string>()
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>()
+  const [isLoading, setIsLoading] = useState(true)
+
+  console.log("notificationsEnabled", notificationsEnabled)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const [twitchKey, notifications] = await Promise.all([
+        storage.get("userTwitchKey"),
+        storage.get<boolean>("notificationsEnabled")
+      ])
+      console.log("twitchKey", twitchKey)
+      console.log("notifications", notifications)
+      setUserTwitchKey(twitchKey)
+      setNotificationsEnabled(notifications)
+      setIsLoading(false)
+    }
+    fetchData()
+  }, [])
+
+  const handleNotificationsToggle = async () => {
+    const newValue = !notificationsEnabled
+    await storage.set("notificationsEnabled", newValue)
+    setNotificationsEnabled(newValue)
+  }
+
+  const handleTwitchLogout = async () => {
+    await storage.remove("userTwitchKey")
+    await localStorageInstance.remove("followedLive")
+    setUserTwitchKey(undefined)
+    sendRuntimeMessage("logout")
+  }
 
   if (kickMenu) return <KickMenuTab />
 
-  if (notificationsEnabled === undefined) {
+  if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
         <IconLoader2 className="h-8 w-8 animate-spin" />
@@ -41,20 +65,16 @@ const OptionsTab = () => {
     <div className="flex flex-col h-full gap-4 items-center justify-center">
       <div className="flex items-center justify-start w-3/4 space-x-2">
         <Switch
-          onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+          onClick={handleNotificationsToggle}
           checked={notificationsEnabled}
           id="notifications-option"
         />
         <Label htmlFor="notifications-option">Stream Notifications</Label>
       </div>
-      {twitchLoggedIn ? (
+      {userTwitchKey ? (
         <Button
           className="w-3/4 rounded-md border-0  hover:bg-red-700 bg-zinc-800 text-primary"
-          onClick={() => {
-            twitchLogout()
-            eraseFollows()
-            sendRuntimeMessage("logout")
-          }}>
+          onClick={handleTwitchLogout}>
           Logout of Twitch
         </Button>
       ) : (
