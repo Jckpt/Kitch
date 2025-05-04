@@ -21,9 +21,15 @@ export function createNotification(newLiveChannel, iconUrl) {
     function (createdId) {
       const handler = (id) => {
         if (id == createdId) {
-          chrome.tabs.create({
-            url: `https://www.twitch.tv/${newLiveChannel.user_name}`
-          })
+          if (newLiveChannel.platform === "Kick") {
+            chrome.tabs.create({
+              url: `https://kick.com/${newLiveChannel.user_name}`
+            })
+          } else {
+            chrome.tabs.create({
+              url: `https://www.twitch.tv/${newLiveChannel.user_name}`
+            })
+          }
           chrome.notifications.clear(id)
           chrome.notifications.onClicked.removeListener(handler)
         }
@@ -47,9 +53,6 @@ export function createNotificationMultipleStreams(newLiveChannels, iconUrl) {
     function (createdId) {
       const handler = (id) => {
         if (id == createdId) {
-          chrome.tabs.create({
-            url: `https://www.twitch.tv/directory/following/live`
-          })
           chrome.notifications.clear(id)
           chrome.notifications.onClicked.removeListener(handler)
         }

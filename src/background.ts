@@ -123,12 +123,16 @@ const refresh = async () => {
     }
     if (newLiveChannels.length == 1) {
       const liveChannel = newLiveChannels[0]
-      const { profile_image_url } = await getTwitchStreamer(
-        userTwitchKey,
-        liveChannel.user_id
-      )
 
-      createNotification(liveChannel, profile_image_url)
+      if (liveChannel?.platform === "Kick") {
+        createNotification(liveChannel, Logo)
+      } else {
+        const { profile_image_url } = await getTwitchStreamer(
+          userTwitchKey,
+          liveChannel.user_id
+        )
+        createNotification(liveChannel, profile_image_url)
+      }
     }
     if (newLiveChannels.length > 1) {
       createNotificationMultipleStreams(newLiveChannels, Logo)

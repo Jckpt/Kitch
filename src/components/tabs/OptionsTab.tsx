@@ -29,6 +29,14 @@ const OptionsTab = () => {
 
   if (kickMenu) return <KickMenuTab />
 
+  if (notificationsEnabled === undefined) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <IconLoader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col h-full gap-4 items-center justify-center">
       <div className="flex items-center justify-start w-3/4 space-x-2">
