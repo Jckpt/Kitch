@@ -1,4 +1,3 @@
-import { useAutoAnimate } from "@formkit/auto-animate/react"
 import { useAtom } from "jotai"
 import React from "react"
 
@@ -11,12 +10,9 @@ import { Input } from "../ui/input"
 const TopBar = ({ twitchLoggedIn }) => {
   const [searchQuery, setSearchQuery] = useAtom(searchQueryAtom)
 
-  const [parent] = useAutoAnimate({ duration: 300 })
-
   return (
     <div
-      className="pt-3 pb-3 flex-grow-0 flex-shrink flex justify-evenly items-center bg-zinc-900"
-      ref={parent}>
+      className="pt-3 pb-3 flex-grow-0 flex-shrink flex justify-evenly items-center bg-zinc-900">
       <PlatformIcon disabled={!twitchLoggedIn} />
       <Input
         type="input"

@@ -3,7 +3,6 @@ import React, { useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
-import { Badge } from "../../components/ui/badge"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 
@@ -52,12 +51,13 @@ const KickMenuTab = () => {
       handleAdd(kickNickname)
     }
   }
+  
   return (
-    <div className="flex flex-col h-full overflow-y-auto gap-4 items-center justify-center">
-      <div className="w-full flex flex-row items-center justify-center gap-[1px]">
+    <div className="flex flex-col h-full gap-4 items-center justify-center">
+      <div className="w-9/12 flex flex-row items-center justify-center gap-[1px]">
         <Input
           type="input"
-          className="w-7/12 rounded-l-md border-0 bg-neutral-800"
+          className="w-10/12 rounded-l-md border-0 bg-neutral-800"
           placeholder="Add a Kick streamer"
           value={kickNickname}
           onChange={(e) => setKickNickname(e.target.value)}
@@ -76,17 +76,18 @@ const KickMenuTab = () => {
         </Button>
       </div>
       <div className="text-red-500 min-h-[24px]">{info}</div>
-      <div className="max-w-full pl-8 pr-8 flex flex-row gap-2 items-center justify-center flex-wrap">
+      <div className="w-9/12 flex flex-col gap-2 overflow-y-auto max-h-36">
         {kickFollows?.map((followedStreamer) => (
-          <Badge
+          <div 
             key={followedStreamer}
-            className=" hover:bg-red-700 hover:cursor-pointer bg-neutral-800 text-primary flex items-center justify-around gap-1 rounded-md"
-            onClick={() =>
-              setKickFollows(kickFollows.filter((f) => f !== followedStreamer))
-            }>
-            {followedStreamer}
-            <IconX className="w-2 h-2" />
-          </Badge>
+            className="flex justify-between items-center bg-neutral-800 p-2 rounded-md hover:bg-neutral-700 transition-colors cursor-pointer group"
+            onClick={() => setKickFollows(kickFollows.filter((f) => f !== followedStreamer))}
+          >
+            <span className="text-primary">{followedStreamer}</span>
+            <IconX 
+              className="w-4 h-4 group-hover:text-red-500 transition-colors"
+            />
+          </div>
         ))}
       </div>
     </div>

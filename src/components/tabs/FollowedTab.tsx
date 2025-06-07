@@ -5,21 +5,32 @@ import React from "react"
 import { Storage } from "@plasmohq/storage"
 import { useStorage } from "@plasmohq/storage/hook"
 
-import { searchQueryAtom } from "~src/lib/util"
+import { searchQueryAtom, followedLiveFilterAtom } from "~src/lib/util"
 
 import type { PlatformStream } from "../../lib/types/twitchTypes"
 import StreamItem from "../StreamItem"
 
 const FollowedTab = () => {
   const [searchQuery] = useAtom(searchQueryAtom)
+  const [followedLiveFilter] = useAtom(followedLiveFilterAtom)
   const [followedLive] = useStorage({
     key: "followedLive",
     instance: new Storage({ area: "local" })
   })
 
-  const filteredStreams = followedLive?.data?.filter((stream) =>
-    stream.user_name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredStreams = followedLive?.data?.filter((stream) => {
+    const matchesSearch = stream.user_name.toLowerCase().includes(searchQuery.toLowerCase())
+    
+    if (followedLiveFilter === "All") {
+      return matchesSearch
+    }
+    if (followedLiveFilter === "Kick") {
+      return stream.platform === "Kick" && matchesSearch
+    }
+    else {
+      return (stream.platform === "Twitch" || stream.platform === undefined) && matchesSearch
+    }
+  })
 
   if (followedLive?.length === 0) {
     return (
