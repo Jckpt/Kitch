@@ -12,12 +12,12 @@ from parsers import (
 )
 import ssl
 import redis
+from auth_manager import auth_manager
 
 app = FastAPI()
 
 load_dotenv()
 
-KICK_API_KEY = os.getenv("KICK_API_KEY")
 PROXY_URL = os.getenv("PROXY_URL")
 BRIGHTDATA_API_KEY = os.getenv("BRIGHTDATA_API_KEY")
 proxies = {"http": PROXY_URL, "https": PROXY_URL}
@@ -43,9 +43,9 @@ app.add_middleware(
 async def get_channel_data(streamer: str, request: Request):
     try:
         # First get user_id from channels API
-        response = requests.get(
+        response = auth_manager.make_authenticated_request(
+            method="GET",
             url=f"https://api.kick.com/public/v1/channels?slug={streamer}",
-            headers={"Authorization": f"Bearer {KICK_API_KEY}"},
         )
 
         if response.status_code == 404:
@@ -66,9 +66,9 @@ async def get_channel_data(streamer: str, request: Request):
         user_id = channel_data["data"][0].get("broadcaster_user_id")
 
         # Get username from users API
-        response = requests.get(
+        response = auth_manager.make_authenticated_request(
+            method="GET",
             url=f"https://api.kick.com/public/v1/users?id={user_id}",
-            headers={"Authorization": f"Bearer {KICK_API_KEY}"},
         )
 
         if response.status_code != 200:
@@ -115,9 +115,9 @@ async def get_channels_data(streamers: str, request: Request):
             url = f"https://api.kick.com/public/v1/channels?{slug_params}"
 
             # Fetch data for current chunk
-            response = requests.get(
+            response = auth_manager.make_authenticated_request(
+                method="GET",
                 url=url,
-                headers={"Authorization": f"Bearer {KICK_API_KEY}"},
             )
 
             print(f"response: {response}")
@@ -326,8 +326,10 @@ async def get_livestreams_v2(request: Request):
                 "https://api.kick.com/public/v1/livestreams?limit=100&sort=viewer_count"
             )
 
-        response = requests.get(
-            url=url, headers={"Authorization": f"Bearer {KICK_API_KEY}"}
+        response = auth_manager.make_authenticated_request(
+            method="GET",
+            url=url,
+            use_secondary=True
         )
 
         if response.status_code != 200:
@@ -363,8 +365,10 @@ async def get_categories_v2(request: Request):
             # Default to fetching all categories if no query is provided
             url = "https://api.kick.com/public/v1/categories"
 
-        response = requests.get(
-            url=url, headers={"Authorization": f"Bearer {KICK_API_KEY}"}
+        response = auth_manager.make_authenticated_request(
+            method="GET",
+            url=url,
+            use_secondary=True
         )
 
         if response.status_code != 200:
@@ -405,9 +409,9 @@ async def get_channels_data_v2(streamers: str, request: Request):
             url = f"https://api.kick.com/public/v1/channels?{slug_params}"
 
             # Fetch data for current chunk
-            response = requests.get(
+            response = auth_manager.make_authenticated_request(
+                method="GET",
                 url=url,
-                headers={"Authorization": f"Bearer {KICK_API_KEY}"},
             )
 
             print(f"response: {response}")
@@ -451,9 +455,9 @@ async def fetch_user_details(user_ids: list) -> dict:
         id_params = "&".join([f"id={user_id}" for user_id in user_ids])
         url = f"https://api.kick.com/public/v1/users?{id_params}"
 
-        response = requests.get(
+        response = auth_manager.make_authenticated_request(
+            method="GET",
             url=url,
-            headers={"Authorization": f"Bearer {KICK_API_KEY}"},
         )
 
         if response.status_code != 200:
