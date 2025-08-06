@@ -1,7 +1,7 @@
 {
   "name": "kitch",
   "displayName": "Kitch - Kick & Twitch notifications",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Follow your favorite streamers on Kick and Twitch",
   "author": "jckpt",
   "scripts": {

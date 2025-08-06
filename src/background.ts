@@ -42,8 +42,20 @@ chrome.runtime.onStartup.addListener(() => {
   refresh()
 })
 
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener(async (details) => {
   storageLocal.remove("followedLive")
+
+  if (details.reason === "install") {
+    const userTwitchKey = await storage.get<UserTwitchKey>("userTwitchKey")
+    const kickFollows = await storage.get<string[]>("kickFollows")
+    const isNewUser = await storage.get<boolean>("isNewUser")
+
+    if (isNewUser === undefined && !userTwitchKey && (!kickFollows || kickFollows.length === 0)) {
+      await storage.set("isNewUser", true)
+    } else if (isNewUser === undefined) {
+      await storage.set("isNewUser", false)
+    }
+  }
 
   refresh()
 })
@@ -209,6 +221,9 @@ async function authorize(redirectUrl) {
     const storage = new Storage()
     await storage.set("userTwitchKey", userCredentials)
     await storage.set("authLoading", false)
+
+    // Wyłącz flagę nowego użytkownika po pierwszym zalogowaniu
+    await storage.set("isNewUser", false)
   } catch (e) {
     console.error("Błąd autoryzacji:", e)
     const storage = new Storage()

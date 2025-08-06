@@ -1,4 +1,4 @@
-import { IconLoader2 } from "@tabler/icons-react"
+import { IconLoader2, IconGhost3, IconSettings } from "@tabler/icons-react"
 import { useAtom } from "jotai"
 import React from "react"
 
@@ -17,6 +17,9 @@ const FollowedTab = () => {
     key: "followedLive",
     instance: new Storage({ area: "local" })
   })
+  const [isNewUser] = useStorage<boolean>("isNewUser")
+  const [userTwitchKey] = useStorage("userTwitchKey")
+  const [kickFollows] = useStorage<string[]>("kickFollows")
 
   const filteredStreams = followedLive?.data?.filter((stream) => {
     const matchesSearch = stream.user_name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -40,11 +43,23 @@ const FollowedTab = () => {
     )
   }
 
+  const isNewUserWithNoData = isNewUser === true && !userTwitchKey && (!kickFollows || kickFollows.length === 0)
+
   return (
     <>
       {(filteredStreams?.length === 0 || filteredStreams === undefined) && (
-        <div className="flex justify-center items-center h-full">
-          <p className="text-white">No streams found</p>
+        <div className="flex flex-col justify-center items-center h-full gap-3">
+          {isNewUserWithNoData ? (
+            <>
+              <IconSettings className="h-12 w-12 text-gray-400" />
+              <p className="text-white text-center text-gray-400">Complete setup</p>
+            </>
+          ) : (
+            <>
+              <IconGhost3 className="h-12 w-12 text-gray-400" />
+              <p className="text-white text-center text-gray-400">No streams found</p>
+            </>
+          )}
         </div>
       )}
       {filteredStreams?.map((stream: PlatformStream) =>

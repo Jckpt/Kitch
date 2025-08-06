@@ -13,16 +13,19 @@ import { useStorage } from "@plasmohq/storage/hook"
 
 import { categoryAtom, currentTabAtom, platformAtom } from "~src/lib/util"
 
-import { TabsList, TabsTrigger } from "../../components/ui/tabs"
+import NewUserTooltip from "../NewUserTooltip"
+import { TabsList, TabsTrigger } from "../ui/tabs"
 import { kickMenuAtom } from "./OptionsTab"
 
 const SidebarTabs = () => {
   const [category, setCategory] = useAtom(categoryAtom)
   const [kickMenu, setKickMenu] = useAtom(kickMenuAtom)
-  const [_, setCurrentTab] = useAtom(currentTabAtom)
+  const [currentTab, setCurrentTab] = useAtom(currentTabAtom)
   const [platform, setPlatform] = useAtom(platformAtom)
   //usertwitchkey
   const [userTwitchKey] = useStorage("userTwitchKey")
+  const [isNewUser] = useStorage<boolean>("isNewUser")
+  const [kickFollows] = useStorage<string[]>("kickFollows")
   const twitchLoggedIn = userTwitchKey !== undefined
 
   const handleClick = (tabName) => {
@@ -64,7 +67,7 @@ const SidebarTabs = () => {
         <IconSearch />
       </TabsTrigger>
       <TabsTrigger
-        className="p-1"
+        className="p-1 relative"
         value="options"
         onMouseDown={() => handleClick("options")}>
         {kickMenu === false ? (
@@ -72,6 +75,14 @@ const SidebarTabs = () => {
         ) : (
           <IconChevronLeft className="stroke-white" />
         )}
+        <NewUserTooltip 
+          isVisible={
+            isNewUser === true && 
+            !twitchLoggedIn && 
+            (!kickFollows || kickFollows.length === 0) &&
+            currentTab === "followed"
+          } 
+        />
       </TabsTrigger>
     </TabsList>
   )

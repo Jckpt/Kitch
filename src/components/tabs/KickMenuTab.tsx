@@ -1,6 +1,7 @@
 import { IconPlus, IconX } from "@tabler/icons-react"
 import React, { useState } from "react"
 
+import { Storage } from "@plasmohq/storage"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { Button } from "../../components/ui/button"
@@ -40,6 +41,10 @@ const KickMenuTab = () => {
         setKickFollows([...kickFollows, nickname])
       }
       setInfo("")
+      
+      // Wyłącz flagę nowego użytkownika po dodaniu pierwszego follow na Kick
+      const storage = new Storage()
+      await storage.set("isNewUser", false)
     } catch (e) {
       console.error(e)
     } finally {

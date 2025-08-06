@@ -7,8 +7,12 @@
     ".plasmo/index.d.ts",
     "./**/*.ts",
     "./**/*.tsx",
-    "./src/lib/util/fetcher.js", "tailwind.config.js", "postcss.config.js" ],
+    "./src/lib/util/fetcher.js",
+    "tailwind.config.js",
+    "postcss.config.js"
+  ],
   "compilerOptions": {
+    "jsx": "react",
     "paths": {
       "~*": [
         "./*"

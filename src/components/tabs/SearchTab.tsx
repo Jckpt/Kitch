@@ -17,6 +17,20 @@ const SearchTab = ({ userTwitchKey }) => {
   const listRef = useRef(null)
   const [scrollToTop, setScrollToTop] = useState(false)
 
+  // Trigger focus na polu wyszukiwania gdy komponent się montuje
+  useEffect(() => {
+    const triggerSearchFocus = () => {
+      const searchInput = document.querySelector('input[placeholder="Search"]') as HTMLInputElement
+      if (searchInput && !searchInput.disabled) {
+        setTimeout(() => {
+          searchInput.focus()
+        }, 100)
+      }
+    }
+    
+    triggerSearchFocus()
+  }, [])
+
   const getKey = (pageIndex, previousPageData) => {
     if (previousPageData && !previousPageData.data) return null
     // first page, we don't have `previousPageData`

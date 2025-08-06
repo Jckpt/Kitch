@@ -69,7 +69,7 @@ const OptionsTab = () => {
           checked={notificationsEnabled}
           id="notifications-option"
         />
-        <Label htmlFor="notifications-option">Stream Notifications</Label>
+        <Label htmlFor="notifications-option">Stream notifications</Label>
       </div>
       {userTwitchKey ? (
         <Button
