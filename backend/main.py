@@ -42,10 +42,20 @@ app.add_middleware(
 @app.get("/api/channel/{streamer}")
 async def get_channel_data(streamer: str, request: Request):
     try:
+        # Try to get data from Redis cache first
+        cache_key = f"channel:{streamer.lower()}"
+        cached_data = redis_client.get(cache_key)
+        
+        if cached_data:
+            return json.loads(cached_data)
+        
+        print(f"Cache miss for channel {streamer}")
+        
         # First get user_id from channels API
         response = auth_manager.make_authenticated_request(
             method="GET",
             url=f"https://api.kick.com/public/v1/channels?slug={streamer}",
+            use_secondary=True
         )
 
         if response.status_code == 404:
@@ -83,6 +93,10 @@ async def get_channel_data(streamer: str, request: Request):
             raise HTTPException(status_code=404, detail="User not found")
 
         result = {"user": {"username": user_data["data"][0]["name"]}}
+        
+        # Cache the successful result for 10 minutes
+        redis_client.setex(cache_key, 3600 * 24, json.dumps(result))
+        
         return result
 
     except HTTPException as e:
