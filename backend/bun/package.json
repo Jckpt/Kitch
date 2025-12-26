@@ -6,7 +6,6 @@
     "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
-    "@sentry/bun": "^10.32.1",
     "elysia": "latest"
   },
   "devDependencies": {
