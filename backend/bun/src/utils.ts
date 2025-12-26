@@ -88,7 +88,7 @@ export async function fetchActiveStreamers(
   }
 
   const activeStreamers: KickChannel[] = []
-  const CHUNK_SIZE = 50
+  const CHUNK_SIZE = 20 // seems like API returns bad data if batch size is too high
   let currentToken = token
   let tokenWasRefreshed = false
 
