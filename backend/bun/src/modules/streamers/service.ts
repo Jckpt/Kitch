@@ -21,9 +21,12 @@ export abstract class StreamersService {
 
   static async getStreamersTracked(): Promise<object> {
     const allStreamers = await redis.hgetall("count")
-    return Object.entries(allStreamers || {}).filter(
-      ([_, count]) => parseInt(count as string) > 0
-    )
+    return Object.entries(allStreamers || {})
+      .filter(([_, count]) => parseInt(count as string) > 0)
+      .map(([streamer, subscribers]) => ({
+        streamer,
+        subscribers: parseInt(subscribers)
+      }))
   }
 
   static async incrementStreamerCount(streamer: string): Promise<void> {
@@ -104,10 +107,16 @@ export abstract class StreamersService {
       `Active streamers: ${activeStreamers.length}/${streamersToCheck.length}`
     )
 
-    // Update active streamers data
-    for (const streamer of activeStreamers) {
+    // Update active streamers data - track only changed ones
+    const changedStreamers: KickChannel[] = []
+
+    // Batch fetch all previous data
+    const activeSlugs = activeStreamers.map((s) => s.slug)
+    const previousDataArray = await redis.hmget("data", ...activeSlugs)
+
+    for (const [index, streamer] of activeStreamers.entries()) {
       const streamerDataString = JSON.stringify(streamer)
-      const previousData = await redis.hget("data", streamer.slug)
+      const previousData = previousDataArray[index]
 
       if (previousData === streamerDataString) {
         continue
@@ -115,29 +124,48 @@ export abstract class StreamersService {
 
       await redis.hset("data", streamer.slug, streamerDataString)
       await redis.send("HEXPIRE", ["data", "300", "FIELDS", "1", streamer.slug])
+
+      // Only add to changed list if data actually changed
+      changedStreamers.push(streamer)
     }
 
-    // Handle offline streamers
+    // Handle offline streamers - track only those that were previously online
     const activeStreamersSet = new Set(activeStreamers.map((s) => s.slug))
-    const inactiveStreamers = streamersToCheck.filter(
+    const potentiallyInactiveStreamers = streamersToCheck.filter(
       (s) => !activeStreamersSet.has(s)
     )
 
-    for (const streamer of inactiveStreamers) {
-      const previousData = await redis.hget("data", streamer)
+    const actuallyInactiveStreamers: string[] = []
 
-      if (!previousData) {
-        continue
+    if (potentiallyInactiveStreamers.length > 0) {
+      // Batch fetch all previous data for potentially inactive streamers
+      const previousDataArray = await redis.hmget(
+        "data",
+        ...potentiallyInactiveStreamers
+      )
+
+      for (const [index, streamer] of potentiallyInactiveStreamers.entries()) {
+        const previousData = previousDataArray[index]
+
+        if (!previousData) {
+          continue
+        }
+
+        await redis.hdel("data", streamer)
+
+        // Only add to inactive list if was previously in Redis (changed from online to offline)
+        actuallyInactiveStreamers.push(streamer)
       }
-
-      await redis.hdel("data", streamer)
     }
 
     return {
       newToken: result.newToken,
-      activeStreamers: activeStreamers.length > 0 ? activeStreamers : undefined,
+      activeStreamers:
+        changedStreamers.length > 0 ? changedStreamers : undefined,
       inactiveStreamers:
-        inactiveStreamers.length > 0 ? inactiveStreamers : undefined
+        actuallyInactiveStreamers.length > 0
+          ? actuallyInactiveStreamers
+          : undefined
     }
   }
 }
