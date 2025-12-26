@@ -1,0 +1,18 @@
+{
+  "name": "backendv2",
+  "version": "1.0.50",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "bun run --watch src/index.ts"
+  },
+  "dependencies": {
+    "@sentry/bun": "^10.32.1",
+    "elysia": "latest"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "oxfmt": "^0.20.0",
+    "oxlint": "^1.35.0"
+  },
+  "module": "src/index.js"
+}
