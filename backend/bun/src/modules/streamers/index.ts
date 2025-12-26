@@ -7,7 +7,7 @@ import { StreamersService } from "./service"
 export const streamers = new Elysia()
   .get("/stats", async () => {
     return {
-      active_connections: StreamersService.getActiveConnections(),
+      connections: StreamersService.getActiveConnections(),
       streamers_tracked: await StreamersService.getStreamersTracked()
     }
   })
