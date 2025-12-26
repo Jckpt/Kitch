@@ -7,6 +7,7 @@ import { StreamersWorker } from "./modules/streamers/worker"
 let KICK_TOKEN = process.env.KICK_API_KEY || ""
 
 const app = new Elysia().use(streamers).listen(3000)
+console.log("Elysia server created")
 
 redis.send("FLUSHDB", [])
 

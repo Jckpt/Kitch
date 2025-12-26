@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "backendv2",
+      "name": "bun_backend",
       "dependencies": {
         "@sentry/bun": "^10.32.1",
         "elysia": "latest",

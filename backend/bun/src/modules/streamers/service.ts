@@ -19,11 +19,11 @@ export abstract class StreamersService {
     return this.activeConnections
   }
 
-  static async getStreamersTracked(): Promise<number> {
+  static async getStreamersTracked(): Promise<object> {
     const allStreamers = await redis.hgetall("count")
     return Object.entries(allStreamers || {}).filter(
       ([_, count]) => parseInt(count as string) > 0
-    ).length
+    )
   }
 
   static async incrementStreamerCount(streamer: string): Promise<void> {
