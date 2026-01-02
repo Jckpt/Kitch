@@ -17,7 +17,7 @@ const SearchTab = ({ userTwitchKey }) => {
   const listRef = useRef(null)
   const [scrollToTop, setScrollToTop] = useState(false)
 
-  // Trigger focus na polu wyszukiwania gdy komponent się montuje
+  // Trigger focus on search field when component mounts
   useEffect(() => {
     const triggerSearchFocus = () => {
       const searchInput = document.querySelector('input[placeholder="Search"]') as HTMLInputElement

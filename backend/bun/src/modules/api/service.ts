@@ -65,7 +65,7 @@ export abstract class ApiService {
     /**
      * Pobiera kategorie z Kick API
      * @param query - opcjonalny search query
-     * @param page - opcjonalny numer strony (nie używany w obecnej implementacji)
+     * @param page - optional page number (not used in current implementation)
      * @param token - OAuth token
      * @param clientId - Kick Client ID
      * @param clientSecret - Kick Client Secret
@@ -134,7 +134,7 @@ export abstract class ApiService {
         newToken?: string
     }> {
         try {
-            // Najpierw pobierz user_id z channels API
+            // First get user_id from channels API
             const channelsUrl = `https://api.kick.com/public/v1/channels?slug=${encodeURIComponent(
                 streamer
             )}`
@@ -169,7 +169,7 @@ export abstract class ApiService {
 
             const userId = channelsData.data[0].broadcaster_user_id
 
-            // Pobierz username z users API
+            // Get username from users API
             const usersUrl = `https://api.kick.com/public/v1/users?id=${userId}`
 
             const usersResult = await makeAuthenticatedRequest(

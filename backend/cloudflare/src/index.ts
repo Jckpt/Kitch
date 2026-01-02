@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 
-// Definicje typów
+// Type definitions
 interface TokenResponse {
   access_token: string
   token_type: string
@@ -12,7 +12,7 @@ interface ChannelData {
   data: Array<{
     broadcaster_user_id: string
     slug: string
-    [key: string]: any // Dodaj elastyczność dla innych pól
+    [key: string]: any // Add flexibility for other fields
   }>
 }
 
@@ -23,7 +23,7 @@ interface UserData {
   }>
 }
 
-// Typ dla środowiska Cloudflare Workers
+// Type for Cloudflare Workers environment
 interface Env {
   KICK_API_KEY: string
   KICK_CLIENT_ID: string
@@ -44,7 +44,7 @@ app.get('/', (c) => {
   return c.text('Hono.js API is running!')
 })
 
-// Funkcja do odświeżania tokenu OAuth
+// Function to refresh OAuth token
 async function refreshToken(clientId: string, clientSecret: string): Promise<string | null> {
   try {
     const response = await fetch('https://id.kick.com/oauth/token', {
@@ -64,15 +64,15 @@ async function refreshToken(clientId: string, clientSecret: string): Promise<str
       return tokenData.access_token
     }
 
-    console.error('Błąd podczas odświeżania tokenu:', response.status)
+    console.error('Error refreshing token:', response.status)
     return null
   } catch (error) {
-    console.error('Wyjątek podczas odświeżania tokenu:', error)
+    console.error('Exception while refreshing token:', error)
     return null
   }
 }
 
-// Funkcja parsująca dane streamera (dokładna kopia parse_public_kick_stream_object z Python)
+// Function to parse streamer data (exact copy of parse_public_kick_stream_object from Python)
 function parsePublicKickStreamObject(kickObject: any) {
   const parsedKickObject = {
     id: kickObject.broadcaster_user_id || null,
@@ -82,7 +82,7 @@ function parsePublicKickStreamObject(kickObject: any) {
     livestream: null as any
   }
 
-  // Sprawdź czy stream istnieje i jest live
+  // Check if stream exists and is live
   if (kickObject.stream && kickObject.stream.is_live) {
     parsedKickObject.livestream = {
       categories: kickObject.category ? [
@@ -104,7 +104,7 @@ function parsePublicKickStreamObject(kickObject: any) {
   return parsedKickObject
 }
 
-// Funkcja do wykonywania uwierzytelnionych zapytań
+// Function to make authenticated requests
 async function makeAuthenticatedRequest(
   url: string,
   token: string,
@@ -118,9 +118,9 @@ async function makeAuthenticatedRequest(
       }
     })
 
-    // Jeśli dostajemy 401, spróbuj odświeżyć token
+    // If we get 401, try to refresh token
     if (response.status === 401) {
-      console.log('Otrzymano błąd 401, próbuję odświeżyć token...')
+      console.log('Received 401 error, attempting to refresh token...')
       const newToken = await refreshToken(clientId, clientSecret)
 
       if (newToken) {
@@ -135,7 +135,7 @@ async function makeAuthenticatedRequest(
 
     return response
   } catch (error) {
-    console.error('Błąd podczas wykonywania zapytania:', error)
+    console.error('Error making request:', error)
     return null
   }
 }
@@ -240,7 +240,7 @@ app.get('/api/v2/channels', async (c) => {
     const streamersList = streamers.split(',')
     const tempSlugToData: Record<string, any> = {}
 
-    // Funkcja do dzielenia listy na kawałki
+    // Function to split list into chunks
     function chunkList<T>(list: T[], chunkSize: number): T[][] {
       const chunks: T[][] = []
       for (let i = 0; i < list.length; i += chunkSize) {
@@ -251,13 +251,13 @@ app.get('/api/v2/channels', async (c) => {
 
     const streamerChunks = chunkList(streamersList, 50)
 
-    // Przetwarzaj każdy kawałek
+    // Process each chunk
     for (const chunk of streamerChunks) {
       // Buduj URL z wieloma parametrami slug (max 50)
       const slugParams = chunk.map(streamer => `slug=${streamer.toLowerCase()}`).join('&')
       const url = `https://api.kick.com/public/v1/channels?${slugParams}`
 
-      // Pobierz dane dla aktualnego kawałka
+      // Fetch data for current chunk
       const response = await makeAuthenticatedRequest(
         url,
         KICK_API_KEY,
@@ -277,14 +277,14 @@ app.get('/api/v2/channels', async (c) => {
 
       const responseData = await response.json() as ChannelData
 
-      // Przetwarzaj dane każdego streamera z odpowiedzi
+      // Process data for each streamer from response
       for (const streamerData of responseData.data || []) {
         const streamer = streamerData.slug
         const parsedData = parsePublicKickStreamObject(streamerData)
         tempSlugToData[streamer.toLowerCase()] = parsedData
       }
 
-      // Obsłuż nie znalezionych streamerów
+      // Handle not found streamers
       const responseStreamers = new Set(
         (responseData.data || []).map(data => data.slug?.toLowerCase()).filter(Boolean)
       )

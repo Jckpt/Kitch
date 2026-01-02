@@ -50,10 +50,9 @@ const KickCategories = () => {
     if (category !== "") {
       const data = await kickFetcher(...args)
       return transformKickData(data)
-    }
-    const data = await kickFetcher(...args)
-    console.log("Categories fetcher response:", data)
-    return data
+    } 
+    
+    return await kickFetcher(...args) 
   })
 
   useEffect(() => {

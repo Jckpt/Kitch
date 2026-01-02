@@ -43,7 +43,7 @@ const KickMenuTab = () => {
       }
       setInfo("")
       
-      // Wyłącz flagę nowego użytkownika po dodaniu pierwszego follow na Kick
+      // Disable new user flag after adding first Kick follow
       const storage = new Storage()
       await storage.set("isNewUser", false)
       

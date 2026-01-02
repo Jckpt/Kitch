@@ -41,7 +41,7 @@ storage.watch({
     if (c.newValue !== undefined) refresh()
   },
   kickFollows: async (c) => {
-    // Reconnect WebSocket przy zmianie listy followów
+    // Reconnect WebSocket when follows list changes
     if (c.newValue !== undefined) {
       await connectKickWebSocket()
     }
@@ -83,12 +83,11 @@ async function connectKickWebSocket() {
     kickWsManager.disconnect()
 
     if (!kickFollows || kickFollows.length === 0) {
-      console.log("No Kick follows, skipping WebSocket connection")
       await storageLocal.set("kickLiveStreams", [])
       return
     }
 
-    console.log(`Connecting Kick WebSocket with ${kickFollows.length} streamers`)
+
 
     // Clear previous callbacks
     kickWsManager.clearCallbacks()
@@ -128,7 +127,6 @@ async function handleKickWebSocketMessage(message: any) {
 
     if (message.type === "stream_live") {
       const kickChannel = message.data
-      console.log(`Stream live: ${kickChannel.slug}`)
 
       // Convert KickChannel to PlatformStream format (using WebSocket-specific parser)
       const kickStream = parseKickChannelFromWebSocket(kickChannel, kickChannel.slug)
@@ -181,7 +179,6 @@ async function handleKickWebSocketMessage(message: any) {
 
     } else if (message.type === "stream_offline") {
       const slug = message.data.slug
-      console.log(`Stream offline: ${slug}`)
 
       // Remove from kickLiveStreams
       const updatedKickStreams = kickLiveStreams.filter(
@@ -295,7 +292,7 @@ const refresh = async () => {
   }
 }
 
-// Nasłuchiwanie na aktualizacje zakładek
+// Listen for tab updates
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (
     changeInfo.status === "complete" &&
@@ -303,9 +300,9 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   ) {
     try {
       await authorize(tab.url)
-      // Zamknij zakładkę po autoryzacji
+      // Close tab after authorization
     } catch (e) {
-      console.error("Błąd podczas autoryzacji:", e)
+      console.error("Error during authorization:", e)
       await storage.set("authLoading", false)
     }
   }
@@ -317,10 +314,10 @@ chrome.runtime.onMessage.addListener(async (request) => {
     try {
       await storage.set("authLoading", true)
       const authUrl = getTwitchOAuthURL()
-      // Otwórz nową zakładkę z URL autoryzacji
+      // Open new tab with authorization URL
       chrome.tabs.create({ url: authUrl })
     } catch (e) {
-      console.error("Błąd podczas autoryzacji:", e)
+      console.error("Error during authorization:", e)
       await storage.set("authLoading", false)
     }
   } else if (request.type === "refresh") {
@@ -347,7 +344,7 @@ async function authorize(redirectUrl) {
     const accessToken = new URLSearchParams(fragment).get("access_token")
 
     if (!accessToken) {
-      throw new Error("Nie udało się uzyskać tokena dostępu")
+      throw new Error("Failed to obtain access token")
     }
 
     const clientId = "256lknox4x75bj30rwpctxna2ckbmn"
@@ -364,10 +361,10 @@ async function authorize(redirectUrl) {
     await storage.set("userTwitchKey", userCredentials)
     await storage.set("authLoading", false)
 
-    // Wyłącz flagę nowego użytkownika po pierwszym zalogowaniu
+    // Disable new user flag after first login
     await storage.set("isNewUser", false)
   } catch (e) {
-    console.error("Błąd autoryzacji:", e)
+    console.error("Authorization error:", e)
     const storage = new Storage()
     await storage.set("authLoading", false)
   }

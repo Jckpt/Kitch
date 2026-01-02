@@ -18,7 +18,7 @@ export const api = new Elysia({ prefix: "/api" })
                 clientSecret
             )
 
-            // Jeśli token został odświeżony, zaktualizuj go globalnie
+            // If token was refreshed, update it globally
             if (result.newToken) {
                 tokenManager.updateToken(result.newToken)
             }
@@ -29,7 +29,7 @@ export const api = new Elysia({ prefix: "/api" })
                 }
             }
 
-            // Zwróć surową odpowiedź
+            // Return raw response
             return result.data
         } catch (error) {
             console.error("Error in /api/channel/:streamer endpoint:", error)
@@ -50,7 +50,7 @@ export const api = new Elysia({ prefix: "/api" })
                 clientSecret
             )
 
-            // Jeśli token został odświeżony, zaktualizuj go globalnie
+            // If token was refreshed, update it globally
             if (result.newToken) {
                 tokenManager.updateToken(result.newToken)
             }
@@ -61,7 +61,7 @@ export const api = new Elysia({ prefix: "/api" })
                 }
             }
 
-            // Zwróć surową odpowiedź z Kick API
+            // Return raw response from Kick API
             return result.data
         } catch (error) {
             console.error("Error in /api/livestreams endpoint:", error)
@@ -83,7 +83,7 @@ export const api = new Elysia({ prefix: "/api" })
                 clientSecret
             )
 
-            // Jeśli token został odświeżony, zaktualizuj go globalnie
+            // If token was refreshed, update it globally
             if (result.newToken) {
                 tokenManager.updateToken(result.newToken)
             }
@@ -94,7 +94,7 @@ export const api = new Elysia({ prefix: "/api" })
                 }
             }
 
-            // Zwróć surową odpowiedź z Kick API
+            // Return raw response from Kick API
             return result.data
         } catch (error) {
             console.error("Error in /api/categories endpoint:", error)

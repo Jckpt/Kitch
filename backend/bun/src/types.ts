@@ -13,7 +13,7 @@ export interface KickCategory {
   name: string
 }
 
-// Dane streamu na żywo
+// Live stream data
 export interface KickStream {
   is_live: boolean
   viewer_count?: number
@@ -23,29 +23,29 @@ export interface KickStream {
   is_mature?: boolean
 }
 
-// Pojedynczy kanał z API Kicka
+// Single channel from Kick API
 export interface KickChannel {
   broadcaster_user_id: string
   slug: string
   stream?: KickStream
   stream_title?: string
   category?: KickCategory
-  // Możliwe dodatkowe pola, które mogą być w odpowiedzi
+  // Possible additional fields that may be in response
   [key: string]: any
 }
 
-// Odpowiedź z API channels
+// Response from channels API
 export interface KickChannelsResponse {
   data: KickChannel[]
 }
 
-// Dane użytkownika z API users
+// User data from users API
 export interface KickUserData {
   name: string
   user_id: string
 }
 
-// Odpowiedź z API users
+// Response from users API
 export interface KickUsersResponse {
   data: KickUserData[]
 }
@@ -91,13 +91,13 @@ export interface KickLivestream {
   viewer_count: number
 }
 
-// Odpowiedź z API livestreams
+// Response from livestreams API
 export interface KickLivestreamsResponse {
   data: KickLivestream[]
   message?: string
 }
 
-// Odpowiedź z API categories (search)
+// Response from categories API (search)
 export interface KickCategoriesResponse {
   data: KickCategoryWithThumbnail[]
   message?: string

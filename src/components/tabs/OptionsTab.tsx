@@ -21,16 +21,13 @@ const OptionsTab = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>()
   const [isLoading, setIsLoading] = useState(true)
 
-  console.log("notificationsEnabled", notificationsEnabled)
-
   useEffect(() => {
     const fetchData = async () => {
       const [twitchKey, notifications] = await Promise.all([
         storage.get("userTwitchKey"),
         storage.get<boolean>("notificationsEnabled")
       ])
-      console.log("twitchKey", twitchKey)
-      console.log("notifications", notifications)
+      
       setUserTwitchKey(twitchKey)
       setNotificationsEnabled(notifications)
       setIsLoading(false)

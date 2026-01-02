@@ -22,7 +22,6 @@ export class KickWebSocketManager {
     private maxReconnectAttempts: number = 10
 
     constructor(wsUrl: string) {
-        console.log(wsUrl)
         this.wsUrl = wsUrl
     }
 
@@ -32,14 +31,13 @@ export class KickWebSocketManager {
      */
     connect(streamers: string[]): void {
         if (streamers.length === 0) {
-            console.log("No streamers to track, skipping WebSocket connection")
             return
         }
 
         this.streamers = streamers
         this.isManualDisconnect = false
 
-        // Jeśli już jest połączenie, zamknij je
+        // If connection already exists, close it
         if (this.ws) {
             this.ws.close()
         }
@@ -51,20 +49,17 @@ export class KickWebSocketManager {
                 .join(",")
             const url = `${this.wsUrl}/ws?streamers=${streamersParam}`
 
-            console.log(`Connecting to WebSocket: ${url}`)
             this.ws = new WebSocket(url)
 
             this.ws.onopen = () => {
-                console.log("WebSocket connected")
                 this.reconnectAttempts = 0
             }
 
             this.ws.onmessage = (event) => {
                 try {
                     const message = JSON.parse(event.data) as WebSocketMessage
-                    console.log("WebSocket message received:", message.type)
 
-                    // Wywołaj wszystkie zarejestrowane callbacki
+                    // Call all registered callbacks
                     this.messageCallbacks.forEach((callback) => {
                         try {
                             callback(message)
@@ -89,10 +84,9 @@ export class KickWebSocketManager {
             }
 
             this.ws.onclose = (event) => {
-                console.log("WebSocket closed:", event.code, event.reason)
                 this.ws = null
 
-                // Jeśli to nie było manualne zamknięcie i nie przekroczono limitu prób
+                // If it wasn't manual disconnect and reconnect limit not exceeded
                 if (
                     !this.isManualDisconnect &&
                     this.reconnectAttempts < this.maxReconnectAttempts
@@ -113,7 +107,7 @@ export class KickWebSocketManager {
     }
 
     /**
-     * Planuje ponowne połączenie po 5 sekundach
+     * Schedule reconnection after 5 seconds
      */
     private scheduleReconnect(): void {
         if (this.reconnectTimer) {
@@ -123,15 +117,10 @@ export class KickWebSocketManager {
         this.reconnectAttempts++
         const delay = 5000 // 5 sekund
 
-        console.log(
-            `Scheduling reconnect in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`
-        )
-
         this.reconnectTimer = setTimeout(() => {
-            console.log("Attempting to reconnect...")
             this.connect(this.streamers)
 
-            // Wywołaj callbacki reconnect
+            // Call reconnect callbacks
             this.reconnectCallbacks.forEach((callback) => {
                 try {
                     callback()
@@ -143,7 +132,7 @@ export class KickWebSocketManager {
     }
 
     /**
-     * Zamyka połączenie WebSocket
+     * Close WebSocket connection
      */
     disconnect(): void {
         this.isManualDisconnect = true
@@ -158,7 +147,6 @@ export class KickWebSocketManager {
             this.ws = null
         }
 
-        console.log("WebSocket manually disconnected")
     }
 
     /**
