@@ -100,6 +100,30 @@ export function parseKickObject(kickObject, streamer) {
   return parsedKickObject
 }
 
+// Parse KickChannel from WebSocket (different structure than old API)
+export function parseKickChannelFromWebSocket(kickChannel, streamer) {
+  const parsedKickObject = {
+    id: kickChannel.broadcaster_user_id || "",
+    user_id: kickChannel.broadcaster_user_id || "",
+    user_login: kickChannel.slug || "",
+    user_name: streamer || kickChannel.slug || "",
+    game_id: kickChannel.category?.id?.toString() || "",
+    game_name: kickChannel.category?.name || "",
+    type: "live",
+    title: kickChannel.stream_title || "",
+    tags: [],
+    viewer_count: kickChannel.stream?.viewer_count || 0,
+    started_at: kickChannel.stream?.start_time || new Date().toISOString(),
+    language: kickChannel.stream?.language || "en",
+    thumbnail_url: kickChannel.stream?.thumbnail || "",
+    tag_ids: [],
+    is_mature: kickChannel.stream?.is_mature || false,
+    platform: "Kick"
+  } as PlatformStream
+
+  return parsedKickObject
+}
+
 export function sendRuntimeMessage(type: string, ...args: any[]): Promise<any> {
   return chrome.runtime.sendMessage({ type, args })
 }

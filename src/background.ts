@@ -8,6 +8,7 @@ import {
   type PlatformStream,
   type UserTwitchKey
 } from "./lib/types/twitchTypes"
+import { API_URL, WS_URL } from "./lib/util/config"
 import {
   getTwitchOAuthURL,
   getTwitchStreamer,
@@ -18,8 +19,10 @@ import {
   createNotification,
   createNotificationMultipleStreams,
   justWentLive,
-  parseKickObject
+  parseKickObject,
+  parseKickChannelFromWebSocket
 } from "./lib/util/helperFunc"
+import { KickWebSocketManager } from "./lib/util/kickWebSocket"
 
 chrome.alarms.onAlarm.addListener(() => {
   refresh()
@@ -30,20 +33,30 @@ const storageLocal = new Storage({
   area: "local"
 })
 
+// Inicjalizacja WebSocket managera dla Kick
+const kickWsManager = new KickWebSocketManager(WS_URL)
+
 storage.watch({
   userTwitchKey: (c) => {
     if (c.newValue !== undefined) refresh()
+  },
+  kickFollows: async (c) => {
+    // Reconnect WebSocket przy zmianie listy followów
+    if (c.newValue !== undefined) {
+      await connectKickWebSocket()
+    }
   }
 })
 
-chrome.runtime.onStartup.addListener(() => {
-  storageLocal.remove("followedLive")
+chrome.runtime.onStartup.addListener(async () => {
+  await storageLocal.remove("followedLive")
 
   refresh()
+  await connectKickWebSocket()
 })
 
 chrome.runtime.onInstalled.addListener(async (details) => {
-  storageLocal.remove("followedLive")
+  await storageLocal.remove("followedLive")
 
   if (details.reason === "install") {
     const userTwitchKey = await storage.get<UserTwitchKey>("userTwitchKey")
@@ -58,7 +71,144 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   }
 
   refresh()
+  await connectKickWebSocket()
 })
+
+// WebSocket connection management for Kick
+async function connectKickWebSocket() {
+  try {
+    const kickFollows = await storage.get<string[]>("kickFollows")
+
+    // Disconnect existing connection
+    kickWsManager.disconnect()
+
+    if (!kickFollows || kickFollows.length === 0) {
+      console.log("No Kick follows, skipping WebSocket connection")
+      await storageLocal.set("kickLiveStreams", [])
+      return
+    }
+
+    console.log(`Connecting Kick WebSocket with ${kickFollows.length} streamers`)
+
+    // Clear previous callbacks
+    kickWsManager.clearCallbacks()
+
+    // Setup message handler
+    kickWsManager.onMessage(handleKickWebSocketMessage)
+
+    // Setup error handler
+    kickWsManager.onError((error) => {
+      console.error("Kick WebSocket error:", error)
+    })
+
+    // Setup reconnect handler
+    kickWsManager.onReconnect(() => {
+      console.log("Kick WebSocket reconnected")
+    })
+
+    // Connect with list of streamers
+    kickWsManager.connect(kickFollows)
+  } catch (error) {
+    console.error("Error connecting Kick WebSocket:", error)
+  }
+}
+
+// Handle WebSocket messages from Kick
+async function handleKickWebSocketMessage(message: any) {
+  try {
+    const followedLive = await storageLocal.get<PlatformResponse<PlatformStream>>("followedLive") || {
+      data: [],
+      pagination: { cursor: null },
+      platform: "twitch"
+    }
+
+    const kickLiveStreams = await storageLocal.get<PlatformStream[]>("kickLiveStreams") || []
+    const notificationsEnabled = await storage.get<boolean>("notificationsEnabled")
+    const userTwitchKey = await storage.get<UserTwitchKey>("userTwitchKey")
+
+    if (message.type === "stream_live") {
+      const kickChannel = message.data
+      console.log(`Stream live: ${kickChannel.slug}`)
+
+      // Convert KickChannel to PlatformStream format (using WebSocket-specific parser)
+      const kickStream = parseKickChannelFromWebSocket(kickChannel, kickChannel.slug)
+
+      // Check if streamer already exists in kickLiveStreams
+      const existingIndex = kickLiveStreams.findIndex(
+        (s) => s.user_login?.toLowerCase() === kickChannel.slug.toLowerCase()
+      )
+
+      const oldKickLiveStreams = [...kickLiveStreams]
+
+      if (existingIndex >= 0) {
+        // Update existing stream
+        kickLiveStreams[existingIndex] = kickStream
+      } else {
+        // Add new stream
+        kickLiveStreams.push(kickStream)
+      }
+
+      // Save updated Kick streams
+      await storageLocal.set("kickLiveStreams", kickLiveStreams)
+
+      // Update followedLive with all streams (Twitch + Kick)
+      // Filter out any undefined/null values to prevent errors
+      const twitchStreams = followedLive.data.filter(s => s && s.platform !== "Kick")
+      const validKickStreams = kickLiveStreams.filter(s => s && s.user_login)
+      const allStreams = [...twitchStreams, ...validKickStreams]
+      allStreams.sort((a, b) => b.viewer_count - a.viewer_count)
+
+      const updatedFollowedLive = {
+        ...followedLive,
+        data: allStreams
+      }
+
+      await storageLocal.set("followedLive", updatedFollowedLive)
+      chrome.action.setBadgeText({ text: allStreams.length.toString() })
+      chrome.action.setBadgeBackgroundColor({ color: "#737373" })
+
+      // Check for new live notification (only if wasn't previously live)
+      if (existingIndex < 0 && notificationsEnabled) {
+        const newLiveChannels = await justWentLive(
+          oldKickLiveStreams,
+          kickLiveStreams
+        )
+
+        if (newLiveChannels.length > 0) {
+          createNotification(newLiveChannels[0], Logo)
+        }
+      }
+
+    } else if (message.type === "stream_offline") {
+      const slug = message.data.slug
+      console.log(`Stream offline: ${slug}`)
+
+      // Remove from kickLiveStreams
+      const updatedKickStreams = kickLiveStreams.filter(
+        (s) => s && s.user_login && s.user_login.toLowerCase() !== slug.toLowerCase()
+      )
+
+      await storageLocal.set("kickLiveStreams", updatedKickStreams)
+
+      // Update followedLive
+      const twitchStreams = followedLive.data.filter(s => s && s.platform !== "Kick")
+      const validKickStreams = updatedKickStreams.filter(s => s && s.user_login)
+      const allStreams = [...twitchStreams, ...validKickStreams]
+      allStreams.sort((a, b) => b.viewer_count - a.viewer_count)
+
+      const updatedFollowedLive = {
+        ...followedLive,
+        data: allStreams
+      }
+
+      await storageLocal.set("followedLive", updatedFollowedLive)
+      chrome.action.setBadgeText({ text: allStreams.length.toString() })
+      chrome.action.setBadgeBackgroundColor({ color: "#737373" })
+    }
+  } catch (error) {
+    console.error("Error handling Kick WebSocket message:", error)
+  }
+}
 
 const refresh = async () => {
   try {
@@ -93,28 +243,14 @@ const refresh = async () => {
       ])) as PlatformResponse<PlatformStream>
     }
 
-    let kickLivestreams = []
-    if (kickFollows && kickFollows.length > 0) {
-      try {
-        const streamersQuery = kickFollows.join(",")
-        const kickStreamsResponse = await fetch(
-          `https://kitch.pl/api/v2/channels?streamers=${streamersQuery}`
-        )
-        const kickStreamsJson = await kickStreamsResponse.json()
+    // Kick streams are now managed via WebSocket
+    // Get current Kick live streams from storage
+    const kickLiveStreams = await storageLocal.get<PlatformStream[]>("kickLiveStreams") || []
 
-        for (const streamer of kickFollows) {
-          const kickStreamJson = kickStreamsJson[streamer.toLowerCase()]
-          if (kickStreamJson.error || kickStreamJson.livestream === null)
-            continue
+    // Filter out any undefined/null values to prevent errors
+    const validKickStreams = kickLiveStreams.filter(s => s && s.user_login)
 
-          kickLivestreams.push(parseKickObject(kickStreamJson, streamer))
-        }
-      } catch (error) {
-        console.error("Error fetching kick streams:", error)
-      }
-    }
-
-    refreshedLive.data = [...refreshedLive.data, ...kickLivestreams]
+    refreshedLive.data = [...refreshedLive.data, ...validKickStreams]
     // sort by viewer count
     refreshedLive.data.sort((a, b) => b.viewer_count - a.viewer_count)
 
@@ -188,6 +324,9 @@ chrome.runtime.onMessage.addListener(async (request) => {
       await storage.set("authLoading", false)
     }
   } else if (request.type === "refresh") {
+    // Reconnect Kick WebSocket to refresh followed streamers
+    await connectKickWebSocket()
+    // Refresh Twitch data
     refresh()
   } else if (request.type === "logout") {
     const storage = new Storage()
@@ -195,6 +334,9 @@ chrome.runtime.onMessage.addListener(async (request) => {
     await storage.remove("followedLive")
     await storage.remove("authLoading")
     refresh()
+  } else if (request.type === "KICK_FOLLOWS_CHANGED") {
+    console.log("Kick follows changed, reconnecting WebSocket...")
+    await connectKickWebSocket()
   }
 })
 

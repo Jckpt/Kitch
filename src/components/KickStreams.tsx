@@ -2,6 +2,7 @@ import { IconLoader2 } from "@tabler/icons-react"
 import React, { useEffect, useRef, useState } from "react"
 import useSWRInfinite from "swr/infinite"
 
+import { API_URL } from "~src/lib/util/config"
 import { kickFetcher } from "~src/lib/util/fetcher"
 import { transformKickData } from "~src/lib/util/helperFunc"
 
@@ -10,7 +11,7 @@ import { MappedStreams } from "./Mapped"
 const KickStreams = () => {
   const listRef = useRef(null)
   const [scrollToTop, setScrollToTop] = useState(false)
-  const fetchUrl = "https://kitch.pl/api/v2/livestreams"
+  const fetchUrl = `${API_URL}/api/livestreams`
   const getKey = (pageIndex, previousPageData) => {
     // first page, we don't have `previousPageData`
     if (pageIndex === 0) return fetchUrl

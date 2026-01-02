@@ -7,8 +7,26 @@ import PlatformIcon from "../PlatformIcon"
 import RefreshButton from "../RefreshButton"
 import { Input } from "../ui/input"
 
-const TopBar = ({ twitchLoggedIn }) => {
+const TopBar = ({ twitchLoggedIn, currentTab, platform }) => {
   const [searchQuery, setSearchQuery] = useAtom(searchQueryAtom)
+
+  // Determine if search should be disabled
+  const isSearchDisabled = () => {
+    // Disable on top_streams tab
+    if (currentTab === "top_streams") {
+      return true
+    }
+    // Disable on search tab if not logged in
+    if (currentTab === "search" && !twitchLoggedIn) {
+      return true
+    }
+    // For Twitch, require login
+    if (platform === "Twitch" && !twitchLoggedIn) {
+      return true
+    }
+    // Kick doesn't require login
+    return false
+  }
 
   return (
     <div
@@ -19,7 +37,7 @@ const TopBar = ({ twitchLoggedIn }) => {
         className="w-3/4 rounded-md border-0 bg-neutral-800"
         placeholder="Search"
         value={searchQuery}
-        disabled={!twitchLoggedIn}
+        disabled={isSearchDisabled()}
         onChange={(e) => setSearchQuery(e.target.value)}
       />
       <RefreshButton />

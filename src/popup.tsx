@@ -22,16 +22,19 @@ function IndexPopup() {
   const [_, setSearchQuery] = useAtom(searchQueryAtom)
   const [platform, setPlatform] = useAtom(platformAtom)
   const [category, setCategory] = useAtom(categoryAtom)
+  const [currentTab, setCurrentTab] = React.useState("followed")
 
   const [userTwitchKey] = useStorage("userTwitchKey")
   const twitchLoggedIn = userTwitchKey !== undefined
-  const handleTabsClick = () => {
+  const handleTabsClick = (value: string) => {
+    setCurrentTab(value)
     setCategory("")
     setSearchQuery("")
   }
 
   return (
     <Tabs
+      value={currentTab}
       onValueChange={handleTabsClick}
       defaultValue="followed"
       className="h-[32rem] w-96 flex text-white">
@@ -39,7 +42,11 @@ function IndexPopup() {
         <SidebarTabs />
       </div>
       <div className="w-full bg-neutral-900 flex flex-col">
-        <TopBar twitchLoggedIn={twitchLoggedIn} />
+        <TopBar 
+          twitchLoggedIn={twitchLoggedIn} 
+          currentTab={currentTab}
+          platform={platform}
+        />
         {true ? (
           <>
             <TabsContent className="overflow-y-auto flex-grow" value="followed">
