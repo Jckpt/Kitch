@@ -52,3 +52,25 @@ export interface PlatformResponse<T> {
   }
   platform: string
 }
+
+export interface KickChannel {
+  slug: string
+  user?: {
+    username?: string
+  }
+  stream?: {
+    id?: number
+    is_live?: boolean
+    session_title?: string
+    viewer_count?: number
+    created_at?: string
+    language?: string
+    thumbnail?: {
+      url?: string
+    }
+    categories?: Array<{
+      id?: number
+      name?: string
+    }>
+  }
+}

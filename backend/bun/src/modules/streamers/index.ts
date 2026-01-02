@@ -27,10 +27,11 @@ export const streamers = new Elysia()
         const activeStreamersData =
           await StreamersService.getActiveStreamersData(streamers)
 
-        if (activeStreamersData.length > 0) {
+        // Send individual messages for each active streamer
+        for (const streamerData of activeStreamersData) {
           const message = {
             type: "stream_live",
-            data: activeStreamersData
+            data: streamerData
           }
           ws.send(JSON.stringify(message))
         }

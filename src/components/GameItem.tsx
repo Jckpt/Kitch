@@ -11,18 +11,35 @@ type Props = {
   category: string
 }
 
-const GameItem = ({ game: { name, box_art_url, id } }: Props) => {
-  const gameThumbnail = useMemo(
-    () => box_art_url.replace("{width}x{height}", "80x100"),
-    []
-  )
+const GameItem = ({ game }: Props) => {
+  const { name, box_art_url, id, thumbnail } = game as any
+  
+  const gameThumbnail = useMemo(() => {
+    // Handle Kick format (direct thumbnail URL)
+    if (thumbnail) {
+      return thumbnail
+    }
+    // Handle Twitch format (box_art_url with placeholders)
+    if (box_art_url) {
+      return box_art_url.replace("{width}x{height}", "80x100")
+    }
+    // Fallback to empty string
+    return ""
+  }, [box_art_url, thumbnail])
   const [category, setCategory] = useAtom(categoryAtom)
   const [loaded, setLoaded] = useState(false)
+  
   if (category === undefined) return null
+  
+  // Handle missing data
+  if (!name || !gameThumbnail) {
+    return null
+  }
+  
   return (
     <div
       className="p-1 flex max-h-[121px] items-center flex-col hover:cursor-pointer hover:bg-neutral-800"
-      onClick={() => setCategory(id)}>
+      onClick={() => setCategory(String(id))}>
       <img
         src={gameThumbnail}
         style={{ display: loaded ? "block" : "none" }}

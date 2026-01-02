@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kitch",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-08-06",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "vars": {
+    "KICK_API_KEY": "",
+    "KICK_CLIENT_ID": "",
+    "KICK_CLIENT_SECRET": ""
+  },
+}

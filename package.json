@@ -50,6 +50,7 @@
     "host_permissions": [
       "https://api.twitch.tv/helix/*",
       "https://kitch.pl/*",
+      "http://localhost:3000/*",
       "https://id.twitch.tv/oauth2/authorize"
     ],
     "permissions": [

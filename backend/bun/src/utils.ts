@@ -7,7 +7,7 @@ import type {
   TokenResponse
 } from "./types"
 
-// Funkcja do odświeżania tokenu OAuth
+// Function to refresh OAuth token
 export async function refreshToken(
   clientId: string,
   clientSecret: string
@@ -38,7 +38,7 @@ export async function refreshToken(
   }
 }
 
-// Funkcja do wykonywania uwierzytelnionych zapytań
+// Function to make authenticated requests
 export async function makeAuthenticatedRequest(
   url: string,
   token: string,
@@ -52,7 +52,7 @@ export async function makeAuthenticatedRequest(
       }
     })
 
-    // Jeśli dostajemy 401, spróbuj odświeżyć token
+    // If we get 401, try to refresh token
     if (response.status === 401) {
       console.log("Received 401 error, attempting to refresh token...")
       const newToken = await refreshToken(clientId, clientSecret)
@@ -64,7 +64,7 @@ export async function makeAuthenticatedRequest(
           }
         })
         console.log("Request retried with new token")
-        // Zwróć nowy token, żeby można go było zapisać
+        // Return new token so it can be saved
         return { response, newToken }
       }
     }
@@ -76,7 +76,7 @@ export async function makeAuthenticatedRequest(
   }
 }
 
-// Funkcja do pobierania aktywnych streamerów z Kick API
+// Function to fetch active streamers from Kick API
 export async function fetchActiveStreamers(
   streamers: string[],
   token: string,
@@ -92,7 +92,7 @@ export async function fetchActiveStreamers(
   let currentToken = token
   let tokenWasRefreshed = false
 
-  // Dzielimy na chunki po 50 (limit API)
+  // Split into chunks of 50 (API limit)
   for (let i = 0; i < streamers.length; i += CHUNK_SIZE) {
     const chunk = streamers.slice(i, i + CHUNK_SIZE)
 
@@ -110,7 +110,7 @@ export async function fetchActiveStreamers(
       clientSecret
     )
 
-    // Jeśli token został odświeżony, zapisz go
+    // If token was refreshed, save it
     if (result.newToken) {
       currentToken = result.newToken
       tokenWasRefreshed = true
@@ -124,7 +124,7 @@ export async function fetchActiveStreamers(
 
     const data = (await result.response.json()) as KickChannelsResponse
 
-    // Filtrujemy tylko aktywnych streamerów i zwracamy surowe dane z API
+    // Filter only active streamers and return raw data from API
     for (const streamerData of data.data || []) {
       if (streamerData.stream && streamerData.stream.is_live) {
         activeStreamers.push(streamerData)

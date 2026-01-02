@@ -4,6 +4,7 @@ import React, { useState } from "react"
 import { Storage } from "@plasmohq/storage"
 import { useStorage } from "@plasmohq/storage/hook"
 
+import { API_URL } from "~src/lib/util/config"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 
@@ -27,7 +28,7 @@ const KickMenuTab = () => {
     }
     setIsLoading(true)
     try {
-      const kickUser = await fetch(`https://kitch.pl/api/channel/${nickname}`)
+      const kickUser = await fetch(`${API_URL}/api/channel/${nickname}`)
       if (kickUser === null || kickUser.status !== 200) {
         setInfo("Streamer not found")
         return
@@ -42,9 +43,12 @@ const KickMenuTab = () => {
       }
       setInfo("")
       
-      // Wyłącz flagę nowego użytkownika po dodaniu pierwszego follow na Kick
+      // Disable new user flag after adding first Kick follow
       const storage = new Storage()
       await storage.set("isNewUser", false)
+      
+      // Notify background to reconnect WebSocket
+      chrome.runtime.sendMessage({ type: "KICK_FOLLOWS_CHANGED" })
     } catch (e) {
       console.error(e)
     } finally {
@@ -86,7 +90,11 @@ const KickMenuTab = () => {
           <div 
             key={followedStreamer}
             className="flex justify-between items-center bg-neutral-800 p-2 rounded-md hover:bg-neutral-700 transition-colors cursor-pointer group"
-            onClick={() => setKickFollows(kickFollows.filter((f) => f !== followedStreamer))}
+            onClick={() => {
+              setKickFollows(kickFollows.filter((f) => f !== followedStreamer))
+              // Notify background to reconnect WebSocket
+              chrome.runtime.sendMessage({ type: "KICK_FOLLOWS_CHANGED" })
+            }}
           >
             <span className="text-primary">{followedStreamer}</span>
             <IconX 

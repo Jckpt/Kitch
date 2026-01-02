@@ -22,6 +22,11 @@ const FollowedTab = () => {
   const [kickFollows] = useStorage<string[]>("kickFollows")
 
   const filteredStreams = followedLive?.data?.filter((stream) => {
+    // Defensive check for undefined values
+    if (!stream || !stream.user_name) {
+      return false
+    }
+    
     const matchesSearch = stream.user_name.toLowerCase().includes(searchQuery.toLowerCase())
     
     if (followedLiveFilter === "All") {

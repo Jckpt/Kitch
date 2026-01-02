@@ -1,21 +1,25 @@
 import { redis } from "bun"
 import { Elysia } from "elysia"
 
+import { tokenManager } from "./auth/tokenManager"
+import { api } from "./modules/api"
 import { streamers } from "./modules/streamers"
 import { StreamersWorker } from "./modules/streamers/worker"
 
-let KICK_TOKEN = process.env.KICK_API_KEY || ""
-
-const app = new Elysia().use(streamers).listen(3000)
+const app = new Elysia().use(api).use(streamers).listen(3000)
 console.log("Elysia server created")
 
 redis.send("FLUSHDB", [])
 
 setInterval(async () => {
-  KICK_TOKEN = await StreamersWorker.checkAndBroadcastActiveStreamers(
+  const { token, clientId, clientSecret } = tokenManager.getCredentials()
+  const newToken = await StreamersWorker.checkAndBroadcastActiveStreamers(
     (topic, message) => app.server?.publish(topic, message),
-    KICK_TOKEN,
-    process.env.KICK_CLIENT_ID || "",
-    process.env.KICK_CLIENT_SECRET || ""
+    token,
+    clientId,
+    clientSecret
   )
+  if (newToken) {
+    tokenManager.updateToken(newToken)
+  }
 }, 60_000)

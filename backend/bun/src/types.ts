@@ -13,7 +13,7 @@ export interface KickCategory {
   name: string
 }
 
-// Dane streamu na żywo
+// Live stream data
 export interface KickStream {
   is_live: boolean
   viewer_count?: number
@@ -23,29 +23,29 @@ export interface KickStream {
   is_mature?: boolean
 }
 
-// Pojedynczy kanał z API Kicka
+// Single channel from Kick API
 export interface KickChannel {
   broadcaster_user_id: string
   slug: string
   stream?: KickStream
   stream_title?: string
   category?: KickCategory
-  // Możliwe dodatkowe pola, które mogą być w odpowiedzi
+  // Possible additional fields that may be in response
   [key: string]: any
 }
 
-// Odpowiedź z API channels
+// Response from channels API
 export interface KickChannelsResponse {
   data: KickChannel[]
 }
 
-// Dane użytkownika z API users
+// User data from users API
 export interface KickUserData {
   name: string
   user_id: string
 }
 
-// Odpowiedź z API users
+// Response from users API
 export interface KickUsersResponse {
   data: KickUserData[]
 }
@@ -60,4 +60,58 @@ export interface AuthenticatedRequestResult {
 export interface FetchActiveStreamersResult {
   streamers: KickChannel[]
   newToken?: string
+}
+
+// Kategoria z thumbnailem (z API categories)
+export interface KickCategoryWithThumbnail {
+  id: number
+  name: string
+  thumbnail?: string
+  tags?: string[]
+  viewer_count?: number
+}
+
+// Pojedynczy livestream z API livestreams
+export interface KickLivestream {
+  broadcaster_user_id: number
+  category?: {
+    id: number
+    name: string
+    thumbnail?: string
+  }
+  channel_id: number
+  custom_tags?: string[]
+  has_mature_content?: boolean
+  language: string
+  profile_picture?: string
+  slug: string
+  started_at: string
+  stream_title: string
+  thumbnail?: string
+  viewer_count: number
+}
+
+// Response from livestreams API
+export interface KickLivestreamsResponse {
+  data: KickLivestream[]
+  message?: string
+}
+
+// Response from categories API (search)
+export interface KickCategoriesResponse {
+  data: KickCategoryWithThumbnail[]
+  message?: string
+}
+
+// Query params dla livestreams
+export interface LivestreamQueryParams {
+  category_id?: string
+  limit?: string
+  sort?: string
+}
+
+// Query params dla categories
+export interface CategoriesQueryParams {
+  q?: string
+  page?: string
 }
