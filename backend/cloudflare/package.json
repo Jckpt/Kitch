@@ -2,7 +2,7 @@
   "name": "cloudflare",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --latest --port 8787",
     "deploy": "wrangler deploy --minify",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings"
   },
@@ -10,8 +10,8 @@
     "hono": "^4.8.12"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20241218.0",
+    "@cloudflare/workers-types": "^4.20260613.1",
     "typescript": "^5.6.0",
-    "wrangler": "^4.4.0"
+    "wrangler": "^4.100.0"
   }
 }

@@ -5,6 +5,10 @@ Endpoint `/api/channel/{streamer}` przeniesiony z backendu Python do Hono.js na 
 ## Funkcjonalność
 
 - **GET `/api/channel/:streamer`** - Pobiera informacje o kanale streamora z Kick.com API
+- **GET `/api/v2/channels?streamers=a,b`** - Pobiera dane wielu kanałów Kick
+- **GET `/api/v2/livestreams`** - Pobiera aktualne livestreamy Kick
+- **GET `/api/v2/livestreams?category_id=123`** - Pobiera livestreamy dla kategorii
+- **GET `/api/subcategories`** - Pobiera kategorie do popupu z publicznego Kick categories API
 - Automatyczne odświeżanie tokenów OAuth
 - CORS support
 - TypeScript support
@@ -23,7 +27,6 @@ Ustaw zmienne środowiskowe w Cloudflare Dashboard lub używając Wrangler:
 
 ```sh
 # Ustaw zmienne dla środowiska produkcyjnego
-wrangler secret put KICK_API_KEY
 wrangler secret put KICK_CLIENT_ID  
 wrangler secret put KICK_CLIENT_SECRET
 ```
@@ -33,10 +36,23 @@ wrangler secret put KICK_CLIENT_SECRET
 Utwórz plik `.dev.vars` w katalogu głównym:
 
 ```
-KICK_API_KEY=your_kick_api_key_here
 KICK_CLIENT_ID=your_kick_client_id_here
 KICK_CLIENT_SECRET=your_kick_client_secret_here
 ```
+
+Worker pobiera access token z Kick OAuth client credentials i cache'uje go w KV
+pod bindingiem `KICK_TOKEN_CACHE`.
+
+### 4. KV dla cache tokena Kick
+
+Lokalnie Wrangler użyje bindingu z `wrangler.jsonc`. Dla Cloudflare production
+utwórz namespace:
+
+```sh
+pnpm wrangler kv namespace create KICK_TOKEN_CACHE
+```
+
+Następnie podmień `id` w `wrangler.jsonc` na ID zwrócone przez Wranglera.
 
 ## Development
 
