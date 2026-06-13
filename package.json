@@ -5,8 +5,10 @@
   "description": "Follow your favorite streamers on Kick and Twitch",
   "author": "jckpt",
   "scripts": {
-    "dev": "plasmo dev",
+    "dev": "sh -c 'pnpm --dir backend/cloudflare dev & backend_pid=$!; trap \"kill $backend_pid\" EXIT; PLASMO_PUBLIC_KITCH_API_BASE_URL=http://localhost:8787 plasmo dev'",
+    "dev:kitch": "plasmo dev",
     "build": "plasmo build",
+    "backend:hono": "pnpm --dir backend/cloudflare dev",
     "test": "plasmo test"
   },
   "dependencies": {

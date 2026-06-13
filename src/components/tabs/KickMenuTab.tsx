@@ -6,6 +6,7 @@ import { useStorage } from "@plasmohq/storage/hook"
 
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
+import { kickApiUrl } from "../../lib/util/kickApi"
 
 const KickMenuTab = () => {
   const [kickFollows, setKickFollows] = useStorage<string[]>("kickFollows")
@@ -27,7 +28,7 @@ const KickMenuTab = () => {
     }
     setIsLoading(true)
     try {
-      const kickUser = await fetch(`https://kitch.pl/api/channel/${nickname}`)
+      const kickUser = await fetch(kickApiUrl(`/api/channel/${nickname}`))
       if (kickUser === null || kickUser.status !== 200) {
         setInfo("Streamer not found")
         return
