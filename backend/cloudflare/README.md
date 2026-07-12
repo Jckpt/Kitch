@@ -29,6 +29,8 @@ Ustaw zmienne środowiskowe w Cloudflare Dashboard lub używając Wrangler:
 # Ustaw zmienne dla środowiska produkcyjnego
 wrangler secret put KICK_CLIENT_ID  
 wrangler secret put KICK_CLIENT_SECRET
+wrangler secret put KICK_CLIENT_ID_SECONDARY
+wrangler secret put KICK_CLIENT_SECRET_SECONDARY
 ```
 
 ### 3. Lokalne zmienne (development)
@@ -38,6 +40,8 @@ Utwórz plik `.dev.vars` w katalogu głównym:
 ```
 KICK_CLIENT_ID=your_kick_client_id_here
 KICK_CLIENT_SECRET=your_kick_client_secret_here
+KICK_CLIENT_ID_SECONDARY=your_secondary_kick_client_id_here
+KICK_CLIENT_SECRET_SECONDARY=your_secondary_kick_client_secret_here
 ```
 
 Worker pobiera access token z Kick OAuth client credentials i cache'uje go w KV

@@ -18,12 +18,43 @@ type ChannelLookup = Record<
   ReturnType<typeof parsePublicKickStreamObject> | { error: string }
 >
 
+class KickApiError extends Error {
+  constructor(
+    readonly upstreamStatus: number,
+    readonly upstreamMessage: string | null
+  ) {
+    super(
+      `Kick API returned ${upstreamStatus}` +
+      (upstreamMessage ? `: ${upstreamMessage}` : "")
+    )
+    this.name = "KickApiError"
+  }
+}
+
 function endpoint(handler: (c: AppContext) => EndpointResponse) {
   return async (c: AppContext) => {
     try {
       return await handler(c)
     } catch (error) {
-      console.error("Route error:", error)
+      console.error("Route error", {
+        method: c.req.method,
+        path: c.req.path,
+        error
+      })
+
+      if (error instanceof KickApiError) {
+        const status = error.upstreamStatus >= 500 ? 502 : 500
+
+        return c.json({
+          error: "Kick API request failed",
+          message: error.upstreamStatus >= 500
+            ? "Kick API is temporarily unavailable"
+            : "Kick API rejected the request",
+          upstream_status: error.upstreamStatus,
+          upstream_message: error.upstreamMessage
+        }, status)
+      }
+
       return c.json({ error: "An error occurred while fetching data" }, 500)
     }
   }
@@ -37,11 +68,14 @@ function chunkList<T>(list: T[], chunkSize: number): T[][] {
   return chunks
 }
 
-function requireKickEnv(env: Env) {
-  const kickEnv = getKickEnv(env)
+function requireKickEnv(
+  env: Env,
+  client: "primary" | "secondary" = "primary"
+) {
+  const kickEnv = getKickEnv(env, client)
 
   if (!kickEnv) {
-    throw new Error("Missing Kick API configuration")
+    throw new Error(`Missing Kick API ${client} configuration`)
   }
 
   return kickEnv
@@ -54,7 +88,21 @@ async function kickJson<T>(
   const response = await makeAuthenticatedRequest(url, kickEnv)
 
   if (!response.ok) {
-    throw new Error(`Kick API returned ${response.status} for ${url}`)
+    const responseBody = await response.text()
+    let upstreamMessage: string | null = responseBody || null
+
+    try {
+      const parsedBody = JSON.parse(responseBody) as {
+        message?: unknown
+        error?: unknown
+      }
+      const message = parsedBody.message ?? parsedBody.error
+      upstreamMessage = typeof message === "string" ? message : upstreamMessage
+    } catch {
+      // Upstream did not return JSON, so preserve its plain-text response.
+    }
+
+    throw new KickApiError(response.status, upstreamMessage)
   }
 
   return response.json() as Promise<T>
@@ -69,7 +117,7 @@ export function registerRoutes(app: Hono<{ Bindings: Env }>) {
     "/api/channel/:streamer",
     endpoint(async (c) => {
       const streamer = c.req.param("streamer")
-      const kickEnv = requireKickEnv(c.env)
+      const kickEnv = requireKickEnv(c.env, "secondary")
 
       const channelsUrl = `https://api.kick.com/public/v1/channels?slug=${streamer}`
       const channelResponse = await makeAuthenticatedRequest(
@@ -158,7 +206,7 @@ export function registerRoutes(app: Hono<{ Bindings: Env }>) {
   app.get(
     "/api/v2/livestreams",
     endpoint(async (c) => {
-      const kickEnv = requireKickEnv(c.env)
+      const kickEnv = requireKickEnv(c.env, "secondary")
 
       const categoryId = c.req.query("category_id")
       const params = new URLSearchParams({
@@ -182,7 +230,7 @@ export function registerRoutes(app: Hono<{ Bindings: Env }>) {
   app.get(
     "/api/v2/categories",
     endpoint(async (c) => {
-      const kickEnv = requireKickEnv(c.env)
+      const kickEnv = requireKickEnv(c.env, "secondary")
 
       const query = c.req.query("query")
       const params = new URLSearchParams({
@@ -206,7 +254,7 @@ export function registerRoutes(app: Hono<{ Bindings: Env }>) {
     "/api/subcategories",
     endpoint(async (c) => {
       const limit = c.req.query("limit") || "1000"
-      const kickEnv = requireKickEnv(c.env)
+      const kickEnv = requireKickEnv(c.env, "secondary")
 
       const normalizedLimit = Math.min(Number(limit) || 1000, 1000)
       const params = new URLSearchParams({

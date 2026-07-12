@@ -1,10 +1,9 @@
 import type { KickEnv } from './env'
 import type { KickTokenCache, TokenResponse } from './types'
 
-const KICK_TOKEN_CACHE_KEY = 'kick-access-token'
 const TOKEN_REFRESH_BUFFER_MS = 60_000
 
-let cachedKickToken: KickTokenCache | null = null
+const cachedKickTokens = new Map<string, KickTokenCache>()
 
 function isTokenValid(token: KickTokenCache | null) {
   return Boolean(
@@ -36,8 +35,8 @@ export async function refreshToken(kickEnv: KickEnv): Promise<KickTokenCache> {
     expiresAt: Date.now() + tokenData.expires_in * 1000,
   }
 
-  cachedKickToken = token
-  await kickEnv.KICK_TOKEN_CACHE.put(KICK_TOKEN_CACHE_KEY, JSON.stringify(token), {
+  cachedKickTokens.set(kickEnv.tokenCacheKey, token)
+  await kickEnv.KICK_TOKEN_CACHE.put(kickEnv.tokenCacheKey, JSON.stringify(token), {
     expirationTtl: tokenData.expires_in,
   })
 
@@ -45,17 +44,19 @@ export async function refreshToken(kickEnv: KickEnv): Promise<KickTokenCache> {
 }
 
 export async function getKickToken(kickEnv: KickEnv) {
+  const cachedKickToken = cachedKickTokens.get(kickEnv.tokenCacheKey) || null
+
   if (isTokenValid(cachedKickToken)) {
     return cachedKickToken!.token
   }
 
   const kvToken = await kickEnv.KICK_TOKEN_CACHE.get<KickTokenCache>(
-    KICK_TOKEN_CACHE_KEY,
+    kickEnv.tokenCacheKey,
     'json'
   )
 
   if (isTokenValid(kvToken)) {
-    cachedKickToken = kvToken
+    cachedKickTokens.set(kickEnv.tokenCacheKey, kvToken!)
     return kvToken!.token
   }
 
