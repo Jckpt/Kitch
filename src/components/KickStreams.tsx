@@ -4,13 +4,14 @@ import useSWRInfinite from "swr/infinite"
 
 import { kickFetcher } from "~src/lib/util/fetcher"
 import { transformKickData } from "~src/lib/util/helperFunc"
+import { kickApiUrl } from "~src/lib/util/kickApi"
 
 import { MappedStreams } from "./Mapped"
 
 const KickStreams = () => {
   const listRef = useRef(null)
   const [scrollToTop, setScrollToTop] = useState(false)
-  const fetchUrl = "https://kitch.pl/api/v2/livestreams"
+  const fetchUrl = kickApiUrl("/api/v2/livestreams")
   const getKey = (pageIndex, previousPageData) => {
     // first page, we don't have `previousPageData`
     if (pageIndex === 0) return fetchUrl

@@ -6,6 +6,7 @@ import useSWRInfinite from "swr/infinite"
 import { categoryAtom } from "~src/lib/util"
 import { kickFetcher } from "~src/lib/util/fetcher"
 import { transformKickData } from "~src/lib/util/helperFunc"
+import { kickApiUrl } from "~src/lib/util/kickApi"
 
 import { MappedCategories, MappedStreams } from "./Mapped"
 
@@ -15,8 +16,8 @@ const KickCategories = () => {
   const [scrollToTop, setScrollToTop] = useState(false)
   const fetchUrl =
     category === ""
-      ? "https://kitch.pl/api/subcategories"
-      : `https://kitch.pl/api/v2/livestreams?category_id=${category}`
+      ? kickApiUrl("/api/subcategories")
+      : kickApiUrl(`/api/v2/livestreams?category_id=${category}`)
   const getKey = (pageIndex, previousPageData) => {
     // first page, we don't have `previousPageData`
     if (pageIndex === 0) return fetchUrl

@@ -20,6 +20,8 @@ import {
   justWentLive,
   parseKickObject
 } from "./lib/util/helperFunc"
+import { kickApiUrl } from "./lib/util/kickApi"
+import { TWITCH_REDIRECT_URI } from "./lib/util/twitchAuth"
 
 chrome.alarms.onAlarm.addListener(() => {
   refresh()
@@ -98,7 +100,7 @@ const refresh = async () => {
       try {
         const streamersQuery = kickFollows.join(",")
         const kickStreamsResponse = await fetch(
-          `https://kitch.pl/api/v2/channels?streamers=${streamersQuery}`
+          kickApiUrl(`/api/v2/channels?streamers=${streamersQuery}`)
         )
         const kickStreamsJson = await kickStreamsResponse.json()
 
@@ -163,7 +165,7 @@ const refresh = async () => {
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (
     changeInfo.status === "complete" &&
-    tab.url?.startsWith("https://kitch.pl/")
+    tab.url?.startsWith(TWITCH_REDIRECT_URI)
   ) {
     try {
       await authorize(tab.url)

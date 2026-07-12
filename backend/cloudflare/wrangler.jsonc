@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kitch",
+  "main": "src/index.ts",
+  "kv_namespaces": [
+    {
+      "binding": "KICK_TOKEN_CACHE",
+      "id": "local-kick-token-cache"
+    }
+  ]
+}
