@@ -2,6 +2,8 @@ export type UserTwitchKey = {
   user_id: string
   access_token: string
   client_id: string
+  refresh_token?: string
+  auth_version?: 2
 }
 
 export type PlatformStream = {
