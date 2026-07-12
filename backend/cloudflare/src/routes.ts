@@ -1,9 +1,10 @@
 import type { Context, Hono } from "hono"
 
 import type { Env } from "./env"
-import { getKickEnv } from "./env"
+import { getKickEnv, getTwitchEnv } from "./env"
 import { makeAuthenticatedRequest } from "./kickClient"
 import { parseCategoryData, parsePublicKickStreamObject } from "./parsers"
+import { exchangeTwitchCode, refreshTwitchToken } from "./twitchAuth"
 import type {
   CategoryResponse,
   ChannelData,
@@ -45,6 +46,23 @@ function requireKickEnv(env: Env) {
   }
 
   return kickEnv
+}
+
+function requireTwitchEnv(env: Env) {
+  const twitchEnv = getTwitchEnv(env)
+
+  if (!twitchEnv) {
+    throw new Error("Missing Twitch API configuration")
+  }
+
+  return twitchEnv
+}
+
+async function readStringBodyField(c: AppContext, field: string) {
+  const body = await c.req.json<Record<string, unknown>>()
+  const value = body[field]
+
+  return typeof value === "string" && value.length > 0 ? value : null
 }
 
 async function kickJson<T>(
@@ -106,6 +124,30 @@ export function registerRoutes(app: Hono<{ Bindings: Env }>) {
           username: userData.data[0].name
         }
       })
+    })
+  )
+
+  app.post(
+    "/api/twitch/token",
+    endpoint(async (c) => {
+      const code = await readStringBodyField(c, "code")
+      if (!code) {
+        return c.json({ error: "Missing authorization code" }, 400)
+      }
+
+      return exchangeTwitchCode(code, requireTwitchEnv(c.env))
+    })
+  )
+
+  app.post(
+    "/api/twitch/refresh",
+    endpoint(async (c) => {
+      const refreshToken = await readStringBodyField(c, "refresh_token")
+      if (!refreshToken) {
+        return c.json({ error: "Missing refresh token" }, 400)
+      }
+
+      return refreshTwitchToken(refreshToken, requireTwitchEnv(c.env))
     })
   )
 

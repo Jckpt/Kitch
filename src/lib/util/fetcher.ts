@@ -1,48 +1,133 @@
-import { type PlatformStream, type UserTwitchKey } from "../types/twitchTypes"
-import { TWITCH_REDIRECT_URI } from "./twitchAuth"
+import { Storage } from "@plasmohq/storage"
 
-export const twitchFetcher = async (params) => {
-  const [url, userTwitchKey] = params
-  if (!userTwitchKey || url === null) return
-  const headerValue = {
+import { type PlatformStream, type UserTwitchKey } from "../types/twitchTypes"
+import { refreshTwitchCredentials, TwitchAuthError } from "./twitchAuth"
+
+let refreshPromise: Promise<UserTwitchKey> | null = null
+const refreshedCredentialsByAccessToken = new Map<string, UserTwitchKey>()
+
+const resolveCurrentCredentials = (credentials: UserTwitchKey) => {
+  let current = credentials
+  let replacement = refreshedCredentialsByAccessToken.get(current.access_token)
+
+  while (replacement) {
+    current = replacement
+    replacement = refreshedCredentialsByAccessToken.get(current.access_token)
+  }
+
+  return current
+}
+
+const fetchTwitch = (url: string, credentials: UserTwitchKey) =>
+  fetch(url, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${userTwitchKey?.access_token}`,
-      "Client-Id": userTwitchKey?.client_id
+      Authorization: `Bearer ${credentials.access_token}`,
+      "Client-Id": credentials.client_id
+    }
+  })
+
+const refreshStoredCredentials = async (credentials: UserTwitchKey) => {
+  const currentCredentials = resolveCurrentCredentials(credentials)
+
+  if (!refreshPromise) {
+    refreshPromise = refreshTwitchCredentials(currentCredentials)
+      .then(async (refreshedCredentials) => {
+        refreshedCredentialsByAccessToken.set(
+          currentCredentials.access_token,
+          refreshedCredentials
+        )
+        await new Storage().set("userTwitchKey", refreshedCredentials)
+        return refreshedCredentials
+      })
+      .finally(() => {
+        refreshPromise = null
+      })
+  }
+
+  return refreshPromise
+}
+
+const requestTwitchReauthorization = () => {
+  void chrome.runtime.sendMessage({ type: "twitch-auth-required" })
+}
+
+export async function twitchFetcher<T extends object = Record<string, unknown>>(
+  params
+): Promise<(T & { platform: string }) | undefined> {
+  const [url, userTwitchKey] = params as [string, UserTwitchKey]
+  if (!userTwitchKey || url === null) return
+
+  const currentCredentials = resolveCurrentCredentials(userTwitchKey)
+  let response = await fetchTwitch(url, currentCredentials)
+
+  if (response.status === 401 && currentCredentials.refresh_token) {
+    try {
+      const refreshedCredentials =
+        await refreshStoredCredentials(currentCredentials)
+      response = await fetchTwitch(url, refreshedCredentials)
+    } catch (error) {
+      if (
+        error instanceof TwitchAuthError &&
+        (error.status === 400 || error.status === 401)
+      ) {
+        requestTwitchReauthorization()
+        throw new TwitchAuthError("Twitch authorization has expired", 401)
+      }
+
+      throw error
     }
   }
-  const response = await fetch(url, headerValue)
-  let data = await response.json()
-  data = { ...data, platform: "Twitch" }
-  return data
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      requestTwitchReauthorization()
+    }
+
+    throw new TwitchAuthError(
+      `Twitch API returned status ${response.status}`,
+      response.status
+    )
+  }
+
+  const data = (await response.json()) as T
+  return { ...data, platform: "Twitch" }
 }
 
-export const getTwitchUserId = async (credentials) => {
-  const data = await twitchFetcher([
-    "https://api.twitch.tv/helix/users",
-    credentials
-  ])
+export const getTwitchUserId = async (
+  credentials: Pick<UserTwitchKey, "access_token" | "client_id">
+) => {
+  const response = await fetch("https://api.twitch.tv/helix/users", {
+    headers: {
+      Authorization: `Bearer ${credentials.access_token}`,
+      "Client-Id": credentials.client_id
+    }
+  })
+
+  if (!response.ok) {
+    throw new TwitchAuthError(
+      `Could not get Twitch user with status ${response.status}`,
+      response.status
+    )
+  }
+
+  const data = (await response.json()) as { data: Array<{ id: string }> }
+  if (!data.data[0]) {
+    throw new Error("Twitch did not return the authenticated user")
+  }
+
   return data.data[0].id
-}
-
-export const getTwitchOAuthURL = () => {
-  const BASE_URL = "https://id.twitch.tv/oauth2/authorize"
-  const CLIENT_ID = "256lknox4x75bj30rwpctxna2ckbmn"
-  const SCOPE = "user:read:follows"
-  const FINAL_URL = `${BASE_URL}?client_id=${CLIENT_ID}&redirect_uri=${TWITCH_REDIRECT_URI}&force_verify=true&response_type=token&scope=${SCOPE}`
-  return FINAL_URL
 }
 
 export const getTwitchStreamer = async (
   credentials: UserTwitchKey,
   user_id: string
 ) => {
-  const data = await twitchFetcher([
-    `https://api.twitch.tv/helix/users?id=${user_id}`,
-    credentials
-  ])
+  const data = await twitchFetcher<{
+    data: Array<{ profile_image_url: string }>
+  }>([`https://api.twitch.tv/helix/users?id=${user_id}`, credentials])
 
-  return data.data[0]
+  return data?.data[0]
 }
 
 export const kickFetcher = async (url) => {

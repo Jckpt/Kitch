@@ -9,7 +9,6 @@ import {
   type UserTwitchKey
 } from "./lib/types/twitchTypes"
 import {
-  getTwitchOAuthURL,
   getTwitchStreamer,
   getTwitchUserId,
   twitchFetcher
@@ -21,7 +20,17 @@ import {
   parseKickObject
 } from "./lib/util/helperFunc"
 import { kickApiUrl } from "./lib/util/kickApi"
-import { TWITCH_REDIRECT_URI } from "./lib/util/twitchAuth"
+import {
+  createTwitchOAuthState,
+  exchangeTwitchAuthorizationCode,
+  getTwitchOAuthURL,
+  TWITCH_CLIENT_ID,
+  TWITCH_REDIRECT_URI,
+  TwitchAuthError
+} from "./lib/util/twitchAuth"
+
+let twitchAuthorizationInProgress = false
+let twitchAuthorizationTabId: number | null = null
 
 chrome.alarms.onAlarm.addListener(() => {
   refresh()
@@ -52,7 +61,11 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     const kickFollows = await storage.get<string[]>("kickFollows")
     const isNewUser = await storage.get<boolean>("isNewUser")
 
-    if (isNewUser === undefined && !userTwitchKey && (!kickFollows || kickFollows.length === 0)) {
+    if (
+      isNewUser === undefined &&
+      !userTwitchKey &&
+      (!kickFollows || kickFollows.length === 0)
+    ) {
       await storage.set("isNewUser", true)
     } else if (isNewUser === undefined) {
       await storage.set("isNewUser", false)
@@ -89,10 +102,10 @@ const refresh = async () => {
       platform: "twitch"
     }
     if (userTwitchKey) {
-      refreshedLive = (await twitchFetcher([
+      refreshedLive = await twitchFetcher<PlatformResponse<PlatformStream>>([
         `https://api.twitch.tv/helix/streams/followed?user_id=${userTwitchKey?.user_id}`,
         userTwitchKey
-      ])) as PlatformResponse<PlatformStream>
+      ])
     }
 
     let kickLivestreams = []
@@ -153,82 +166,149 @@ const refresh = async () => {
     }
   } catch (error) {
     console.error("Error fetching Twitch data:", error)
-    if (error.status === 401 || error.message.includes("not iterable")) {
-      const storage = new Storage()
-      storage.remove("userTwitchKey")
-      storage.remove("followedLive")
+    if (error instanceof TwitchAuthError && error.status === 401) {
+      await startTwitchAuthorization()
     }
   }
 }
 
 // Nasłuchiwanie na aktualizacje zakładek
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  if (
-    changeInfo.status === "complete" &&
-    tab.url?.startsWith(TWITCH_REDIRECT_URI)
-  ) {
+  const isOAuthResponse = (() => {
+    if (!tab.url?.startsWith(TWITCH_REDIRECT_URI)) return false
+
+    const url = new URL(tab.url)
+    return url.searchParams.has("code") || url.searchParams.has("error")
+  })()
+
+  if (changeInfo.status === "complete" && tab.url && isOAuthResponse) {
     try {
       await authorize(tab.url)
-      // Zamknij zakładkę po autoryzacji
+      await chrome.tabs.remove(tabId)
     } catch (e) {
       console.error("Błąd podczas autoryzacji:", e)
       await storage.set("authLoading", false)
+      await chrome.tabs.remove(tabId)
     }
   }
+})
+
+chrome.tabs.onRemoved.addListener(async (tabId) => {
+  const storedTabId = await storage.get<number>("twitchOAuthTabId")
+  if (tabId !== twitchAuthorizationTabId && tabId !== storedTabId) return
+
+  twitchAuthorizationTabId = null
+  twitchAuthorizationInProgress = false
+  await storage.set("authLoading", false)
+  await storage.remove("twitchOAuthState")
+  await storage.remove("twitchOAuthTabId")
 })
 
 // on message do authorization
 chrome.runtime.onMessage.addListener(async (request) => {
   if (request.type === "authorize") {
     try {
-      await storage.set("authLoading", true)
-      const authUrl = getTwitchOAuthURL()
-      // Otwórz nową zakładkę z URL autoryzacji
-      chrome.tabs.create({ url: authUrl })
+      await startTwitchAuthorization()
     } catch (e) {
       console.error("Błąd podczas autoryzacji:", e)
       await storage.set("authLoading", false)
     }
+  } else if (request.type === "twitch-auth-required") {
+    await startTwitchAuthorization()
   } else if (request.type === "refresh") {
     refresh()
   } else if (request.type === "logout") {
     const storage = new Storage()
     await storage.remove("userTwitchKey")
+    await storage.remove("twitchOAuthState")
+    await storage.remove("twitchOAuthTabId")
     await storage.remove("followedLive")
     await storage.remove("authLoading")
     refresh()
   }
 })
 
-async function authorize(redirectUrl) {
+async function startTwitchAuthorization() {
+  if (twitchAuthorizationInProgress) return
+
+  const storedTabId = await storage.get<number>("twitchOAuthTabId")
+  if (storedTabId !== undefined) {
+    try {
+      await chrome.tabs.get(storedTabId)
+      twitchAuthorizationInProgress = true
+      twitchAuthorizationTabId = storedTabId
+      return
+    } catch {
+      await storage.remove("twitchOAuthTabId")
+    }
+  }
+
+  twitchAuthorizationInProgress = true
+  const state = createTwitchOAuthState()
+  try {
+    await storage.set("authLoading", true)
+    await storage.set("twitchOAuthState", state)
+    const tab = await chrome.tabs.create({ url: getTwitchOAuthURL(state) })
+    twitchAuthorizationTabId = tab.id ?? null
+    if (tab.id !== undefined) {
+      await storage.set("twitchOAuthTabId", tab.id)
+    }
+  } catch (error) {
+    twitchAuthorizationInProgress = false
+    await storage.set("authLoading", false)
+    await storage.remove("twitchOAuthState")
+    await storage.remove("twitchOAuthTabId")
+    throw error
+  }
+}
+
+async function authorize(redirectUrl: string) {
   try {
     const urlObject = new URL(redirectUrl)
-    const fragment = urlObject.hash.substring(1)
-    const accessToken = new URLSearchParams(fragment).get("access_token")
+    const authorizationCode = urlObject.searchParams.get("code")
+    const oauthError = urlObject.searchParams.get("error")
 
-    if (!accessToken) {
-      throw new Error("Nie udało się uzyskać tokena dostępu")
+    if (oauthError) {
+      throw new Error(`Twitch authorization failed: ${oauthError}`)
     }
 
-    const clientId = "256lknox4x75bj30rwpctxna2ckbmn"
-    const userCredentials = {
+    if (!authorizationCode) {
+      throw new Error("Nie udało się uzyskać kodu autoryzacji Twitch")
+    }
+
+    const expectedState = await storage.get<string>("twitchOAuthState")
+    const returnedState = urlObject.searchParams.get("state")
+
+    if (!expectedState || returnedState !== expectedState) {
+      throw new Error("Nieprawidłowy stan autoryzacji Twitch")
+    }
+
+    const token = await exchangeTwitchAuthorizationCode(authorizationCode)
+
+    const userCredentials: UserTwitchKey = {
       user_id: await getTwitchUserId({
-        access_token: accessToken,
-        client_id: clientId
+        access_token: token.access_token,
+        client_id: TWITCH_CLIENT_ID
       }),
-      access_token: accessToken,
-      client_id: clientId
+      access_token: token.access_token,
+      client_id: TWITCH_CLIENT_ID,
+      refresh_token: token.refresh_token,
+      auth_version: 2
     }
 
-    const storage = new Storage()
     await storage.set("userTwitchKey", userCredentials)
     await storage.set("authLoading", false)
+    await storage.remove("twitchOAuthState")
+    await storage.remove("twitchOAuthTabId")
 
     // Wyłącz flagę nowego użytkownika po pierwszym zalogowaniu
     await storage.set("isNewUser", false)
   } catch (e) {
     console.error("Błąd autoryzacji:", e)
-    const storage = new Storage()
     await storage.set("authLoading", false)
+    await storage.remove("twitchOAuthState")
+    throw e
+  } finally {
+    twitchAuthorizationInProgress = false
   }
 }
