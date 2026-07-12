@@ -1,2 +1,4 @@
 KICK_CLIENT_ID=your_kick_client_id_here
 KICK_CLIENT_SECRET=your_kick_client_secret_here
+TWITCH_CLIENT_ID=your_twitch_client_id_here
+TWITCH_CLIENT_SECRET=your_twitch_client_secret_here
